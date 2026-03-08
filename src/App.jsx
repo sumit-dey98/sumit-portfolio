@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { useCursor } from './hooks/useCursor';
 import { ThemeProvider, useThemeContext } from './theme/ThemeContext';
 import Loader from './sections/Loader';
@@ -61,6 +62,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <PortfolioInner />
+      <Analytics />
     </ThemeProvider>
   );
 }
