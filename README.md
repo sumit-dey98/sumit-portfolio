@@ -1,16 +1,40 @@
-# React + Vite
+# About Project
+Portfolio website for Sumit Hillol Dey, a front-end web developer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Used Tech
+React+Vite, GSAP, Framer Motion, React Bits
 
-Currently, two official plugins are available:
+## Custom Components
+>> CurtainTransition: The Loader animation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+>> Button: Fill button with backgroud wipe animation. Regular and icon variant
 
-## React Compiler
+>> SvgButton: Button with svg border animation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+>> Terminal: expandable macOS style terminal with minimize(disabled), close(disabled) and expand(active) functionality
 
-## Expanding the ESLint configuration
+>> ThemeSwitcher: Theme switcher dropdown and panel variant
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+>> DotGrid: From React Bits
+
+## Custom Hooks
+>> useCursor: Custom dot and ring pointer
+
+>> useTypewriter: Typewriter effect
+
+>> useDecryptedText: Repurposed from React Bits Component
+
+>>useTheme: For switching and applying themes, getCssVar() to get current theme variables
+
+## To be Updated:
+>> Lite Mode: Less heavy version of the website with simpler animations, and reduced gimmicks (No custom cursor, dotgrid, typewriter loop, simpler/no loader animation)
+
+>> More Content in the expandable terminal
+
+>> More projects and a seperate project page and a project repo
+
+>> Interest section
+
+>> CV
+
+>> Contact Info

@@ -99,8 +99,8 @@ export default function Nav({ children }) {
             color = "var(--border)"
             colorHover = "var(--accent)"
             textColor = "var(--dim)"
-            width = {34}
-            height = {34}
+            width = {36}
+            height = {36}
             strokeWidth = {1.5}
             fadeLength = {0.5}
             duration = {1000}

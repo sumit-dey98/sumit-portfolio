@@ -40,7 +40,12 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
               // borderColor: themeKey === key ? t.vars['--accent'] : t.vars['--border'],
             }}
           >
-            <span className={styles.optionIcon} style={{ color: t.vars['--accent'], backgroundColor: t.vars['--bg'], boxShadow: `0 0 2px 1px ${t.vars['--accent']}` }}>
+            <span className={styles.optionIcon} style={{
+              color: t.vars['--accent'],
+              backgroundColor: t.vars['--bg'],
+              outline: `1px solid ${t.vars['--accent']}`,
+              outlineOffset: '-1px'
+            }}>
               <ThemeIcon icon={t.icon}/>
             </span>
             <span className={styles.optionLabel} 
@@ -61,7 +66,7 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
   return (
     <div ref={wrapperRef} className={styles.wrapper}>
       <SvgButton
-        height = {34}
+        height = {36}
         radius = {4}
         strokeWidth = {1.5}
         duration = {1000}
@@ -87,9 +92,9 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
         {open && (
           <motion.ul
             className={styles.menu}
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
           >
             {Object.entries(THEMES).map(([key, t]) => (
@@ -102,7 +107,12 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
                     // borderColor: themeKey === key ? t.vars['--accent'] : t.vars['--border'],
                   }}
                 >
-                  <span className={styles.optionIcon} style={{ color: t.vars['--accent'], backgroundColor: t.vars['--bg'], boxShadow: `0 0 2px 1px ${t.vars['--accent']}` }}>
+                  <span className={styles.optionIcon} style={{
+                    color: t.vars['--accent'],
+                    backgroundColor: t.vars['--bg'],
+                    outline: `1px solid ${t.vars['--accent']}`,
+                    outlineOffset: '-1px'
+                  }}>
                     <ThemeIcon icon={t.icon} />
                   </span>
                   <span className={styles.optionLabel} 

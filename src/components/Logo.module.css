@@ -1,58 +1,79 @@
 .logo {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--accent2);
-  cursor: pointer;
-  letter-spacing: 2px;
   display: inline-flex;
-  align-items: flex-end;
-  gap: 2px;
-  transition: color 0.3s ease, transform 0.2s ease;
-  will-change: transform, color;
-}
-
-.logo:hover {
-  color: var(--accent);
-  transform: scale(1.05);
+  min-width: 240px;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  outline: none;
 }
 
 .logo:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.svg {
+  width: auto;
+  height: 36px;
+  flex-shrink: 0;
+  transition: filter 0.3s ease;
+}
+
+.logo:hover .svg {
+  filter: drop-shadow(0 0 1px var(--accent));
+}
+
+.textClip {
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  padding-right: 0px;
+}
+
+.text {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 3px;
+  color: var(--text);
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.dot {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0;
+  color: var(--accent2);
+  flex-shrink: 0;
 }
 
 .mobileLogo {
   position: fixed;
-  top: 0;
-  left: 0;
-  padding: 18px 28px;
+  top: 14px;
+  left: 14px;
   z-index: 200;
-  background: transparent;
   display: none;
+  /* padding: 4px; */
 }
 
-.statusDot {
-  display: inline-block;
-  background-color: var(--accent);
-  width: 4px;
-  height: 4px;
-  margin: 0 3px 5px 3px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
+.mobileLogo .svg {
+  width: auto;
+  height: 36px;
 }
 
-.logo:hover .statusDot {
-  background-color: var(--accent2);
-}
-
-.prompt {
-  color: var(--accent);
-  margin-right: 4px;
+.mobileLogo:active .svg {
+  filter: drop-shadow(0 0 4px var(--accent));
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
 }
 
 @media (max-width: 1023px) {
   .mobileLogo {
-    display: flex;
+    display: inline-flex;
   }
 }

@@ -28,8 +28,8 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
     const OFFSET = 150;             // Ms stagger between layers — higher = more separation between panels
     const STEPS = 80;               // Polyline resolution of the curved edge — above 80 no visible difference
     const BELL_WIDTH = 4;           // Bell curve width — higher = narrower, more concentrated centre warp
-    const CURVATURE = W >= 1023 ? -1.25 : W >= 576 ? 0.5 : 0.33; // Edge curve per breakpoint — +ve convex, -ve concave, 0 straight
-    const RISE_FRACTION = 0.6;      // Fraction of DURATION spent rising — lower = exits faster, higher = slower
+    const CURVATURE = W >= 1023 ? -0.25 : W >= 576 ? 0.5 : 0.33; // Edge curve per breakpoint — +ve convex, -ve concave, 0 straight
+    const RISE_FRACTION = 0.5;      // Fraction of DURATION spent rising — lower = exits faster, higher = slower
     const RISE_START_OFFSET =400;  // px below screen the panel starts from — higher = longer entrance
     const RISE_END_OFFSET = 100;   // px above screen the panel travels to before finishing — higher = rises further
     const WARP_BUILD_FRACTION = 0.6;     // Fraction of DURATION for bell to fully form — lower = snaps in earlier
