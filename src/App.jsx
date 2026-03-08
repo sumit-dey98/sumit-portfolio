@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useCursor } from './hooks/useCursor';
 import { ThemeProvider, useThemeContext } from './theme/ThemeContext';
 import Loader from './sections/Loader';
@@ -63,6 +64,7 @@ export default function App() {
     <ThemeProvider>
       <PortfolioInner />
       <Analytics />
+      <SpeedInsights />
     </ThemeProvider>
   );
 }
