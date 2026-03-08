@@ -1,0 +1,140 @@
+.about {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--section-pad-y) var(--section-pad-x);
+}
+
+.inner {
+  max-width: 1000px;
+  width: 100%;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 48px;
+}
+
+.prompt {
+  color: var(--accent2);
+  margin-right: 6px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.headline {
+  font-family: var(--display);
+  font-size: clamp(40px, 5.5vw, 64px);
+  line-height: 1;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.bio {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--text-dim);
+  font-weight: 400;
+  max-width: 520px;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.link {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s, gap 0.2s;
+  width: fit-content;
+}
+
+.link:hover {
+  color: var(--accent2);
+  gap: 16px;
+}
+
+.linkArrow {
+  transition: transform 0.2s;
+}
+
+.link:hover .linkArrow {
+  transform: translateX(4px);
+}
+
+/* Image -- hidden */
+.imageWrap {
+  display: none; 
+  position: relative;
+}
+
+.imageFrame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.image {
+  width: 100%;
+  display: block;
+  filter: grayscale(20%) contrast(1.05);
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 20%, transparent),
+      transparent 60%);
+  mix-blend-mode: screen;
+}
+
+.imageBorder {
+  position: absolute;
+  inset: -8px -8px 8px 8px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* responsive rules */
+@media (max-width: 1023px) {
+  /* .layout {
+    grid-template-columns: 1fr;
+  } */
+
+  /* .imageWrap {
+    max-width: 280px;
+  } */
+}

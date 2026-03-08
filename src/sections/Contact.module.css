@@ -1,0 +1,169 @@
+.contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--section-pad-y) var(--section-pad-x);
+  padding-bottom: 40px;
+  position: relative;
+}
+
+.inner {
+  max-width: 700px;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 48px;
+}
+
+.prompt {
+  color: var(--accent2);
+  margin-right: 6px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+.headline {
+  font-family: var(--display);
+  font-size: clamp(56px, 9vw, 112px);
+  line-height: 0.95;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.sub {
+  font-size: 15px;
+  color: var(--text-dim);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Email button */
+.emailBtn {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  margin-top: 8px;
+}
+
+.emailBtn:hover {
+  border-color: var(--accent2);
+}
+
+.emailText {
+  font-family: var(--mono);
+  font-size: clamp(13px, 2vw, 18px);
+  color: var(--text);
+  padding: 16px 24px;
+  letter-spacing: 1px;
+}
+
+.emailAction {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: var(--bg);
+  background: var(--accent2);
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  transition: background 0.2s;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.emailBtn:hover .emailAction {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Socials */
+.socials {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.social {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  text-transform: uppercase;
+}
+
+.social:hover {
+  color: var(--accent2);
+}
+
+.socialDiv {
+  color: var(--dim);
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
+/* Footer */
+.footer {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.footerText {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--dim);
+}
+
+.footerText sup {
+  font-size: 0.75rem;
+}
+
+@media(max-width: 479px) {
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .footer .prompt {
+    display: none;
+  }
+}

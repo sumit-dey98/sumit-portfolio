@@ -1,0 +1,58 @@
+.logo {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent2);
+  cursor: pointer;
+  letter-spacing: 2px;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  transition: color 0.3s ease, transform 0.2s ease;
+  will-change: transform, color;
+}
+
+.logo:hover {
+  color: var(--accent);
+  transform: scale(1.05);
+}
+
+.logo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.mobileLogo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 18px 28px;
+  z-index: 200;
+  background: transparent;
+  display: none;
+}
+
+.statusDot {
+  display: inline-block;
+  background-color: var(--accent);
+  width: 4px;
+  height: 4px;
+  margin: 0 3px 5px 3px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.logo:hover .statusDot {
+  background-color: var(--accent2);
+}
+
+.prompt {
+  color: var(--accent);
+  margin-right: 4px;
+}
+
+@media (max-width: 1023px) {
+  .mobileLogo {
+    display: flex;
+  }
+}

@@ -1,0 +1,711 @@
+/* ── Root ── */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ── Corner brackets ── */
+.corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+}
+
+.cornerTL {
+  top: 20px;
+  left: 20px;
+}
+
+.cornerTR {
+  top: 20px;
+  right: 20px;
+}
+
+.cornerBL {
+  bottom: 20px;
+  left: 20px;
+}
+
+.cornerBR {
+  bottom: 20px;
+  right: 20px;
+}
+
+.cornerInner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cLine {
+  position: absolute;
+  background: var(--accent);
+  display: block;
+}
+
+.cLineH {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  transform-origin: left center;
+}
+
+.cLineV {
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  transform-origin: top center;
+}
+
+.cornerTR .cLineH {
+  transform-origin: right center;
+}
+
+.cornerBL .cLineH {
+  top: auto;
+  bottom: 0;
+}
+
+.cornerBL .cLineV {
+  transform-origin: bottom center;
+  top: auto;
+  bottom: 0;
+}
+
+.cornerBR .cLineH {
+  top: auto;
+  bottom: 0;
+  transform-origin: right center;
+}
+
+.cornerBR .cLineV {
+  transform-origin: bottom center;
+  top: auto;
+  bottom: 0;
+  left: auto;
+  right: 0;
+}
+
+.cornerTR .cLineV {
+  left: auto;
+  right: 0;
+}
+
+/* ── Step dots ── */
+.dots {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.stepDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dim);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.stepDotActive {
+  background: var(--accent);
+  transform: scale(1.5);
+}
+
+.stepDotDone {
+  background: var(--accent2);
+}
+
+/* ── Content ── */
+.content {
+  width: 100%;
+  min-height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Typography ── */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin-bottom: 4rem;
+}
+
+.prompt {
+  color: var(--accent2);
+  margin-right: 6px;
+}
+
+.welcomeWrapper {
+  max-width: clamp(300px, 50vw, 800px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bigTitle {
+  max-width: 800px;
+  font-family: var(--name);
+  font-size: clamp(52px, 11vw, 120px);
+  line-height: 1.15;
+  color: var(--text);
+  letter-spacing: 1px;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.stepTitle {
+  font-family: var(--display);
+  font-size: clamp(26px, 4vw, 44px);
+  letter-spacing: 2px;
+  color: var(--text);
+  line-height: 1;
+  margin-top: -4px;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sub {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+
+/* ── Returning summary ── */
+.settingsSummary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  width: fit-content;
+}
+
+.settingsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingsLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--dim);
+}
+
+.settingsValue {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+
+.settingsDivider {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+}
+
+/* ── Theme grid ── */
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.themeCard {
+  width: 100%;
+  height: min(10vw, 100px);
+  background: var(--cc-bg);
+  border: 1px solid var(--cc-border);
+  box-shadow: 0 0 0 1px var(--cc-border);
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  transition: border-color 0.18s, transform 0.18s;
+  text-align: left;
+}
+
+.themeCardOn {
+  border-color: var(--cc-accent) !important;
+  box-shadow: 0 0 2px 1px var(--cc-accent);
+}
+
+.cardPreview {
+  background: color-mix(in srgb, var(--cc-bg) 60%, var(--cc-border));
+  border-radius: 3px;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cardBar {
+  display: flex;
+  gap: 3px;
+}
+
+.cardDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+.cardLines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cardLine {
+  height: 2px;
+  border-radius: 1px;
+  background: var(--cc-accent);
+  opacity: 0.5;
+  display: block;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: auto;
+}
+
+.cardIcon {
+  color: var(--cc-accent);
+  display: flex;
+  align-items: center;
+}
+
+.cardName {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--cc-text);
+}
+
+.cardCheck {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-family: var(--mono);
+  background-color: var(--accent2);
+  height: 8px;
+  width: 8px;
+  border-radius: 99px;
+  box-shadow: 0 0 3px 2px var(--accent2);
+}
+
+/* ── Name input ── */
+.inputWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.fakePlaceholder {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 18px;
+  letter-spacing: 4px;
+  color: var(--dim);
+  opacity: 0.5;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  direction: rtl;
+  text-align: left;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  transition: border-color 0.2s;
+}
+
+.inputRow:focus-within {
+  border-color: var(--accent);
+}
+
+.inputPrompt {
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--accent2);
+}
+
+.input {
+  font-family: var(--mono);
+  font-size: 18px;
+  letter-spacing: 4px;
+  color: var(--text);
+  border: none;
+  outline: none;
+  flex: 1;
+  caret-color: transparent;
+  appearance: none;
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+.input::placeholder {
+  color: var(--dim);
+  opacity: 0.5;
+}
+
+.inputCursor {
+  font-size: 18px;
+  color: var(--accent2);
+  font-weight: 900;
+  animation: blink 0.7s ease infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── Mode grid ── */
+.modeGrid {
+  width: 99%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.modeCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 22px 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  position: relative;
+  transition: border-color 0.2s;
+  height: 100%;
+}
+
+.modeCard:hover {
+  border-color: var(--accent);
+}
+
+.modeCardOn {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.modeTag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.modeTitle {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.modeDesc {
+  font-family: var(--body);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-dim);
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+.modeCheck {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--accent2);
+}
+
+/* ── Buttons ── */
+.btnRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.nextBtn {
+  background: transparent;
+  font-family: var(--mono);
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 1rem;
+}
+
+.backBtn {
+  background-color: transparent;
+  color: var(--accent);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 1px 1px var(--accent);
+  padding: 6px;
+  margin-right: 12px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.backBtn:hover {
+  background-color: var(--accent);
+  color: var(--bg);
+}
+
+.backIcon {
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+.backBtn:hover .backIcon {
+  transform: scale(105%);
+}
+
+.backBtn:active .backIcon {
+  transform: scale(98%);
+}
+
+.arrow {
+  margin-left: 8px;
+}
+
+.skipBtn {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
+  cursor: pointer;
+  margin-right: 12px;
+  padding: 0;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.skipBtn::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background: var(--muted);
+  transition: width 0.2s ease;
+}
+
+.skipBtn:hover {
+  color: var(--dim);
+}
+
+.skipBtn:hover::after {
+  width: 100%;
+  background-color: var(--dim);
+}
+
+/* ── Enter button ── */
+.enterBtn {
+  position: relative;
+  overflow: hidden;
+  background: var(--accent);
+  border: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--bg);
+  padding: 15px 36px;
+  cursor: pointer;
+  border-radius: 2px;
+  align-self: flex-start;
+  transition: opacity 0.2s;
+}
+
+.enterBtnOff {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.enterBg {
+  position: absolute;
+  inset: 0;
+  background: var(--accent2);
+  transform: translateX(-101%);
+  transition: transform 0.4s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.enterBtn:not(.enterBtnOff):hover .enterBg {
+  transform: translateX(0);
+}
+
+.enterText {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Status bar ── */
+.statusBar {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.statusDot {
+  width: 15px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent2);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.statusRight {
+  margin-left: 6px;
+  opacity: 0.4;
+}
+/* ── Wizard slider ── */
+.wizardOuter {
+  max-width: 800px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.wizardTrack {
+  display: flex;
+  width: 300%;
+  /* always 3x container width */
+  will-change: transform;
+}
+
+.wizardPanel {
+  width: calc(100% / 3);
+  /* each panel = container width */
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 32px 4px 32px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 800px) {
+  .content {
+    padding: 0;
+  }
+
+  .themeGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .themeCard {
+    width: 100%;
+    height: 100px;
+  }
+
+  .cardName {
+    line-break: anywhere;
+  }
+}
+
+@media (max-width: 479px) {
+  .cardName {
+      font-size: 9px;
+    }
+
+  .cardCheck {
+  display: none;
+  }
+}

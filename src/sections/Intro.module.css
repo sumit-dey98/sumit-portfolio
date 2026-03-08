@@ -1,0 +1,162 @@
+.Intro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--section-pad-y) var(--section-pad-x);
+  overflow: hidden;
+}
+
+.inner {
+  max-width: 760px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.label {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.prompt {
+  color: var(--accent2);
+  margin-right: 6px;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent2);
+  box-shadow: 0 0 8px var(--accent2);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--accent2);
+  }
+
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 20px var(--accent2);
+  }
+}
+
+.statusText {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--accent2);
+}
+
+.headline {
+  font-family: var(--display);
+  font-size: clamp(48px, 7vw, 88px);
+  line-height: 1;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
+.typed {
+  color: var(--accent);
+  display: block;
+  min-height: 1.1em;
+}
+
+.cursor {
+  color: var(--accent2);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.body {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-dim);
+  margin-bottom: 56px;
+  font-weight: 400;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaVal {
+  font-family: var(--display);
+  font-size: 40px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.metaKey {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.metaDivider {
+  width: 1px;
+  height: 48px;
+  background: var(--border);
+}
+
+/* Background line decoration */
+.lineDecor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.line {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom,
+      transparent,
+      color-mix(in srgb, var(--accent) 20%, transparent),
+      transparent);
+  transform: translateX(calc(var(--i) * -60px - 60px));
+  opacity: calc(1 - var(--i) * 0.08);
+}

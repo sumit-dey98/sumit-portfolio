@@ -1,0 +1,54 @@
+.skills {
+  padding: var(--section-pad-y) var(--section-pad-x);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin: auto;
+  max-width: 800px;
+  width: 100%;
+  height: 100%;
+}
+
+
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 40px;
+  margin-top: auto;
+}
+
+.prompt {
+  color: var(--accent2);
+  margin-right: 6px;
+}
+
+.floatingIcon {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) !important;
+  background: var(--accent);
+  color: var(--surface);
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  transition: background 0.2s;
+}
+
+.floatingIcon:hover {
+  background: var(--accent2);
+}

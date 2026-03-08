@@ -1,0 +1,189 @@
+.terminal {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 0px 6px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border);
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: auto;
+  /* transition: all 0.2s; */
+}
+
+.fullscreen {
+  --term-margin: 14px;
+  position: fixed;
+  top: var(--term-margin);
+  left: var(--term-margin);
+  right: var(--term-margin);
+  bottom: var(--term-margin);
+  max-width: none;
+  width: auto;
+  height: auto;
+  z-index: 1000;
+  border-radius: 12px;
+}
+
+.fullscreen .terminalBody {
+  max-height: calc(100dvh - 120px);
+}
+
+.terminalBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.termDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0px 2px var(--accent), 0 0 0 1px var(--border);
+  transition: all 100ms ease-in-out;
+  padding: 0;
+}
+
+.termDot:hover {
+  opacity: 0.6;
+  cursor: pointer;
+  transform: scale(1.25);
+}
+
+.termDot * {
+  opacity: 0;
+  transition: all 100ms ease-in-out;
+}
+
+.termDot:hover * {
+  opacity: 0.9;
+}
+
+.termTitle {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 12px;
+  letter-spacing: 1px;
+}
+
+.terminalBody {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 600px;
+}
+
+.termCmd {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.termPrompt {
+  color: var(--accent2);
+  margin-right: 10px;
+}
+
+.cursor {
+  color: var(--accent2);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Groups */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.groupName {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.termDir {
+  color: var(--dim);
+  margin-right: 12px;
+  font-size: 11px;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 20px;
+}
+
+.item {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--dim);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: default;
+  transition: color 0.15s, transform 0.15s;
+  will-change: transform, color;
+}
+
+.item:hover,
+.item:hover * {
+  color: var(--text-dim);
+}
+
+.fileIcon {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--dim);
+  min-width: 100px;
+}
+
+/* responsive rules */
+@media (max-width: 767px) {
+  .terminalBody {
+    padding: clamp(16px, 3vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 3vw, 32px);
+    max-height: 600px;
+  }
+
+  .termPrompt {
+    font-size: 13px;
+  }
+
+  .termCmd, .groupName {
+    font-size: 12px;
+  }
+
+  .item {
+    font-size: 11px;
+  }
+}

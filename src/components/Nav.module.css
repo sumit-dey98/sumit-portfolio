@@ -1,0 +1,333 @@
+/* ── Desktop nav ── */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px;
+  background: linear-gradient(to bottom, var(--surface), transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, border-color 0.4s ease;
+}
+
+.nav.visible {
+  opacity: 1;
+  pointer-events: all;
+  border-color: var(--border);
+}
+
+.statusDot {
+  display: block;
+  background-color: var(--accent);
+  width: 4px;
+  height: 4px;
+  margin-bottom: 5px;
+  margin-right: 3px;
+  border-radius: 99px;
+}
+
+.prompt {
+  color: var(--accent);
+  margin-right: 4px;
+}
+
+/* ── Nav links ── */
+.links {
+  list-style: none;
+  display: flex;
+  gap: 32px;
+}
+
+.link {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  cursor: pointer;
+  text-transform: uppercase;
+  padding: 4px 0;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent2);
+  transition: width 0.2s ease;
+}
+
+.link:hover,
+.link.active {
+  color: var(--text);
+}
+
+.link.active::after,
+.link:hover::after {
+  width: 100%;
+}
+
+/* ── Right slot ── */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Settings button ── */
+.settingsBtn {
+  background: var(--surface);
+  border-radius: 4px;
+  color: var(--muted);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.settingsBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.settingsBtnActive {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Side indicator dots ── */
+.indicator {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dim);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.dot.activeDot {
+  background: var(--accent2);
+  transform: scale(1.4);
+}
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 1023px) {
+  .nav {
+    display: none;
+  }
+
+  .indicator {
+    display: none;
+  }
+
+  .mobileLogo {
+    display: flex;
+  }
+}
+
+/* ── Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  width: min(320px, 85vw);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -20px 0 60px color-mix(in srgb, var(--surface), transparent 30%);
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--border);
+  min-height: 68px;
+}
+
+.sidebarLogo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent2);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.backBtn:hover {
+  color: var(--text);
+}
+
+/* ── Sidebar body (full height, clips panels) ── */
+.sidebarBody {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Nav view ── */
+.sidebarNavView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebarLinks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  flex: 1;
+}
+
+.sidebarLink {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--muted);
+  transition: color 0.2s, background 0.2s, padding-left 0.2s;
+  position: relative;
+}
+
+.sidebarLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: var(--accent2);
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.sidebarLink:hover,
+.sidebarLinkActive {
+  color: var(--accent);
+  background: var(--bg);
+  padding-left: 36px;
+}
+
+.sidebarLink:hover::before,
+.sidebarLinkActive::before {
+  transform: scaleY(1);
+}
+
+.sidebarNum {
+  font-size: 10px;
+  color: var(--dim);
+  min-width: 24px;
+  transition: color 0.2s;
+}
+
+.sidebarLink:hover .sidebarNum,
+.sidebarLinkActive .sidebarNum {
+  color: var(--accent);
+}
+
+/* ── Sidebar footer ── */
+.sidebarFooter {
+  padding: 20px 28px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Preferences button in sidebar ── */
+.sidebarSettingsBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--dim);
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.2s, color 0.2s;
+  width: 100%;
+}
+
+.sidebarSettingsBtn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.sidebarSettingsArrow {
+  margin-left: auto;
+}
+
+/* ── Settings inline view ── */
+.sidebarSettingsView {
+  height: 100%;
+  overflow-y: auto;
+}
