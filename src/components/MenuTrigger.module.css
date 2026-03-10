@@ -18,7 +18,7 @@
   }
 }
 
-/* ── Lines ── */
+/* ---- Lines ---- */
 .lines {
   display: flex;
   flex-direction: column;

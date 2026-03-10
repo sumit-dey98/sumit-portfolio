@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/project/connect4",
+      "destination": "https://connect4-project.vercel.app/"
+    }
+  ]
+}

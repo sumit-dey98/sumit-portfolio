@@ -205,8 +205,8 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg,
-      color-mix(in srgb, var(--accent2) 30%, transparent),
-      transparent 60%);
+      color-mix(in srgb, var(--accent2) 10%, transparent),
+      transparent 80%);
   mix-blend-mode: screen;
 }
 

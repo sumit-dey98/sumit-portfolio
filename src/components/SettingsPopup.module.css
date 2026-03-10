@@ -1,4 +1,4 @@
-/* ── Popup overlay (desktop) ── */
+/* ---- Popup overlay (desktop) ---- */
 .overlay {
   position: fixed;
   inset: 0;
@@ -20,7 +20,7 @@
   overflow: hidden;
 }
 
-/* ── Inner (shared between popup and inline) ── */
+/* ---- Inner (shared between popup and inline) ---- */
 .inner {
   display: flex;
   flex-direction: column;
@@ -31,7 +31,7 @@
   padding: 0;
 }
 
-/* ── Header ── */
+/* ---- Header ---- */
 .header {
   display: flex;
   align-items: center;
@@ -71,7 +71,7 @@
   color: var(--text);
 }
 
-/* ── Body ── */
+/* ---- Body ---- */
 .body {
   padding: 20px;
   display: flex;
@@ -84,7 +84,7 @@
   flex: 1;
 }
 
-/* ── Field ── */
+/* ---- Field ---- */
 .field {
   display: flex;
   flex-direction: column;
@@ -135,7 +135,7 @@
   font-weight: 400;
 }
 
-/* ── Mode buttons ── */
+/* ---- Mode buttons ---- */
 .modeRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -194,7 +194,7 @@
   will-change: transform;
 }
 
-/* ── Footer ── */
+/* ---- Footer ---- */
 .footer {
   padding: 14px 20px;
   border-top: 1px solid var(--border);
@@ -207,7 +207,7 @@
   padding: 20px 28px;
 }
 
-/* ── Save button ── */
+/* ---- Save button ---- */
 .saveBtn {
   font-size: 11px;
   font-weight: 600;

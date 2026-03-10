@@ -25,7 +25,7 @@ export default function Button({
   const textRef = useRef(null);
   const btnRef = useRef(null);
 
-  // ── Magnetic logic ──
+  // Magnetic logic 
   const handleMagneticMove = (e) => {
     if (variant !== 'magnetic') return;
     const btn = magnetRef.current;
@@ -54,7 +54,7 @@ export default function Button({
     shared.rel = 'noopener noreferrer';
   }
 
-  // ── Fill variant ──
+  // Fill variant 
   if (variant === 'fill') {
     useEffect(() => {
       handleFillMove();
@@ -106,7 +106,7 @@ export default function Button({
     );
   }
 
-  // ── Border draw variant ──
+  // Border draw variant 
   if (variant === 'border') {
     return (
       <Tag {...shared}>
@@ -120,7 +120,7 @@ export default function Button({
     );
   }
 
-  // ── Magnetic variant ──
+  // Magnetic variant 
   if (variant === 'magnetic') {
     return (
       <span

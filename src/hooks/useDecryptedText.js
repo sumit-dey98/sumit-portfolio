@@ -36,8 +36,8 @@ export function useDecryptedText(text, {
     // Build the string: locked chars + scrambled remainder
     const result = text.split('').map((char, i) => {
       if (i < revealed) return char;           // locked in
-      if (char === ' ') return ' ';            // preserve spaces
-      return rand(chars.split(''));                  // scramble
+      if (char === ' ') return ' ';              // preserve spaces
+      return rand(chars.split(''));           // scramble
     }).join('');
 
     setDisplay(result);

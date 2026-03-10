@@ -68,17 +68,17 @@ export default function Nav({ children }) {
 
   return (
     <>
-      {/* ── Desktop settings popup ── */}
+      {/* ---- Desktop settings popup ---- */}
       <AnimatePresence>
         {settingsOpen && (
           <SettingsPopup onClose={() => setSettingsOpen(false)} />
         )}
       </AnimatePresence>
 
-      {/* ── Mobile logo ── */}
+      {/* ---- Mobile logo ---- */}
       <Logo mobile onClick={() => scrollTo('landing')} />
 
-      {/* ── Desktop Nav ── */}
+      {/* ---- Desktop Nav ---- */}
       <nav className={`${styles.nav} ${visible ? styles.visible : ''}`}>
         <Logo onClick={() => scrollTo('landing')} />
 
@@ -131,10 +131,10 @@ export default function Nav({ children }) {
         </div>
       </nav>
 
-      {/* ── Mobile Trigger ── */}
+      {/* ---- Mobile Trigger ---- */}
       <MenuTrigger isOpen={sidebarOpen} onClick={() => setSidebarOpen(o => !o)} fixed={true} />
 
-      {/* ── Sidebar ── */}
+      {/* ---- Sidebar ---- */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -181,7 +181,7 @@ export default function Nav({ children }) {
                 </AnimatePresence>
               </div>
 
-              {/* Body — animated panel switch */}
+              {/* Body -- animated panel switch */}
               <div className={styles.sidebarBody}>
                 <AnimatePresence mode="wait">
 

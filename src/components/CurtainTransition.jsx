@@ -21,9 +21,9 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------------
     // PARAMETERS
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------------
     const DURATION = 2500;          // Total animation length in ms — increase to slow everything down
     const OFFSET = 150;             // Ms stagger between layers — higher = more separation between panels
     const STEPS = 80;               // Polyline resolution of the curved edge — above 80 no visible difference
@@ -39,7 +39,7 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
     const DEPTH_L2 = 0.85;  // Bell depth of middle layer (fillColor)
     const DEPTH_L3 = 0.5;   // Bell depth of top layer (fillColor2) — leads the animation
 
-    // ── Spinner parameters ──
+    // ---- Spinner parameters ----
     const SPINNER_RADIUS = 24; // Radius of the spinner arc in px
     const SPINNER_STROKE = 5;  // Stroke width
     const SPINNER_ARC_FRACTION = 0.28; // Arc length as fraction of full circle (0 → 1)
@@ -48,34 +48,34 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
     const SPINNER_FADE_OUT_START = 0.68; // Fraction of DURATION at which spinner starts fading out
     const SPINNER_FADE_DURATION = 0.12; // Duration of spinner fade as fraction of DURATION
 
-    // ─────────────────────────────────────────────
+    // ----------------------------------------------------------------------------------------
     // EASINGS
-    // ─────────────────────────────────────────────
+    // ----------------------------------------------------------------------------------------
     const easeRise = gsap.parseEase('power2.in');    // Controls panel vertical speed — 'power2.in' accelerates upward
     const easeWarpIn = gsap.parseEase('power4.out');   // Controls how fast the bell curve appears — 'power4.out' snaps in then slows
     const easeWarpOut = gsap.parseEase('power3.in');    // Controls how fast the bell dissolves — 'power3.in' starts slow then accelerates
 
-    // ─────────────────────────────────────────────
+    // ------------------------------------------------------------------------------------------
     // COLORS
-    // ─────────────────────────────────────────────
+    // ------------------------------------------------------------------------------------------
     const cs = getComputedStyle(document.documentElement);
     const fillColor              = color  || cs.getPropertyValue('--accent').trim()  || '#276bff';
     const fillColor2            = color2 || cs.getPropertyValue('--accent2').trim() || '#00ffcc';
     const spinnerColor       = cs.getPropertyValue('--text').trim() || '#ffffff';
     const spinnerColorDim = cs.getPropertyValue('--surface').trim() || '#a4a4ca';
 
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------
     // BELL LUT
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------
     const bellLUT = new Float32Array(STEPS + 1);
     for (let i = 0; i <= STEPS; i++) {
       const nx = i / STEPS;
       bellLUT[i] = (-1.25 + CURVATURE * Math.exp(-Math.pow((nx - 0.5) * BELL_WIDTH, 2)));
     }
 
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------
     // GEOMETRY
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------
     const getPanelShape = (t, maxDepth) => {
       const riseProgress  = easeRise(Math.min(t / RISE_FRACTION, 1));
       const panelBottom  = H + RISE_START_OFFSET - riseProgress * (H + RISE_END_OFFSET);
@@ -104,9 +104,9 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
       ctx.fill();
     };
 
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------------
     // SPINNER — drawn on canvas, rides the leading panel's top edge
-    // ─────────────────────────────────────────────
+    // ---------------------------------------------------------------------------------------
     const drawSpinner = (t3, elapsed, opacity) => {
       if (opacity <= 0) return;
 
@@ -148,9 +148,9 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
       ctx.restore();
     };
 
-    // ─────────────────────────────────────────────
+    // --------------------------------------------------------------------------------
     // RENDER LOOP
-    // ─────────────────────────────────────────────
+    // --------------------------------------------------------------------------------
     let startTime = null;
     let rafId;
 

@@ -53,7 +53,6 @@ const CharReveal = ({ text, delay = 0, className = '' }) => {
   );
 };
 
-// ── Corner bracket ──
 const Corner = ({ delay }) => (
   <motion.span className={styles.cornerInner}>
     <motion.span
@@ -71,7 +70,6 @@ const Corner = ({ delay }) => (
   </motion.span>
 );
 
-// ── Theme mini-card ──
 const ThemeIcon = ({ icon: Icon, size = 11 }) => <Icon size={size} />;
 
 const ThemeCard = ({ themeKey: tk, t, selected, onSelect }) => (
@@ -115,7 +113,6 @@ const ThemeCard = ({ themeKey: tk, t, selected, onSelect }) => (
   </button>
 );
 
-// ── Mode card ──
 const ModeCard = ({ id, tag, title, desc, selected, onSelect }) => (
   <button
     className={`${styles.modeCard} ${selected ? styles.modeCardOn : ''}`}
@@ -135,7 +132,6 @@ const ModeCard = ({ id, tag, title, desc, selected, onSelect }) => (
   </button>
 );
 
-// ── Step index map ──
 const STEPS = ['theme', 'name', 'mode'];
 
 export default function Loader({ onComplete }) {
@@ -162,7 +158,6 @@ export default function Loader({ onComplete }) {
   const stepIndex = STEPS.indexOf(step); 
   const inWizard = STEPS.includes(step);
 
-  // ── Returning user: show welcome-back then curtain ──
   useEffect(() => {
     if (step !== 'returning') return;
     const t = setTimeout(() => {
@@ -184,7 +179,6 @@ useEffect(() => {
 
 }, [stepIndex, inWizard]);
 
-  // ── Focus input on name step ──
   useEffect(() => {
     if (step === 'name') setTimeout(() => inputRef.current?.focus(), 500);
   }, [step]);
@@ -241,7 +235,6 @@ useEffect(() => {
 
   return (
     <>
-      {/* ── Curtain ── */}
       {showCurtain && (
         <CurtainTransition
           color={getCssVar('--accent2')}
@@ -260,13 +253,11 @@ useEffect(() => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-            {/* Corner brackets */}
             <div className={`${styles.corner} ${styles.cornerTL}`}><Corner delay={0.05} /></div>
             <div className={`${styles.corner} ${styles.cornerTR}`}><Corner delay={0.1} /></div>
             <div className={`${styles.corner} ${styles.cornerBL}`}><Corner delay={0.15} /></div>
             <div className={`${styles.corner} ${styles.cornerBR}`}><Corner delay={0.2} /></div>
 
-            {/* Step dots (only during wizard) */}
             {inWizard && (
               <div className={styles.dots}>
                 {STEPS.map((s, i) => (
@@ -281,11 +272,9 @@ useEffect(() => {
               </div>
             )}
 
-            {/* ── Content ── */}
             <div className={styles.content}>
               <AnimatePresence mode="wait">
 
-                {/* ── WELCOME (new user) ── */}
                 {step === 'welcome' && (
                   <motion.div key="welcome" className={styles.panel}
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -314,7 +303,6 @@ useEffect(() => {
                   </motion.div>
                 )}
 
-                {/* ── RETURNING USER ── */}
                 {step === 'returning' && (
                   <motion.div key="returning" className={styles.panel}
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -360,7 +348,6 @@ useEffect(() => {
                   </motion.div>
                 )}
 
-                {/* ── WIZARD SLIDER (theme -> name -> mode) ── */}
                 {inWizard && (
                   <motion.div
                     key="wizard"
@@ -373,7 +360,6 @@ useEffect(() => {
                   >
                     <div className={styles.wizardTrack} ref={trackRef}>
 
-                      {/* ── Panel 1: THEME ── */}
                       <div className={styles.wizardPanel}>
                         <p className={styles.eyebrow}><span className={styles.prompt}>&gt;</span> 01 / THEME</p>
                         <div className={styles.stepHeader}> <h2 className={styles.stepTitle}>Choose your aesthetic.</h2>
@@ -400,7 +386,6 @@ useEffect(() => {
                         </div>
                       </div>
 
-                      {/* ── Panel 2: NAME ── */}
                       <div className={styles.wizardPanel}>
                         <p className={styles.eyebrow}><span className={styles.prompt}>&gt;</span> 02 / IDENTITY</p>
                         <div className={styles.stepHeader}> <h2 className={styles.stepTitle}>What should we call you?</h2>
@@ -438,7 +423,6 @@ useEffect(() => {
                         </div>
                       </div>
 
-                      {/* ── Panel 3: MODE ── */}
                       <div className={styles.wizardPanel}>
                         <p className={styles.eyebrow}><span className={styles.prompt}>&gt;</span> 03 / EXPERIENCE</p>
                         <div className={styles.stepHeader}> <h2 className={styles.stepTitle}>Pick a mode.</h2>
@@ -479,7 +463,6 @@ useEffect(() => {
               </AnimatePresence>
             </div>
 
-            {/* Status bar */}
             <motion.div className={styles.statusBar}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}

@@ -25,7 +25,7 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Sidebar list variant ──
+  // ---- Sidebar list variant ----
   if (variant === 'list') {
     return (
       <div className={styles.list}>
@@ -62,7 +62,7 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
     );
   }
 
-  // ── Desktop dropdown variant ──
+  // ---- Desktop dropdown variant ----
   return (
     <div ref={wrapperRef} className={styles.wrapper}>
       <SvgButton

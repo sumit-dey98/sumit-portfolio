@@ -1,4 +1,4 @@
-/* ── Desktop nav ── */
+/* ---- Desktop nav ---- */
 .nav {
   position: fixed;
   top: 0;
@@ -38,7 +38,7 @@
   margin-right: 4px;
 }
 
-/* ── Nav links ── */
+/* ---- Nav links ---- */
 .links {
   list-style: none;
   display: flex;
@@ -81,14 +81,14 @@
   width: 100%;
 }
 
-/* ── Right slot ── */
+/* ---- Right slot ---- */
 .right {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-/* ── Settings button ── */
+/* ---- Settings button ---- */
 .settingsBtn {
   background: var(--surface);
   border-radius: 4px;
@@ -112,7 +112,7 @@
   color: var(--accent);
 }
 
-/* ── Side indicator dots ── */
+/* ---- Side indicator dots ---- */
 .indicator {
   display: flex;
   flex-direction: column;
@@ -138,7 +138,7 @@
   transform: scale(1.4);
 }
 
-/* ── Mobile breakpoint ── */
+/* ---- Mobile breakpoint ---- */
 @media (max-width: 1023px) {
   .nav {
     display: none;
@@ -153,7 +153,7 @@
   }
 }
 
-/* ── Overlay ── */
+/* ---- Overlay ---- */
 .overlay {
   position: fixed;
   inset: 0;
@@ -162,7 +162,7 @@
   z-index: 200;
 }
 
-/* ── Sidebar ── */
+/* ---- Sidebar ---- */
 .sidebar {
   position: fixed;
   top: 0;
@@ -213,14 +213,14 @@
   color: var(--text);
 }
 
-/* ── Sidebar body (full height, clips panels) ── */
+/* ---- Sidebar body (full height, clips panels) ---- */
 .sidebarBody {
   flex: 1;
   overflow: hidden;
   position: relative;
 }
 
-/* ── Nav view ── */
+/* ---- Nav view ---- */
 .sidebarNavView {
   display: flex;
   flex-direction: column;
@@ -290,7 +290,7 @@
   color: var(--accent);
 }
 
-/* ── Sidebar footer ── */
+/* ---- Sidebar footer ---- */
 .sidebarFooter {
   padding: 20px 28px;
   border-top: 1px solid var(--border);
@@ -299,7 +299,7 @@
   gap: 16px;
 }
 
-/* ── Preferences button in sidebar ── */
+/* ---- Preferences button in sidebar ---- */
 .sidebarSettingsBtn {
   background: none;
   border: 1px solid var(--border);
@@ -326,7 +326,7 @@
   margin-left: auto;
 }
 
-/* ── Settings inline view ── */
+/* ---- Settings inline view ---- */
 .sidebarSettingsView {
   height: 100%;
   overflow-y: auto;

@@ -1,4 +1,4 @@
-/* ── Root ── */
+/*  Root  */
 .loader {
   position: fixed;
   inset: 0;
@@ -11,7 +11,7 @@
   overflow: hidden;
 }
 
-/* ── Corner brackets ── */
+/* Corner brackets  */
 .corner {
   position: absolute;
   width: 28px;
@@ -102,7 +102,7 @@
   right: 0;
 }
 
-/* ── Step dots ── */
+/* Step dots */
 .dots {
   position: absolute;
   top: 28px;
@@ -129,7 +129,7 @@
   background: var(--accent2);
 }
 
-/* ── Content ── */
+/*  Content  */
 .content {
   width: 100%;
   min-height: 440px;
@@ -146,7 +146,7 @@
   gap: 24px;
 }
 
-/* ── Typography ── */
+/* Typography */
 .eyebrow {
   font-family: var(--mono);
   font-size: 14px;
@@ -203,7 +203,7 @@
   color: var(--muted);
 }
 
-/* ── Returning summary ── */
+/*  Returning summary  */
 .settingsSummary {
   display: flex;
   align-items: center;
@@ -243,7 +243,7 @@
   background: var(--border);
 }
 
-/* ── Theme grid ── */
+/* Theme grid */
 .themeGrid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -341,7 +341,7 @@
   box-shadow: 0 0 3px 2px var(--accent2);
 }
 
-/* ── Name input ── */
+/* Name input  */
 .inputWrap {
   position: relative;
   flex: 1;
@@ -420,7 +420,7 @@
   to   { opacity: 0; }
 }
 
-/* ── Mode grid ── */
+/* Mode grid */
 .modeGrid {
   width: 99%;
   display: grid;
@@ -486,7 +486,7 @@
   color: var(--accent2);
 }
 
-/* ── Buttons ── */
+/* Buttons */
 .btnRow {
   display: flex;
   align-items: center;
@@ -576,7 +576,7 @@
   background-color: var(--dim);
 }
 
-/* ── Enter button ── */
+/* Enter button  */
 .enterBtn {
   position: relative;
   overflow: hidden;
@@ -615,7 +615,7 @@
   z-index: 2;
 }
 
-/* ── Status bar ── */
+/* Status bar */
 .statusBar {
   position: absolute;
   bottom: 22px;
@@ -655,7 +655,7 @@
   margin-left: 6px;
   opacity: 0.4;
 }
-/* ── Wizard slider ── */
+/*  Wizard slider  */
 .wizardOuter {
   max-width: 800px;
   width: 100%;
@@ -665,13 +665,11 @@
 .wizardTrack {
   display: flex;
   width: 300%;
-  /* always 3x container width */
   will-change: transform;
 }
 
 .wizardPanel {
   width: calc(100% / 3);
-  /* each panel = container width */
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
