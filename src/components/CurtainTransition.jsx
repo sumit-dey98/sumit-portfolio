@@ -28,7 +28,8 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
     const OFFSET = 150;             // Ms stagger between layers — higher = more separation between panels
     const STEPS = 80;               // Polyline resolution of the curved edge — above 80 no visible difference
     const BELL_WIDTH = 4;           // Bell curve width — higher = narrower, more concentrated centre warp
-    const CURVATURE = W >= 1023 ? -0.25 : W >= 576 ? 0.5 : 0.33; // Edge curve per breakpoint — +ve convex, -ve concave, 0 straight
+    // const CURVATURE = W >= 1023 ? -0.25 : W >= 576 ? 0.5 : 0.33; 
+    const CURVATURE = 0;// Edge curve per breakpoint — +ve convex, -ve concave, 0 straight
     const RISE_FRACTION = 0.5;      // Fraction of DURATION spent rising — lower = exits faster, higher = slower
     const RISE_START_OFFSET =400;  // px below screen the panel starts from — higher = longer entrance
     const RISE_END_OFFSET = 100;   // px above screen the panel travels to before finishing — higher = rises further
@@ -61,7 +62,7 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
     const cs = getComputedStyle(document.documentElement);
     const fillColor              = color  || cs.getPropertyValue('--accent').trim()  || '#276bff';
     const fillColor2            = color2 || cs.getPropertyValue('--accent2').trim() || '#00ffcc';
-    const spinnerColor       = cs.getPropertyValue('--text').trim() || '#ffffff';
+    const spinnerColor = cs.getPropertyValue('--bg').trim() || '#ffffff';
     const spinnerColorDim = cs.getPropertyValue('--surface').trim() || '#a4a4ca';
 
     // ---------------------------------------------------------------------------------
@@ -172,9 +173,9 @@ export default function CurtainTransition({ onComplete, color, color2 }) {
       // Spinner opacity: full until SPINNER_FADE_OUT_START, then fades over SPINNER_FADE_DURATION
       const fadeProgress  = Math.max(0, (globalT - SPINNER_FADE_OUT_START) / SPINNER_FADE_DURATION);
       const spinnerOpacity = Math.max(0, 1 - fadeProgress);
-      drawSpinner(t1, elapsed, spinnerOpacity);
+      drawSpinner(t1*1.05, elapsed, spinnerOpacity);
 
-      if (t3 < 0.9) {
+      if (t3 < 0.99) {
         rafId = requestAnimationFrame(draw);
       } else {
         ctx.clearRect(0, 0, W, H);

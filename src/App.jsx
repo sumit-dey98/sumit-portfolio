@@ -1,5 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useCursor } from './hooks/useCursor';
@@ -10,11 +10,25 @@ import ThemeSwitcher from './components/ThemeSwitcher';
 import Landing from './sections/Landing';
 import Intro from './sections/Intro';
 import Projects from './sections/Projects';
-import Connect4 from './projectRoutes/Connect4';
+import SingleProject from './templates/SingleProject';
 import Skills from './sections/Skills';
 import About from './sections/About';
 import Contact from './sections/Contact';
+import ProjectTransition from './components/ProjectTransition';
 import './index.css';
+
+const PROJECT_ROUTES = {
+  'connect4': {
+    logo: <img src="/projects/connect4/connect4-logo.svg" width={256} height={256} />,
+    src: '/projects/connect4/connect4.html',
+    bgColor: 'var(--surface)',
+  },
+  'rubiks': {
+    logo: <img src="/projects/rubiks/rubiks-logo.svg" width={256} height={256} />,
+    src: '/projects/rubiks/rubiks.html',
+    bgColor: 'var(--surface)',
+  },
+};
 
 function PortfolioInner() {
   const [loaderDone, setLoaderDone] = useState(false);
@@ -59,15 +73,26 @@ function PortfolioInner() {
   );
 }
 
-export default function App() {
+function AppInner() {
+  const location = useLocation();
+
   return (
-    <ThemeProvider>
+    <>
       <Routes>
         <Route path="/" element={<PortfolioInner />} />
-        <Route path="/project/connect4" element={<Connect4 />} />
+        <Route path="/project/connect4" element={<SingleProject {...PROJECT_ROUTES['connect4']} />} />
+        <Route path="/project/rubiks-cube" element={<SingleProject {...PROJECT_ROUTES['rubiks']} />} />
       </Routes>
       <Analytics />
       <SpeedInsights />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
     </ThemeProvider>
   );
 }
