@@ -7,8 +7,8 @@ import styles from './SettingsPopup.module.css';
 const ease = [0.16, 1, 0.3, 1];
 
 /**
- * variant="popup"  — floating popup, desktop nav (default)
- * variant="inline" — fills sidebar settings panel, no overlay
+ * variant="popup"  - floating popup, desktop nav (default)
+ * variant="inline" - fills sidebar settings panel, no overlay
  */
 export default function SettingsPopup({ onClose, variant = 'popup' }) {
   const { prefs, savePrefs } = useUserPrefs();

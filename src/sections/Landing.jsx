@@ -44,7 +44,7 @@ export default function Landing({ onEnter, onSkip }) {
 
       <motion.div
         className={styles.content}
-        initial={{ opacity: 0.5, y: 30 }}
+        initial={{ opacity: 0.5, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
       >
@@ -53,9 +53,9 @@ export default function Landing({ onEnter, onSkip }) {
         </p>
 
         <h1 className={styles.headline}>
-          <AnimatedContent direction='horizontal' delay={0.2}> SUMIT </AnimatedContent>
-          <AnimatedContent direction='horizontal' reverse delay={0.25}> HILLOL </AnimatedContent>
-          <AnimatedContent direction='horizontal' delay={0.3}> DEY </AnimatedContent>
+          <AnimatedContent direction='horizontal' reverse delay={0.2} ease='backIn'> SUMIT </AnimatedContent>
+          <AnimatedContent direction='horizontal' reverse delay={0.25} ease='backIn'> HILLOL </AnimatedContent>
+          <AnimatedContent direction='horizontal' reverse delay={0.3} ease='backIn'> DEY </AnimatedContent>
         </h1>
 
         <p className={styles.role}>

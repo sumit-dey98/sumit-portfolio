@@ -23,7 +23,7 @@ export default function About() {
             </h2>
             <p className={styles.bio}>
               I'm Sumit, a full-stack web developer with a focus on interactive UI and creative engineering.
-              I care deeply about the intersection of performance and aesthetics — interfaces that don't just
+              I care deeply about the intersection of performance and aesthetics - interfaces that don't just
               work, but feel good to use.
             </p>
             <p className={styles.bio}>

@@ -10,7 +10,7 @@ import CurtainTransition from '../components/CurtainTransition';
 import { IoArrowForwardSharp, IoArrowBackSharp } from 'react-icons/io5';
 import styles from './Loader.module.css';
 
-const ease = [0.16, 1, 0.3, 1]; 
+const ease = [0.16, 1, 0.3, 1];
 const TYPEWRITER_LINES = [
   'Enter your name',
   'You can skip this',
@@ -29,7 +29,7 @@ const CharReveal = ({ text, delay = 0, className = '' }) => {
           {word.split('').map((ch, i) => {
             const charIndex = words
               .slice(0, wIdx)
-              .reduce((acc, w) => acc + w.length, 0) + i + wIdx; 
+              .reduce((acc, w) => acc + w.length, 0) + i + wIdx;
             return (
               <motion.span
                 key={i}
@@ -155,7 +155,7 @@ export default function Loader({ onComplete }) {
     paused: isTyping,
   });
 
-  const stepIndex = STEPS.indexOf(step); 
+  const stepIndex = STEPS.indexOf(step);
   const inWizard = STEPS.includes(step);
 
   useEffect(() => {
@@ -167,17 +167,17 @@ export default function Loader({ onComplete }) {
     return () => clearTimeout(t);
   }, [step]);
 
-useEffect(() => {
-  if (!trackRef.current || !inWizard) return;
-  const panelWidth = Math.min(800, window.innerWidth);
-  const targetX = -(stepIndex < 0 ? 0 : stepIndex * panelWidth);
-  gsap.to(trackRef.current, {
-    x: targetX,
-    duration: 1,
-    ease: 'expo.out',
-  });
+  useEffect(() => {
+    if (!trackRef.current || !inWizard) return;
+    const panelWidth = Math.min(800, window.innerWidth);
+    const targetX = -(stepIndex < 0 ? 0 : stepIndex * panelWidth);
+    gsap.to(trackRef.current, {
+      x: targetX,
+      duration: 1,
+      ease: 'expo.out',
+    });
 
-}, [stepIndex, inWizard]);
+  }, [stepIndex, inWizard]);
 
   useEffect(() => {
     if (step === 'name') setTimeout(() => inputRef.current?.focus(), 500);
@@ -188,7 +188,7 @@ useEffect(() => {
   const goBack = () => {
     const idx = STEPS.indexOf(step);
     if (idx > 0) setStep(STEPS[idx - 1]);
-    else setStep('welcome'); 
+    else setStep('welcome');
   };
 
   const handleEnter = (overrides = {}) => {
@@ -214,7 +214,7 @@ useEffect(() => {
 
   useEffect(() => {
     if (!trackRef.current || !inWizard || !wizardRef.current) return;
-    const containerWidth = wizardRef.current.offsetWidth; 
+    const containerWidth = wizardRef.current.offsetWidth;
     const targetX = -(stepIndex < 0 ? 0 : stepIndex * containerWidth);
     gsap.to(trackRef.current, {
       x: targetX,
@@ -230,7 +230,7 @@ useEffect(() => {
   //   return `translateX(-${stepIndex * 33.333}%)`;
   // };
 
-  const THEME_LABEL = prefs ? (THEMES[prefs.themeKey]?.label || prefs.themeKey) : '';
+  const THEME_LABEL = THEMES[themeKey]?.label || themeKey;
   const MODE_LABEL = prefs?.mode === 'full' ? 'Immersive' : 'Essential';
 
   return (
@@ -280,7 +280,7 @@ useEffect(() => {
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                     exit={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
                     transition={{ duration: 0.4, ease }}
-                  > <div className={styles.welcomeWrapper}> 
+                  > <div className={styles.welcomeWrapper}>
                       <h1 className={styles.bigTitle}>
                         <CharReveal text="WELCOME" delay={0.5} />
                         <br />
@@ -299,7 +299,7 @@ useEffect(() => {
                       >
                         <Button variant='fill' icon={IoArrowForwardSharp} onClick={() => goTo('theme')}>GET STARTED</Button>
                       </motion.div>
-                  </div>
+                    </div>
                   </motion.div>
                 )}
 
@@ -363,8 +363,8 @@ useEffect(() => {
                       <div className={styles.wizardPanel}>
                         <p className={styles.eyebrow}><span className={styles.prompt}>&gt;</span> 01 / THEME</p>
                         <div className={styles.stepHeader}> <h2 className={styles.stepTitle}>Choose your aesthetic.</h2>
-                         </div>
-                        
+                        </div>
+
                         <div className={styles.themeGrid}>
                           {Object.entries(THEMES).map(([key, t], i) => (
                             <motion.div key={key}
@@ -391,7 +391,7 @@ useEffect(() => {
                         <div className={styles.stepHeader}> <h2 className={styles.stepTitle}>What should we call you?</h2>
                           <button className={styles.backBtn} onClick={() => goTo('theme')}> <IoArrowBackSharp className={styles.backIcon} /> </button>
                         </div>
-                        {/* <p className={styles.sub}>Optional — personalises your visit.</p> */}
+                        {/* <p className={styles.sub}>Optional - personalises your visit.</p> */}
                         <div className={styles.inputRow}>
                           <span className={styles.inputPrompt}>&gt;</span>
                           <div className={styles.inputWrap}>
@@ -418,8 +418,8 @@ useEffect(() => {
                         <div className={styles.btnRow}>
                           <Button variant='fill' icon={IoArrowForwardSharp} onClick={() => goTo('mode')}>CONTINUE</Button>
                           {inWizard && (
-                              <button className={styles.skipBtn} onClick={handleSkipAll}>skip all</button>
-                          )}      
+                            <button className={styles.skipBtn} onClick={handleSkipAll}>skip all</button>
+                          )}
                         </div>
                       </div>
 
@@ -430,8 +430,8 @@ useEffect(() => {
                         </div>
                         <div className={styles.modeGrid}>
                           {[
-                            { id: 'lite', tag: 'LITE', title: 'Essential', desc: 'Clean layout, reduced motion. Built for focus — no distractions, just content.' },
-                            { id: 'full', tag: 'FULL', title: 'Immersive', desc: 'Every animation, every detail — the complete experience, exactly as designed.' },
+                            { id: 'lite', tag: 'LITE', title: 'Essential', desc: 'Clean layout, reduced motion. Built for focus - no distractions, just content.' },
+                            { id: 'full', tag: 'FULL', title: 'Immersive', desc: 'Every animation, every detail - the complete experience, exactly as designed.' },
                           ].map((m, i) => (
                             <motion.div key={m.id}
                               initial={{ opacity: 0, y: 16 }}
@@ -452,7 +452,7 @@ useEffect(() => {
                             ENTER{name ? `, ${name.toUpperCase()}` : ''}
                           </Button>
                           {inWizard && (
-                              <button className={styles.skipBtn} onClick={handleSkipAll}>skip all</button>
+                            <button className={styles.skipBtn} onClick={handleSkipAll}>skip all</button>
                           )}
                         </div>
                       </div>
@@ -468,7 +468,7 @@ useEffect(() => {
               transition={{ delay: 0.7 }}
             >
               <span className={styles.statusDot} />
-              {/* <span>sumit.dev — portfolio</span>
+              {/* <span>sumit.dev - portfolio</span>
               <span className={styles.statusRight}>{new Date().getFullYear()}</span> */}
             </motion.div>
           </motion.div>

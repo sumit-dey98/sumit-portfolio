@@ -4,9 +4,9 @@ import styles from './Button.module.css';
 
 /**
  * Button variants:
- * - "fill"      — liquid fill slides in from left on hover
- * - "border"    — border draws around then fills on hover
- * - "magnetic"  — button and text follow the cursor
+ * - "fill"      - liquid fill slides in from left on hover
+ * - "border"    - border draws around then fills on hover
+ * - "magnetic"  - button and text follow the cursor
  */
 
 export default function Button({
@@ -17,7 +17,7 @@ export default function Button({
   icon: Icon,
   iconSize = 16,
   px = 12,
-  iconPosition = 'right', 
+  iconPosition = 'right',
   className = '',
   ...props
 }) {
@@ -68,13 +68,13 @@ export default function Button({
         btn.style.setProperty('--icon-offset', '0px');
         return;
       }
-      
-      const iconEl = btn.querySelector(`.${styles.iconWrap}`); 
+
+      const iconEl = btn.querySelector(`.${styles.iconWrap}`);
       if (!iconEl) return;
       const btnRect = btn.getBoundingClientRect();
       const iconRect = iconEl.getBoundingClientRect();
 
-      const strip = iconRect.width + px*2;
+      const strip = iconRect.width + px * 2;
       btn.style.setProperty('--fill-strip', `${strip}px`);
 
       if (iconPosition === 'left') {

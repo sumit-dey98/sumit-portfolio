@@ -22,11 +22,19 @@ const PROJECT_ROUTES = {
     logo: <img src="/projects/connect4/connect4-logo.svg" width={256} height={256} />,
     src: '/projects/connect4/connect4.html',
     bgColor: 'var(--surface)',
+    url: 'connect4',
   },
   'rubiks': {
     logo: <img src="/projects/rubiks/rubiks-logo.svg" width={256} height={256} />,
     src: '/projects/rubiks/rubiks.html',
     bgColor: 'var(--surface)',
+    url: 'rubiks-cube',
+  },
+  'interior': {
+    logo: <img src="/projects/interior/interior-logo.svg" width={256} height={256} />,
+    src: '/projects/interior/index.html',
+    bgColor: '#fff',
+    url: 'interior-design-studio',
   },
 };
 
@@ -82,6 +90,7 @@ function AppInner() {
         <Route path="/" element={<PortfolioInner />} />
         <Route path="/project/connect4" element={<SingleProject {...PROJECT_ROUTES['connect4']} />} />
         <Route path="/project/rubiks-cube" element={<SingleProject {...PROJECT_ROUTES['rubiks']} />} />
+        <Route path="/project/interior" element={<SingleProject {...PROJECT_ROUTES['interior']} />} />
       </Routes>
       <Analytics />
       <SpeedInsights />

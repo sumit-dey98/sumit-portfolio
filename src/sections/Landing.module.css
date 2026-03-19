@@ -36,10 +36,10 @@
 
 .headline {
   font-family: var(--name);
-  font-size: clamp(70px, 16vw, 160px);
+  font-size: clamp(70px, 14vw, 172px);
   text-align: left;
-  line-height: 0.9;
-  letter-spacing: -4px;
+  line-height: 0.95;
+  /* letter-spacing: -4px; */
   color: var(--text);
   /* glitch-ready */
   position: relative;

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/Button';
 import { FaGithub } from "react-icons/fa6";
+import { FiArrowUpRight } from "react-icons/fi";
+import { Link } from 'react-router-dom';
 import styles from './Projects.module.css';
 
 const PROJECTS = [
@@ -12,6 +14,8 @@ const PROJECTS = [
     link: '/project/connect4',
     desc: 'A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes.',
     preview: '/project-connect4-thumb.webp',
+    src: '/projects/connect4/connect4.html',
+    url: 'connect4',
   },
   {
     id: '02',
@@ -20,22 +24,28 @@ const PROJECTS = [
     link: '/project/rubiks-cube',
     desc: "A 3D Rubik's Cube with realistic and customizable visuals and interactions, created with React and Three.js.",
     preview: '/project-rubiks-thumb.webp',
+    src: '/projects/rubiks/rubiks.html',
+    url: 'rubiks-cube',
   },
   {
     id: '03',
-    name: 'Generative Canvas',
-    tags: ['Canvas API', 'TypeScript', 'GSAP'],
-    link: '2023',
-    desc: 'Procedural art system with 40+ algorithmic brushes, real-time rendering, and SVG/PNG export.',
-    preview: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    name: 'Interior Design Studio',
+    tags: ['HTML', 'SCSS', 'JavaScript'],
+    link: '/project/interior',
+    desc: 'A front end demo website with custom scroll animations and responsive layout. Built with HTML, SCSS and vanilla JavaScript.',
+    preview: '/project-interior-thumb.webp',
+    src: '/projects/interior/index.html',
+    url: 'interior-design-studio',
   },
   {
     id: '04',
     name: 'Motion Design System',
     tags: ['Framer Motion', 'Storybook', 'React'],
-    link: '2023',
+    link: null,
     desc: 'A comprehensive animation library with 60+ primitives, used across 3 production products.',
     preview: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
+    src: null,
+    url: null,
   },
 ];
 
@@ -43,8 +53,8 @@ export default function Projects() {
   const [hovered, setHovered] = useState(null);
   const active = PROJECTS.find(p => p.id === hovered);
 
-  const GitRepoBtn = ({iconPosition = 'left', size = 16}) => (
-    <Button variant='fill' href={'https://github.com/sumit-dey98/sumit-dey98.github.io'} icon={FaGithub} iconPosition={iconPosition} iconSize={size}>
+  const GitRepoBtn = ({ iconPosition = 'left', size = 16 }) => (
+    <Button variant='fill' href={'https://github.com/sumit-dey98?tab=repositories'} icon={FaGithub} iconPosition={iconPosition} iconSize={size}>
       VISIT GIT REPO
     </Button>
   );
@@ -61,28 +71,47 @@ export default function Projects() {
 
         <div className={styles.layout}>
           <ul className={styles.list}>
-            {PROJECTS.map((p, i) => (
-              <motion.li
-                key={p.id}
-                className={`${styles.item} ${hovered === p.id ? styles.itemActive : ''}`}
-                onMouseEnter={() => setHovered(p.id)}
-                onMouseLeave={() => setHovered(null)}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.4 }}
-              >
-                <span className={styles.itemNum}>{p.id}</span>
-                <div className={styles.itemBody}>
-                  <span className={styles.itemName}>{p.name}</span>
-                  <div className={styles.itemTags}>
-                    {p.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+            {PROJECTS.map((p, i) => {
+
+              const inner = (
+                <>
+                  <span className={styles.itemNum}>{p.id}</span>
+                  <div className={styles.itemBody}>
+                    <span className={styles.itemName}>{p.name}</span>
+                    <div className={styles.itemTags}>
+                      {p.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+                    </div>
                   </div>
-                </div>
-                <a href={p.link} target='blank' className={styles.itemLink}>DEMO</a>
-                <span className={styles.itemArrow}>→</span>
-              </motion.li>
-            ))}
+                  <div className={styles.itemAction}>
+                    <span className={styles.itemLabel}>DEMO</span>
+                    <FiArrowUpRight className={styles.itemArrow} />
+                  </div>
+                </>
+              );
+
+              return (
+                <motion.li
+                  key={p.id}
+                  className={`${styles.item} ${hovered === p.id ? styles.itemActive : ''} ${!p.link ? styles.itemDisabled : ''}`}
+                  onMouseEnter={() => setHovered(p.id)}
+                  onMouseLeave={() => setHovered(null)}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08, duration: 0.4 }}
+                >
+                  {p.link ? (
+                    <Link to={p.link} className={styles.itemLink}>
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div className={styles.itemLinkDisabled}>
+                      {inner}
+                    </div>
+                  )}
+                </motion.li>
+              );
+            })}
           </ul>
 
           <div className={styles.preview}>
@@ -98,35 +127,26 @@ export default function Projects() {
                 >
                   <div className={styles.previewImg}>
                     <img src={active.preview} alt={active.name} />
-                    <div
-                      className={styles.previewOverlay}
-                    />
                   </div>
                   <div className={styles.previewInfo}>
-                    <h3 className={styles.previewName}
-                    >
-                      {active.name}
-                    </h3>
+                    <h3 className={styles.previewName}>{active.name}</h3>
                     <p className={styles.previewDesc}>{active.desc}</p>
                   </div>
                 </motion.div>
               ) : (
-                <>
-                  <motion.div
-                    key="empty"
-                    className={styles.previewEmpty}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    
-                    <span className={styles.previewHint}>hover a project</span>
-                  </motion.div>
-
-                </>
+                <motion.div
+                  key="empty"
+                  className={styles.previewEmpty}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <span className={styles.previewHint}>hover a project</span>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
+
           <GitRepoBtn iconPosition='left' size={20} />
         </div>
       </div>

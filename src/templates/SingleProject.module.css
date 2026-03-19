@@ -1,0 +1,90 @@
+.browserMockup {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+}
+
+.browserBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--accent2);
+  padding: 10px 16px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.browserDots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.browserDots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 1px var(--border);
+}
+
+.dotRed {
+  background: #ff5f57;
+}
+
+.dotYellow {
+  background: #ffbd2e;
+}
+
+.dotGreen {
+  background: #28c840;
+}
+
+.browserUrl {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+
+.browserLock {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.browserBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-size: 16px;
+  background: var(--surface);
+  border: none;
+  cursor: pointer;
+  padding: 6px 6px;
+  border-radius: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+  will-change: color, background;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.browserBtn:hover {
+  color: #fff;
+  background: var(--accent);
+}

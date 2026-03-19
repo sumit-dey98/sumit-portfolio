@@ -67,8 +67,9 @@
 
 .headline {
   font-family: var(--display);
-  font-size: clamp(48px, 7vw, 88px);
-  line-height: 1;
+  font-size: clamp(44px, 6vw, 80px);
+  font-weight: 400;
+  line-height: 1.05;
   letter-spacing: 2px;
   color: var(--text);
   margin-bottom: 32px;
@@ -119,6 +120,7 @@
 
 .metaVal {
   font-family: var(--display);
+  font-weight: 400;
   font-size: 40px;
   color: var(--text);
   line-height: 1;
@@ -159,4 +161,10 @@
       transparent);
   transform: translateX(calc(var(--i) * -60px - 60px));
   opacity: calc(1 - var(--i) * 0.08);
+}
+
+@media (max-width: 479px) {
+  .body {
+      margin-bottom: 32px;
+  }
 }
