@@ -9,7 +9,7 @@ import { useUserPrefs } from '../hooks/useUserPrefs';
 import { IoSettingsOutline, IoArrowBackOutline, IoArrowForwardSharp } from 'react-icons/io5';
 import styles from './Nav.module.css';
 
-const SECTIONS = ['landing', 'intro', 'projects', 'skills', 'about', 'contact'];
+const SECTIONS = ['landing', 'intro', 'about', 'projects', 'skills' , 'services', 'contact'];
 const ease = [0.16, 1, 0.3, 1];
 
 export default function Nav({ children }) {
@@ -181,7 +181,7 @@ export default function Nav({ children }) {
                 </AnimatePresence>
               </div>
 
-              {/* Body -- animated panel switch */}
+              {/* Body - animated panel switch */}
               <div className={styles.sidebarBody}>
                 <AnimatePresence mode="wait">
 

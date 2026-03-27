@@ -1,20 +1,34 @@
-.projects {
+/* ── Desktop section ─────────────────────────────────────────────────────────── */
+.desktopSection {
+  height: 100dvh;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  padding: var(--section-pad-y) var(--section-pad-x);
+  overflow: hidden;
+  padding: var(--section-pad-y) 0;
+  touch-action: none;
+  /* user-select: none; */
+}
+
+/* ── Mobile section ──────────────────────────────────────────────────────────── */
+.projects {
+  padding: var(--section-pad-y) 0;
+  overflow: hidden;
 }
 
 .inner {
-  max-width: 1100px;
   width: 100%;
 }
 
+/* ── Header ──────────────────────────────────────────────────────────────────── */
 .header {
+  width: min(80vw, 1600px);
+  margin-left: calc(50vw - min(40vw, 800px));
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 48px;
+  margin-bottom: 20px;
+  position: relative;
 }
 
 .label {
@@ -38,261 +52,452 @@
   color: var(--muted);
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 60px;
-  align-items: start;
-}
-
-@media (max-width: 991px) {
-  .layout {
-    grid-template-columns: 1fr;
-    gap: 48px;
-  }
-
-  .preview {
-    display: none;
-  }
-}
-
-/* List */
-.list {
-  list-style: none;
-  border-top: 1px solid var(--border);
-}
-
-.item {
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: border-color 0.2s;
+/* ── View all button + dropdown ──────────────────────────────────────────────── */
+.viewAll {
   position: relative;
 }
 
-.item * {
-  will-change: transform, color;
-}
-
-.item::before {
-  content: '';
-  position: absolute;
-  left: -48px;
-  width: 2px;
-  height: 0;
-  background: var(--accent2);
-  transition: height 0.3s ease;
-  top: 0;
-}
-
-.item.itemActive::before {
-  height: 100%;
-}
-
-.item.itemActive .itemName {
-  color: var(--text);
-}
-
-.item.itemActive .itemTags .tag {
-  color: var(--text-dim);
-}
-
-.item.itemActive .itemLabel {
-  color: var(--text-dim);
-  transform: translateX(0);
-}
-
-.item.itemActive .itemArrow {
-  opacity: 1;
-  transform: translateX(0);
-  color: var(--accent2);
-}
-
-.itemLink,
-.itemLinkDisabled {
+.viewAllBtn {
   display: flex;
   align-items: center;
-  gap: 24px;
-  width: 100%;
-  padding: 24px 0;
-  text-decoration: none;
-  color: inherit;
-  font-weight: inherit;
-}
-
-.itemLinkDisabled {
-  cursor: default;
-}
-
-.itemNum {
-  font-family: var(--mono);
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--accent);
-  min-width: 28px;
-  letter-spacing: 1px;
-  margin-top: 4px;
-  margin-block-end: auto;
-}
-
-.itemBody {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
-}
-
-.itemName {
-  font-family: var(--display);
-  font-size: clamp(22px, 3vw, 32px);
-  font-weight: 400;
-  letter-spacing: 1px;
-  color: var(--muted);
-  transition: color 0.2s;
-}
-
-.itemTags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tag {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  color: var(--dim);
-  border: 1px solid var(--border);
-  padding: 2px 8px;
-  border-radius: 2px;
-  text-transform: uppercase;
-}
-
-.itemAction {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.itemLabel {
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 600;
-  color: var(--dim);
-  letter-spacing: 1px;
-  transform: translateX(24px);
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.itemArrow {
-  font-size: 20px;
+  letter-spacing: 2px;
   color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.viewAllBtn:hover {
+  color: var(--text);
+}
+
+.viewAllCount {
+  color: var(--accent);
+}
+
+.viewAllChevron {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.viewAllChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Dropdown slides in from the right over the preview */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 28px);
+  right: 8px;
+  min-width: 280px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.dropdownItemActive .dropdownNum {
+  color: var(--accent);
+}
+
+.dropdownItemActive .dropdownName {
+  color: var(--text);
+}
+
+.dropdownNum {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
+  min-width: 24px;
+  margin-bottom: 2px;
+}
+
+.dropdownName {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-dim);
+  flex: 1;
+  letter-spacing: 0.5px;
+}
+
+.dropdownArrow {
+  font-size: 16px;
+  color: var(--accent2);
   opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity 0.2s, transform 0.2s, color 0.2s;
+  transition: opacity 0.15s;
+}
+
+.dropdownItem:hover .dropdownArrow {
+  opacity: 1;
+}
+
+/* ── Scroll viewport + track ─────────────────────────────────────────────────── */
+.scrollViewport {
+  width: 100%;
+  /* overflow: hidden; */
+}
+
+.scrollTrack {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  padding-left: calc(50vw - min(40vw, 800px));
+  padding-right: calc(50vw - min(40vw, 800px));
+  will-change: transform;
+}
+
+/* ── Card ─────────────────────────────────────────────────────── */
+.card {
   flex-shrink: 0;
-}
-
-.itemDisabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* Preview panel */
-.preview {
-  position: sticky;
-  top: 120px;
-}
-
-.previewCard {
+  width: min(80vw, 1600px);
+  display: flex;
+  flex-direction: row;
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--border);
+  box-shadow: 0px 0px 2px 1px var(--accent);
+  transform-origin: center center;
+  /* cursor: default; */
 }
 
-.previewImg {
+/* ── Info panel (30%) ────────────────────────────────────────────────────────── */
+.cardInfo {
+  width: 30%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 32px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  pointer-events: all;
   position: relative;
-  aspect-ratio: 16 / 10;
+  z-index: 1;
+}
+
+/* ── Preview panel (70%) ─────────────────────────────────────────────────────── */
+.cardPreview {
+  flex: 1;
+  position: relative;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 
-.previewImg img {
+.cardImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: none;
+  transition: opacity 0.3s ease;
 }
 
-.previewInfo {
-  padding: 20px;
+.cardImgHidden {
+  opacity: 0;
 }
 
-.previewName {
-  font-family: var(--display);
-  font-size: 22px;
-  font-weight: 400;
-  color: var(--accent);
-  letter-spacing: 1px;
-  margin-bottom: 10px;
+.cardVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.previewDesc {
-  font-size: 13px;
-  line-height: 1.7;
+.cardVideoVisible {
+  opacity: 1 !important;
+}
+
+/* ── Card top row ────────────────────────────────────────────────────────────── */
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.cardTopLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.cardNum {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 2px;
+}
+
+.cardSlash {
+  font-family: var(--mono);
+  font-size: 14px;
   color: var(--text-dim);
 }
 
-.previewEmpty {
-  aspect-ratio: 4/3;
-  border: 1px dashed var(--border);
-  border-radius: 4px;
+.cardTotal {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.cardDemoBtn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
 }
 
-.previewHint {
+.cardDemoBtnLabel {
   font-family: var(--mono);
   font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text);
+  transform: translateX(20px);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.cardDemoBtnArrow {
+  font-size: 18px;
+  color: var(--accent2);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.cardInfo:hover .cardDemoBtnLabel {
+  transform: translateX(0);
+  color: var(--accent2);
+}
+
+.cardInfo:hover .cardDemoBtnArrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.cardDemoBtnDisabled {
+  display: flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
+  opacity: 0.4;
+}
+
+/* ── Card mid ────────────────────────────────────────────────────────────────── */
+.cardMid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.cardName {
+  font-family: var(--display);
+  font-size: clamp(24px, 2.4vw, 42px);
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--text);
+  line-height: 1.05;
+  margin: 0;
+}
+
+/* ── Dual desc panels ────────────────────────────────────────────────────────── */
+.descWrapper {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  flex: 1;
+}
+
+.descInner {
+  display: flex;
+  width: 200%;
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.descFlipped {
+  transform: translateX(-50%);
+}
+
+.cardDesc {
+  font-family: var(--body);
+  font-size: clamp(12px, 1vw, 14px);
+  line-height: 1.75;
+  color: var(--text-dim);
+  margin: 0;
+  width: 50%;
+  flex-shrink: 0;
+  padding-right: 12px;
+}
+
+.cardDescAlt {
+  color: var(--text-dim);
+  padding-right: 0;
+}
+
+/* desc dot indicators */
+.descDots {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.descDot {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  transition: background 0.2s, width 0.2s;
+}
+
+.descDotActive {
+  background: var(--accent);
+  width: 20px;
+}
+
+/* ── Card bottom ─────────────────────────────────────────────────────────────── */
+.cardBottom {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 3px;
-  color: var(--dim);
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  /* border: 1px solid var(--accent); */
+  box-shadow: 0 0 2px 1px var(--accent);
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
 }
 
-/* tablet - preview hidden*/
-@media (max-width: 991px) {
-  .preview {
-    display: none;
-  }
+/* ── Progress dots ───────────────────────────────────────────────────────────── */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
 }
 
-/* mobile */
-@media (max-width: 479px) {
-  .item {
-    padding: 0;
-    gap: 16px;
+.dot {
+  width: 24px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  transition: background 0.3s, width 0.3s;
+}
+
+.dotActive {
+  background: var(--accent);
+  width: 40px;
+}
+
+/* ── Mobile carousel ─────────────────────────────────────────────────────────── */
+.carousel {
+  width: 100%;
+  overflow: hidden;
+  padding: 0 var(--section-pad-x);
+  box-sizing: border-box;
+}
+
+.carouselTrack {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.mobileCard {
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  opacity: 0.45;
+  transform: scale(0.95);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.mobileCard .cardPreview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.mobileCard .cardInfo {
+  width: 100%;
+  border-right: none;
+  border-top: 1px solid var(--border);
+  padding: 18px;
+}
+
+.mobileCardActive {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── Mobile overrides ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .header {
+    width: 100%;
+    margin-left: 0;
+    padding: 0 var(--section-pad-x);
+    margin-bottom: 24px;
+    box-sizing: border-box;
   }
 
-  .itemLink, .itemLinkDisabled {
-    padding: 12px 0;
+  .cardName {
+    font-size: clamp(18px, 5vw, 26px);
   }
 
-  .tag {
-    padding: 2px 4px;
-    font-size: 9px;
-  }
-
-  .previewName {
-    font-size: 18px;
-  }
-
-  .previewDesc {
-    font-size: 12px;
-  }
-
-  .previewInfo {
-    padding: 14px;
+  .cardDesc {
+    font-size: 13px;
   }
 }

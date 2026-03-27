@@ -6,7 +6,6 @@ import { useTypewriter } from '../hooks/useTypewriter';
 import { THEMES } from '../theme/themes';
 import { useUserPrefs } from '../hooks/useUserPrefs';
 import Button from '../components/Button';
-import CurtainTransition from '../components/CurtainTransition';
 import { IoArrowForwardSharp, IoArrowBackSharp } from 'react-icons/io5';
 import styles from './Loader.module.css';
 
@@ -142,12 +141,12 @@ export default function Loader({ onComplete }) {
   const [name, setName] = useState(prefs?.name || '');
   const [mode, setMode] = useState(prefs?.mode || null);
   const [exiting, setExiting] = useState(false);
-  const [showCurtain, setShowCurtain] = useState(false);
   const inputRef = useRef(null);
   const wizardRef = useRef(null);
   const trackRef = useRef(null);
 
   const isTyping = name.length > 0;
+  const [focused, setFocused] = useState(false);
   const placeholder = useTypewriter(TYPEWRITER_LINES, {
     speed: 55,
     pause: 1400,
@@ -162,7 +161,11 @@ export default function Loader({ onComplete }) {
     if (step !== 'returning') return;
     const t = setTimeout(() => {
       setExiting(true);
-      setTimeout(() => setShowCurtain(true), 400);
+      setTimeout(() => onComplete({
+        name: prefs?.name || '',
+        mode: prefs?.mode,
+        themeKey,
+      }), 400);
     }, 2000);
     return () => clearTimeout(t);
   }, [step]);
@@ -197,15 +200,10 @@ export default function Loader({ onComplete }) {
     const p = { name: overrides.name ?? name.trim(), mode: finalMode, themeKey };
     savePrefs(p);
     setExiting(true);
-    setTimeout(() => setShowCurtain(true), 400);
+    setTimeout(() => onComplete(p), 400);  // ← call onComplete directly after fade-out
   };
 
   const handleSkipAll = () => handleEnter({ mode: 'lite', name: '' });
-
-  const handleCurtainDone = useCallback(() => {
-    onComplete({ name: name.trim() || prefs?.name || '', mode: mode || prefs?.mode, themeKey });
-  }, [name, mode, themeKey, prefs, onComplete]);
-
 
   useEffect(() => {
     if (!trackRef.current || !inWizard) return;
@@ -224,7 +222,7 @@ export default function Loader({ onComplete }) {
   }, [stepIndex, inWizard]);
 
 
-  // ── Slide offset: each panel is 33.33% of the slider width ──
+  // -- Slide offset: each panel is 33.33% of the slider width --
   // const getTranslateX = () => {
   //   if (stepIndex < 0) return 'translateX(0%)';
   //   return `translateX(-${stepIndex * 33.333}%)`;
@@ -235,14 +233,6 @@ export default function Loader({ onComplete }) {
 
   return (
     <>
-      {showCurtain && (
-        <CurtainTransition
-          color={getCssVar('--accent2')}
-          color2={getCssVar('--accent')}
-          onComplete={handleCurtainDone}
-        />
-      )}
-
       <AnimatePresence>
         {!exiting && (
           <motion.div
@@ -388,14 +378,14 @@ export default function Loader({ onComplete }) {
 
                       <div className={styles.wizardPanel}>
                         <p className={styles.eyebrow}><span className={styles.prompt}>&gt;</span> 02 / IDENTITY</p>
-                        <div className={styles.stepHeader}> <h2 className={styles.stepTitle}>What should we call you?</h2>
+                        <div className={styles.stepHeader}> <h2 className={styles.stepTitle}>What should I call you?</h2>
                           <button className={styles.backBtn} onClick={() => goTo('theme')}> <IoArrowBackSharp className={styles.backIcon} /> </button>
                         </div>
                         {/* <p className={styles.sub}>Optional - personalises your visit.</p> */}
                         <div className={styles.inputRow}>
                           <span className={styles.inputPrompt}>&gt;</span>
                           <div className={styles.inputWrap}>
-                            {!isTyping && (
+                            {!isTyping && !focused && (
                               <span className={styles.fakePlaceholder}>
                                 <span style={{ direction: 'ltr', unicodeBidi: 'embed' }}>
                                   {placeholder}<span className={styles.inputCursor}>_</span>
@@ -409,6 +399,8 @@ export default function Loader({ onComplete }) {
                               value={name}
                               onChange={e => setName(e.target.value)}
                               onKeyDown={e => e.key === 'Enter' && goTo('mode')}
+                              onFocus={() => setFocused(true)}
+                              onBlur={() => setFocused(false)}
                               maxLength={32}
                               spellCheck={false}
                               autoComplete="off"
@@ -430,8 +422,8 @@ export default function Loader({ onComplete }) {
                         </div>
                         <div className={styles.modeGrid}>
                           {[
-                            { id: 'lite', tag: 'LITE', title: 'Essential', desc: 'Clean layout, reduced motion. Built for focus - no distractions, just content.' },
                             { id: 'full', tag: 'FULL', title: 'Immersive', desc: 'Every animation, every detail - the complete experience, exactly as designed.' },
+                            { id: 'lite', tag: 'LITE', title: 'Essential', desc: 'Clean layout, reduced motion. Built for focus - no distractions, just content.' },
                           ].map((m, i) => (
                             <motion.div key={m.id}
                               initial={{ opacity: 0, y: 16 }}

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import styles from './About.module.css';
+import { BiArrowToLeft } from 'react-icons/bi';
 
 export default function About() {
   return (
@@ -22,7 +23,7 @@ export default function About() {
               <span className={styles.accent}>THAT FEEL ALIVE.</span>
             </h2>
             <p className={styles.bio}>
-              I'm Sumit, a full-stack web developer with a focus on interactive UI and creative engineering.
+              I'm Sumit, a front-end web developer with a focus on interactive UI and creative engineering.
               I care deeply about the intersection of performance and aesthetics - interfaces that don't just
               work, but feel good to use.
             </p>

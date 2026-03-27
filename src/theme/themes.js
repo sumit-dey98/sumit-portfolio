@@ -4,7 +4,7 @@ import { PiFlameLight } from 'react-icons/pi';
 
 export const THEMES = {
   dark: {
-    label: 'DARK',
+    label: 'NIGHT',
     icon: BsMoonStarsFill,
     vars: {
       '--bg':       '#080810',
@@ -52,7 +52,7 @@ export const THEMES = {
   },
 
   synthwave: {
-    label: 'SYNTHWAVE',
+    label: 'CYBER',
     icon: BsStars,
     vars: {
       '--bg': '#0d0013',

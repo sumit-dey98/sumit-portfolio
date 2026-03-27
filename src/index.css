@@ -17,17 +17,17 @@
   src: local('Rushford Clean Regular'), url('/fonts/Rushfordclean-rgz89.woff') format('woff');
 }
 @font-face {
-  font-family: 'Rockstar ExtraBold';
+  font-family: 'Rockstar';
   font-style: normal;
   font-weight: normal;
   src: local('Rockstar ExtraBold'), url('/fonts/rockstar-extrabold-webfont.woff') format('woff');
 }
 
 @font-face {
-  font-family: 'Impact Regular';
+  font-family: 'Impact';
   font-style: normal;
   font-weight: 400;
-  src: local('Impact Regular'), url('/fonts/impact.woff') format('woff');
+  src: local('Impact'), url('/fonts/impact.woff') format('woff');
 }
 
 :root {
@@ -43,9 +43,9 @@
   --text-dim: #8888aa;
 
   --mono: 'Roboto Mono', monospace;
-  --display: 'Impact Regular', sans-serif;
+  --display: 'Impact', sans-serif;
   --body: 'DM Sans', sans-serif;
-  --name: 'Rockstar ExtraBold', sans-serif;
+  --name: 'Rockstar', sans-serif;
 
   --section-pad-y: clamp(80px, 12dvh, 140px);
   --section-pad-x: 48px;
@@ -60,7 +60,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-snap-type: y mandatory;
 }
 

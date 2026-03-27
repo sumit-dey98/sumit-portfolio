@@ -48,8 +48,10 @@
   background: var(--surface);
   border-radius: 6px;
   padding: 5px 12px;
-  font-size: 12px;
+  font-size: 13px;
+  font-family: var(--body);
   color: var(--text);
+  letter-spacing: 0px;
   display: flex;
   align-items: center;
   gap: 6px;

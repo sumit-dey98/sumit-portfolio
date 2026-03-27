@@ -3,8 +3,8 @@
   position: fixed;
   inset: 0;
   z-index: 400;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(3px);
+  /* background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px); */
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
@@ -16,7 +16,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   width: 300px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 10px #0006;
   overflow: hidden;
 }
 
