@@ -1,19 +1,48 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
+
+/**
+ * Genie
+ *
+ * Canvas-based genie-out transition. Expands from an anchor point to fill the screen.
+ *
+ * Rendered into document.body via a React portal so that position: fixed is always
+ * relative to the true viewport. Without this, any ancestor with a CSS transform
+ * (common in page-transition wrappers) would make position: fixed relative to that
+ * ancestor instead, causing the canvas to animate off-screen with it.
+ *
+ * @prop {React.RefObject} anchorRef   Ref to the element the animation originates from.
+ *                                     Falls back to bottom-centre of the screen if not provided.
+ * @prop {string}          color       Fill color for the front layer (hex/rgb or CSS var).
+ *                                     Falls back to --accent.
+ * @prop {function}        onComplete  Called when the animation finishes.
+ * @prop {string}          label       Text rendered inside the expanding shape. Default: 'HOME'.
+ *
+ * Module-level constants (edit here to tune the animation):
+ *   DURATION         – total animation length in ms.
+ *   EASE_RISE        – easing for vertical expansion (mobile: power1.in, desktop: power1.out).
+ *   EASE_TOP_W       – easing for top edge width expansion.
+ *   EASE_BOT_W       – easing for bottom edge width expansion.
+ *   SLICES           – number of horizontal slices used to warp the shape.
+ *   CONCAVE_DEPTH    – depth of the top-edge concavity (negative = convex, positive = concave).
+ *   CORNER_RADIUS_PX – rounded corner size in px (0 on mobile).
+ *   LAG_FRACTION     – reserved for layer timing offset.
+ *   LAYER2_SPREAD    – width multiplier for the back accent layer.
+ */
 
 const DURATION = 2000;
 const isMobile = window.innerWidth <= 768;
-const EASE_RISE = gsap.parseEase(isMobile ? 'power1.in' : 'power1.out');
+const EASE_RISE = gsap.parseEase(isMobile ? 'power1.in' : 'power2.out');
 const EASE_TOP_W = gsap.parseEase('power1.inOut');
 const EASE_BOT_W = gsap.parseEase(isMobile ? 'expo.in' : 'power1.in');
 const SLICES = 60;
 const CONCAVE_DEPTH = isMobile ? -0.6 : 0.6;
-const CORNER_RADIUS_PX = isMobile ? 0: 6;
+const CORNER_RADIUS_PX = isMobile ? 0 : 6;
 const LAG_FRACTION = 0.1;
 const LAYER2_SPREAD = 1.1;
 
 export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) {
-
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -23,12 +52,14 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const W = window.innerWidth;
-    const H = window.innerHeight;
+    const W = document.documentElement.clientWidth;
+    const H = document.documentElement.clientHeight;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     canvas.width = W * dpr;
     canvas.height = H * dpr;
+    canvas.style.top = '0px';
+    canvas.style.left = '0px';
     canvas.style.width = `${W}px`;
     canvas.style.height = `${H}px`;
 
@@ -52,15 +83,14 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
 
     const warpFn = (v, t) => {
       const WARP_STRENGTH = 0.25;
-      const WARP_WIDTH = 1;
-
-      const waistCenter = 0.25 - t * 0.5;
+      const WARP_WIDTH = 1.5;
+      const waistCenter = 0.25 - t * 0.2;
       const warpFade = Math.max(0, 1 - t * 1.4);
       const squeeze = WARP_STRENGTH * warpFade
         * v < waistCenter
-        ? Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2.5, 2))
-        : Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2.5, 2))
-      return 1 + squeeze;
+        ? Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2))
+        : Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2));
+      return isMobile ? 0.9 + squeeze : 1+ 0.25 * squeeze;
     };
 
     const funnelFn = (v, t) => {
@@ -69,19 +99,13 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
       const spoutFlare = 0.9;
       const sharpness = 2.5;
       const fade = Math.max(0, 1 - t * 1.4);
-
-      const blend = 1 / (1 + Math.exp(-(v - neckPos) * 100)); 
-
+      const blend = 1 / (1 + Math.exp(-(v - neckPos) * 100));
       const taperP = v / neckPos;
       const taper = 1 - (1 - neckWidth) * Math.pow(Math.min(taperP, 1), sharpness);
-
       const flareP = (v - neckPos) / (1 - neckPos);
       const flare = neckWidth + spoutFlare * Math.max(flareP, 0);
-
       const width = taper * (1 - blend) + flare * blend;
-
       const concavity = CONCAVE_DEPTH * (1 - t) * Math.exp(-v * 8);
-
       return (1 - (1 - width) * fade) - concavity;
     };
 
@@ -207,7 +231,6 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
         const y = topY + shapeH * v;
         const hw = topHW + (botHW - topHW) * v;
         const warpedHW = hw * warpFn(v, t);
-        // const warpedHW = hw * funnelFn(v, t);
         leftPts.push({ x: originX - warpedHW, y });
         rightPts.push({ x: originX + warpedHW, y });
       }
@@ -233,7 +256,6 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
             const y = topY2 + shapeH2 * v;
             const hw = topHW2 + (botHW2 - topHW2) * v;
             const warpedHW = hw * warpFn(v, t2);
-            // const warpedHW = hw * funnelFn(v, t2);
             leftPts2.push({ x: originX - warpedHW, y });
             rightPts2.push({ x: originX + warpedHW, y });
           }
@@ -293,7 +315,6 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
         const v = (screenY - topY) / shapeH;
         const clampedV = Math.max(0, Math.min(1, v));
         const rowWarp = warpFn(clampedV, t);
-        // const rowWarp = funnelFn(clampedV, t);
         const warpedTextW = textW * rowWarp;
 
         if (warpedTextW < 1) continue;
@@ -321,15 +342,15 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
 
     rafId = requestAnimationFrame(tick);
 
-    return () => {
-      cancelAnimationFrame(rafId);
-    };
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
-  return (
+  const canvas = (
     <canvas
       ref={canvasRef}
-      style={{ position: 'fixed', inset: 0, zIndex: 6000, pointerEvents: 'none' }}
+      style={{ position: 'fixed', zIndex: 6000, pointerEvents: 'none' }}
     />
   );
-} 
+
+  return createPortal(canvas, document.body);
+}

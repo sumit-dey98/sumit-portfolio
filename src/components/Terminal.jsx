@@ -1,85 +1,103 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, useEffect } from 'react';
+import { motion, useAnimation, useInView } from 'framer-motion';
 import { IoClose, IoRemove } from 'react-icons/io5';
 import ExpandIcon from '../assets/ExpandIcon';
-import { useThemeContext } from '../theme/ThemeContext';
 import styles from './Terminal.module.css';
 
-const SKILLS = [
-  {
-    group: 'languages',
-    items: ['JavaScript', 'PHP', 'Python'],
-  },
-  {
-    group: 'frameworks',
-    items: ['React', 'Next.js', 'Vite'],
-  },
-  {
-    group: 'graphics & animations',
-    items: ['GSAP', 'Canvas API', 'Framer Motion'],
-  },
-  {
-    group: 'tooling',
-    items: ['Tailwind', 'Wordpress', 'HubSpot'],
-  },
-];
+function SkillItem({ item, level, variants, custom, isInView, isFullscreen }) {
+  const controls = useAnimation();
 
-export default function Terminal({ isFullscreen, onClose, onMinimize, onExpand }) {
+  useEffect(() => {
+    if (isInView) controls.start({ width: `${level}%` });
+  }, [isInView]);
 
-  const { getCssVar } = useThemeContext();
-
-  const windowVariants = useMemo(() => ({
-    hidden: { opacity: 0, y: 50, scale: 0.9 },
-    visible: { opacity: 1, y: 0, scale: 1 },
-    fullscreen: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { type: 'spring', damping: 20, stiffness: 200 }
+  useEffect(() => {
+    if (isFullscreen) {
+      controls.set({ width: 0 });
+      controls.start({ width: `${level}%` });
     }
-  }), []);
-
-  const groupVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: (custom) => ({
-      opacity: 1,
-      x: 0,
-      transition: { delay: custom * 0.1, duration: 0.4 }
-    })
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0 },
-    visible: (custom) => ({
-      opacity: 1,
-      transition: { delay: custom * 0.04, duration: 0.3 }
-    })
-  };
+  }, [isFullscreen]);
 
   return (
     <motion.div
-      className={`${styles.terminal} ${isFullscreen ? styles.fullscreen : ''}`}
-      variants={windowVariants}
+      className={styles.item}
+      variants={variants}
       initial="hidden"
-      animate={isFullscreen ? 'fullscreen' : 'visible'}
-      exit="hidden"
-      layout 
+      animate="visible"
+      custom={custom}
+      whileHover={{ x: 4 }}
+    >
+      <span className={styles.fileIcon}>-rw-r--r--</span>
+      <span className={styles.itemName}>{item}</span>
+      <span className={styles.progressBar}>
+        <motion.span
+          className={styles.progressFill}
+          initial={{ width: 0 }}
+          animate={controls}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: custom * 0.08 }}
+        />
+      </span>
+      <span className={styles.itemLevel}>{level}%</span>
+    </motion.div>
+  );
+}
+
+const groupVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: (custom) => ({
+    opacity: 1,
+    transition: { delay: custom * 0.1, duration: 0.4 }
+  })
+};
+
+const itemVariants = {
+  hidden: { opacity: 0 },
+  visible: (custom) => ({
+    opacity: 1,
+    transition: { delay: custom * 0.04, duration: 0.3 }
+  })
+};
+
+export default function Terminal({ isFullscreen, onExpand, data }) {
+  const terminalRef = useRef(null);
+  const isInView = useInView(terminalRef, { once: true });
+
+  return (
+    <motion.div
+      ref={terminalRef}
+      className={styles.terminal}
+      animate={isFullscreen ? {
+        position: 'absolute',
+        top: 14,
+        left: 14,
+        right: 14,
+        bottom: 14,
+        width: '100%',
+        maxWidth: 'calc(100% - 28px)',
+        height: '100%',
+        maxHeight: 'calc(100% - 28px)',
+        zIndex: 1000,
+        borderRadius: 12,
+      } : {
+        position: 'relative',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        height: '100%',
+        zIndex: 1,
+        borderRadius: 12,
+      }}
+      transition={{ type: 'ease', duration: 0.2 }}
     >
       <div className={styles.terminalBar}>
-        <span
-          className={styles.termDot}
-          style={{ background: '#ff5f57' }}
-          // onClick={onClose}
-        >
+        <span className={styles.termDot} style={{ background: '#ff5f57' }}>
           <IoClose color="#000" size={16} />
         </span>
-        <span
-          className={styles.termDot}
-          style={{
-            background: '#ffbd2e',
-          }}
-          // onClick={onMinimize}
-        >
+        <span className={styles.termDot} style={{ background: '#ffbd2e' }}>
           <IoRemove color="#000" size={16} />
         </span>
         <span
@@ -87,48 +105,39 @@ export default function Terminal({ isFullscreen, onClose, onMinimize, onExpand }
           style={{ background: '#28c840' }}
           onClick={onExpand}
         >
-          <ExpandIcon color="#000" size={8} style={{rotate: '-90deg'}}/>
+          <ExpandIcon color="#000" size={8} style={{ rotate: '-90deg' }} />
         </span>
-        <span className={styles.termTitle}>sumit@portfolio: ~/skills</span>
+        <span className={styles.termTitle}>sumit@portfolio: ~/stack/{data.group}</span>
       </div>
 
-      <div className={styles.terminalBody}>
+      <div className={`${styles.terminalBody} ${isFullscreen ? styles.terminalBodyFullscreen : ''}`}>
         <p className={styles.termCmd}>
-          <span className={styles.termPrompt}>sumit@portfolio:~$</span> ls -la ./skills
+          <span className={styles.termPrompt}>sumit@portfolio:~$</span> ls -la ./{data.group}
         </p>
 
-        {SKILLS.map((group, gi) => (
-          <motion.div
-            key={group.group}
-            className={styles.group}
-            variants={groupVariants}
-            initial="hidden"
-            animate="visible"
-            custom={gi}
-          >
-            <span className={styles.groupName}>
-              <span className={styles.termDir}>drwxr-xr-x</span> ./{group.group}/
-            </span>
-            <div className={styles.items}>
-              {group.items.map((item, ii) => (
-                <motion.span
-                  key={item}
-                  className={styles.item}
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  custom={gi * 10 + ii} 
-                  whileHover={{ x: 4 }}
-                >
-                  <span className={styles.fileIcon}>-rw-r--r--</span>
-                  {item}
-                </motion.span>
-              ))}
-            </div>
-          </motion.div>
-        ))}
+        <motion.div
+          className={styles.group}
+          variants={groupVariants}
+          initial="hidden"
+          animate="visible"
+          custom={0}
+        >
+          <div className={styles.items}>
+            {Object.entries(data.items).map(([item, level], ii) => (
+              <SkillItem
+                key={item}
+                item={item}
+                level={level}
+                variants={itemVariants}
+                custom={ii}
+                isInView={isInView}
+                isFullscreen={isFullscreen}
+              />
+            ))}
+          </div>
+        </motion.div>
 
-        <p className={styles.termCmd} style={{ marginTop : '20px'}}>
+        <p className={styles.termCmd} style={{ marginTop: '20px' }}>
           <span className={styles.termPrompt}>sumit@portfolio:~$</span>
           <span className={styles.cursor}>_</span>
         </p>

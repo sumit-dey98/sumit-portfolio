@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { FiArrowUpRight, FiChevronDown } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import ScreenSlides from './../components/ScreenSlides';
 import styles from './Projects.module.css';
 
 const PROJECTS = [
@@ -10,8 +11,12 @@ const PROJECTS = [
     name: 'Connect 4 Game',
     tags: ['React+Vite', 'Zustand', 'GSAP'],
     link: '/project/connect4',
-    desc: 'A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes.',
-    descAlt: 'Built with a minimax algorithm with alpha-beta pruning for the AI. Supports local multiplayer, AI vs AI, and timed modes with full animation sequencing via GSAP.',
+    desc: 'A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes. A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes. ',
+    screens: [
+      '/project-connect4-thumb.jpg',
+      '/project-rubiks-thumb.jpg',
+      '/project-interior-thumb.jpg',
+    ],
     preview: '/project-connect4-thumb.jpg',
     mobileSrc: '/project-connect4-thumb.jpg',
     videoSrc: '/previews/project-connect4-preview.mp4',
@@ -22,7 +27,11 @@ const PROJECTS = [
     tags: ['React+Vite', 'Three.js', 'Tailwind'],
     link: '/project/rubiks-cube',
     desc: "A 3D Rubik's Cube with realistic and customizable visuals and interactions, created with React and Three.js.",
-    descAlt: "Full cube state management with quaternion-based rotation, scramble generator, and solve timer. Supports keyboard, mouse drag, and touch controls.",
+    screens: [
+      '/project-connect4-thumb.jpg',
+      '/project-rubiks-thumb.jpg',
+      '/project-interior-thumb.jpg',
+    ],
     preview: '/project-rubiks-thumb.jpg',
     mobileSrc: '/project-rubiks-thumb.jpg',
     videoSrc: '/previews/project-rubiks-preview.mp4',
@@ -32,8 +41,12 @@ const PROJECTS = [
     name: 'Interior Design Studio Clone',
     tags: ['HTML', 'SCSS', 'JavaScript'],
     link: '/project/interior',
-    desc: 'A front end demo website with custom scroll animations and responsive layout.',
-    descAlt: 'Parallax sections, staggered text reveals, and a custom cursor built from scratch without any animation library. Fully responsive down to 320px.',
+    desc: 'A front end demo website with custom scroll animations and responsive layout. A front end demo website with custom scroll animations and responsive layout. A front end demo website with custom scroll animations and responsive layout. A front end demo website with custom scroll animations and responsive layout.',
+    screens: [
+      '/project-connect4-thumb.jpg',
+      '/project-rubiks-thumb.jpg',
+      '/project-interior-thumb.jpg',
+    ],
     preview: '/project-interior-thumb.jpg',
     mobileSrc: '/project-interior-thumb.jpg',
     videoSrc: '/previews/project-interior-preview.mp4',
@@ -44,7 +57,11 @@ const PROJECTS = [
     tags: ['Framer Motion', 'Storybook', 'React'],
     link: null,
     desc: 'A comprehensive animation library with 60+ primitives, used across 3 production products.',
-    descAlt: 'Includes spring configs, stagger utilities, scroll-linked variants, and a Storybook playground. Reduced animation-related bug reports by 40%.',
+    screens: [
+      '/project-connect4-thumb.jpg',
+      '/project-rubiks-thumb.jpg',
+      '/project-interior-thumb.jpg',
+    ],
     preview: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
     mobileSrc: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=80',
     videoSrc: null,
@@ -56,25 +73,145 @@ const GAP = 32;
 const CARD_W = () => Math.min(window.innerWidth * 0.8, 1600);
 const MAX_X = () => (TOTAL - 1) * (CARD_W() + GAP);
 
-// ── Dual-panel description ─────────────────────────────────────────────────────
-function DescPanel({ desc, descAlt }) {
-  const [flipped, setFlipped] = useState(false);
+function CardDesc({ text }) {
+  const ref = useRef(null);
+  const thumbRef = useRef(null);
+  const [showScroll, setShowScroll] = useState(false);
+  const [thumbHeight, setThumbHeight] = useState(0);
+  const [thumbTop, setThumbTop] = useState(0);
+  const dragStart = useRef(null);
+  const velocity = useRef(0);
+  const lastY = useRef(0);
+  const lastTime = useRef(0);
+  const rafId = useRef(null);
+
+  const updateThumb = () => {
+    const el = ref.current;
+    if (!el) return;
+    const ratio = el.clientHeight / el.scrollHeight;
+    setShowScroll(ratio < 1);
+    setThumbHeight(ratio * el.clientHeight);
+    setThumbTop((el.scrollTop / el.scrollHeight) * el.clientHeight);
+  };
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    updateThumb();
+    const ro = new ResizeObserver(updateThumb);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text]);
+
+  // scrollbar thumb drag
+  const onThumbPointerDown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startY = e.clientY;
+    const startScrollTop = ref.current.scrollTop;
+
+    const onMove = (e) => {
+      e.stopPropagation();
+      const el = ref.current;
+      if (!el) return;
+      const dy = e.clientY - startY;
+      const scrollRatio = el.scrollHeight / el.clientHeight;
+      el.scrollTop = startScrollTop + dy * scrollRatio;
+    };
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  const onTrackClick = (e) => {
+    e.stopPropagation();
+    const el = ref.current;
+    const track = e.currentTarget;
+    if (!el || !track) return;
+    const rect = track.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const ratio = clickY / track.clientHeight;
+    el.scrollTo({ top: ratio * el.scrollHeight, behavior: 'smooth' });
+  };
+
+  // flick/inertia drag on the text itself
+  const onTextPointerDown = (e) => {
+    e.stopPropagation();
+    const el = ref.current;
+    if (!el) return;
+
+    cancelAnimationFrame(rafId.current);
+    velocity.current = 0;
+    lastY.current = e.clientY;
+    lastTime.current = performance.now();
+    const startScrollTop = el.scrollTop;
+    let moved = false;
+
+    const onMove = (e) => {
+      e.stopPropagation();
+      const now = performance.now();
+      const dt = now - lastTime.current;
+      const dy = e.clientY - lastY.current;
+      velocity.current = dy / (dt || 1);
+      lastY.current = e.clientY;
+      lastTime.current = now;
+      el.scrollTop -= dy;
+      moved = true;
+    };
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+
+      if (!moved) return;
+
+      // inertia
+      const inertia = () => {
+        velocity.current *= 0.92; // friction
+        if (Math.abs(velocity.current) < 0.3) return;
+        el.scrollTop -= velocity.current * 16;
+        updateThumb();
+        rafId.current = requestAnimationFrame(inertia);
+      };
+      rafId.current = requestAnimationFrame(inertia);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
 
   return (
-    <div
-      className={styles.descWrapper}
-      onMouseEnter={() => setFlipped(true)}
-      onMouseLeave={() => setFlipped(false)}
-    >
-      <div className={`${styles.descInner} ${flipped ? styles.descFlipped : ''}`}>
-        <p className={styles.cardDesc}>{desc}</p>
-        <p className={`${styles.cardDesc} ${styles.cardDescAlt}`}>{descAlt}</p>
-      </div>
-      {/* dot indicator */}
-      <div className={styles.descDots}>
-        <span className={`${styles.descDot} ${!flipped ? styles.descDotActive : ''}`} />
-        <span className={`${styles.descDot} ${flipped ? styles.descDotActive : ''}`} />
-      </div>
+    <div className={styles.cardDescWrapper}>
+      <p
+        ref={ref}
+        className={styles.cardDesc}
+        onScroll={updateThumb}
+        onWheel={e => e.stopPropagation()}
+        onPointerDown={onTextPointerDown}
+        style={{ cursor: 'grab' }}
+      >
+        {text}
+      </p>
+
+      {showScroll && (
+        <div
+          className={styles.descScrollTrack}
+          onClick={onTrackClick}
+          onPointerDown={e => e.stopPropagation()}
+        >
+          <div
+            ref={thumbRef}
+            className={styles.descScrollThumb}
+            style={{ height: thumbHeight, top: thumbTop }}
+            onPointerDown={onThumbPointerDown}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -101,7 +238,7 @@ function ProjectCard({ project, progress }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* ── Info panel (30%) ── */}
+      {/* ── Info panel ── */}
       <div className={styles.cardInfo}>
         <div className={styles.cardTop}>
           <div className={styles.cardTopLeft}>
@@ -110,7 +247,12 @@ function ProjectCard({ project, progress }) {
             <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
           </div>
           {project.link ? (
-            <Link to={project.link} target="_blank" className={styles.cardDemoBtn} onClick={e => e.stopPropagation()}>
+            <Link
+              to={project.link}
+              target="_blank"
+              className={styles.cardDemoBtn}
+              onClick={e => e.stopPropagation()}
+            >
               <span className={styles.cardDemoBtnLabel}>DEMO</span>
               <FiArrowUpRight className={styles.cardDemoBtnArrow} />
             </Link>
@@ -121,7 +263,8 @@ function ProjectCard({ project, progress }) {
 
         <div className={styles.cardMid}>
           <h2 className={styles.cardName}>{project.name}</h2>
-          <DescPanel desc={project.desc} descAlt={project.descAlt} />
+          <CardDesc text={project.desc} />
+          <ScreenSlides screens={project.screens} />
         </div>
 
         <div className={styles.cardBottom}>
@@ -129,7 +272,7 @@ function ProjectCard({ project, progress }) {
         </div>
       </div>
 
-      {/* ── Preview panel (70%) ── */}
+      {/* ── Preview panel ── */}
       <div className={styles.cardPreview}>
         <img
           src={project.preview}
@@ -152,16 +295,26 @@ function ProjectCard({ project, progress }) {
 // ── View-all dropdown ──────────────────────────────────────────────────────────
 function ViewAllDropdown({ onSelect, activeIndex }) {
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
-    <div className={styles.viewAll}>
-      <button
-        className={styles.viewAllBtn}
-        onClick={() => setOpen(v => !v)}
-      >
+    <div ref={wrapperRef} className={styles.viewAll}>
+      <button className={styles.viewAllBtn} onClick={() => setOpen(v => !v)}>
         <span>ALL PROJECTS</span>
         <span className={styles.viewAllCount}>{TOTAL}</span>
-        <FiChevronDown className={`${styles.viewAllChevron} ${open ? styles.viewAllChevronOpen : ''}`} />
+        <FiChevronDown
+          className={`${styles.viewAllChevron} ${open ? styles.viewAllChevronOpen : ''}`}
+        />
       </button>
 
       <AnimatePresence>
@@ -233,7 +386,6 @@ function DesktopScroller() {
   const trackRef = useRef(null);
   const progressValues = useRef(PROJECTS.map(() => useMotionValue(0)));
   const [activeIndex, setActiveIndex] = useState(0);
-
   const xRef = useRef(0);
   const targetXRef = useRef(0);
 
@@ -253,7 +405,7 @@ function DesktopScroller() {
     setActiveIndex(Math.max(0, Math.min(TOTAL - 1, Math.round(x / (cw + GAP)))));
   };
 
-  const snapToIndex = (idx) => {
+  const snapToIndex = idx => {
     targetXRef.current = Math.max(0, Math.min(MAX_X(), idx * (CARD_W() + GAP)));
   };
 
@@ -275,7 +427,7 @@ function DesktopScroller() {
     };
     rafId = requestAnimationFrame(tick);
 
-    const onWheel = (e) => {
+    const onWheel = e => {
       const maxX = MAX_X();
       const atStart = xRef.current <= 1 && e.deltaY < 0;
       const atEnd = xRef.current >= maxX - 1 && e.deltaY > 0;
@@ -285,7 +437,7 @@ function DesktopScroller() {
       targetXRef.current = Math.max(0, Math.min(maxX, targetXRef.current + e.deltaY * 1.1));
     };
 
-    const onPointerDown = (e) => {
+    const onPointerDown = e => {
       if (e.target.closest('a, button')) return;
       e.preventDefault();
     };
@@ -327,23 +479,24 @@ function DesktopScroller() {
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────────────────────────
 export default function Projects() {
+  // Desktop scroller for ≥1024px, mobile carousel below.
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   );
   const [carouselIndex, setCarouselIndex] = useState(0);
   const touchStartX = useRef(0);
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px)');
+    const mq = window.matchMedia('(max-width: 1023px)');
     const update = () => setIsMobile(mq.matches);
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
-  const onTouchEnd = (e) => {
+  const onTouchStart = e => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd = e => {
     const dx = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(dx) < 40) return;
     if (dx > 0) setCarouselIndex(i => Math.min(i + 1, TOTAL - 1));
@@ -361,7 +514,11 @@ export default function Projects() {
           </p>
           <span className={styles.count}>{TOTAL} works</span>
         </div>
-        <div className={styles.carousel} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div
+          className={styles.carousel}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
           <div
             className={styles.carouselTrack}
             style={{ transform: `translateX(calc(${carouselIndex * -100}% - ${carouselIndex * 16}px))` }}
@@ -372,7 +529,10 @@ export default function Projects() {
           </div>
           <div className={styles.dots}>
             {PROJECTS.map((_, i) => (
-              <span key={i} className={`${styles.dot} ${carouselIndex === i ? styles.dotActive : ''}`} />
+              <span
+                key={i}
+                className={`${styles.dot} ${carouselIndex === i ? styles.dotActive : ''}`}
+              />
             ))}
           </div>
         </div>

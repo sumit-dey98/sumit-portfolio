@@ -5,54 +5,41 @@ import { PiFlameLight } from 'react-icons/pi';
 export const THEMES = {
   dark: {
     label: 'NIGHT',
+    group: null,
     icon: BsMoonStarsFill,
     vars: {
-      '--bg':       '#080810',
-      '--surface':  '#0e0e1a',
-      '--border':   '#1a1a2e',
-      '--accent':   '#5227FF',
-      '--accent2':  '#00ffcc',
-      '--dim':      '#7a7aad',
-      '--muted':    '#6a6a88',
-      '--text':     '#e0e0f0',
+      '--bg': '#080810',
+      '--surface': '#0e0e1a',
+      '--border': '#1a1a2e',
+      '--accent': '#5227FF',
+      '--accent2': '#00ffcc',
+      '--dim': '#7a7aad',
+      '--muted': '#6a6a88',
+      '--text': '#e0e0f0',
       '--text-dim': '#a4a4ca',
     },
   },
 
-  // light: {
-  //   label: 'LIGHT',
-  //   icon: BsSunFill,
-  //   vars: {
-  //     '--bg': '#ffffff',  
-  //     '--surface': '#DFF0F5', 
-  //     '--border': '#4C91E2', 
-  //     '--accent': '#0A35B9',  
-  //     '--accent2': '#4C91E2',  
-  //     '--dim': '#4c92e2d7',
-  //     '--muted': '#0A35B9aa',
-  //     '--text': '#030844',
-  //     '--text-dim': '#0A35B9',
-  //   },
-  // },
-
-  matrix: {
-    label: 'MATRIX',
-    icon: BsTerminalFill,
+  light: {
+    label: 'LIGHT',
+    group: null,
+    icon: BsSunFill,
     vars: {
-      '--bg': '#000000',
-      '--surface': '#0a0a0a',
-      '--border': '#003300',
-      '--accent': '#009d28',
-      '--accent2': '#00ff39',
-      '--dim': '#006600',
-      '--muted': '#006600',
-      '--text': '#54ff80',
-      '--text-dim': '#009d23',
+      '--bg': '#ffffff',
+      '--surface': '#DFF0F5',
+      '--border': '#4C91E2',
+      '--accent': '#0A35B9',
+      '--accent2': '#4C91E2',
+      '--dim': '#4c92e2d7',
+      '--muted': '#0A35B9aa',
+      '--text': '#030844',
+      '--text-dim': '#0A35B9',
     },
   },
 
-  synthwave: {
+  cyber: {
     label: 'CYBER',
+    group: null,
     icon: BsStars,
     vars: {
       '--bg': '#0d0013',
@@ -67,40 +54,9 @@ export const THEMES = {
     },
   },
 
-  amber: {
-    label: 'AMBER',
-    icon: PiFlameLight,
-    vars: {
-      '--bg': '#0c0800',
-      '--surface': '#150f00',
-      '--border': '#2a1f00',
-      '--accent': '#ffaa00',
-      '--accent2': '#ffdd44',
-      '--dim': '#7c5c00',
-      '--muted': '#664400',
-      '--text': '#ffddaa',
-      '--text-dim': '#aa8833',
-    },
-  },
-
-  // crimson: {
-  //   label: 'CRIMSON',
-  //   icon: BsHexagonFill,
-  //   vars: {
-  //     '--bg': '#0a0008',
-  //     '--surface': '#120010',
-  //     '--border': '#2a0020',
-  //     '--accent': '#ff0044',
-  //     '--accent2': '#ff88aa',
-  //     '--dim': '#7a0040',
-  //     '--muted': '#882255',
-  //     '--text': '#f0d0d8',
-  //     '--text-dim': '#cc8899',
-  //   },
-  // },
-
   arctic: {
     label: 'ARCTIC',
+    group: null,
     icon: BsSnow,
     vars: {
       '--bg': '#f0f4f8',
@@ -117,6 +73,7 @@ export const THEMES = {
 
   solar: {
     label: 'SOLAR',
+    group: null,
     icon: BsSunFill,
     vars: {
       '--bg': '#fffbf0',
@@ -129,7 +86,92 @@ export const THEMES = {
       '--text': '#1a0a00',
       '--text-dim': '#663300',
     },
-  }
+  },
+
+  ash: {
+    label: 'ASH',
+    group: 'MONO',
+    icon: BsHexagonFill,
+    vars: {
+      '--bg': '#080808',
+      '--surface': '#111111',
+      '--border': '#222222',
+      '--accent': '#cccccc',
+      '--accent2': '#ffffff',
+      '--dim': '#444444',
+      '--muted': '#333333',
+      '--text': '#eeeeee',
+      '--text-dim': '#888888',
+    },
+  },
+
+  matrix: {
+    label: 'MATRIX',
+    group: 'MONO',
+    icon: BsTerminalFill,
+    vars: {
+      '--bg': '#000000',
+      '--surface': '#0a0a0a',
+      '--border': '#003300',
+      '--accent': '#009d28',
+      '--accent2': '#00ff39',
+      '--dim': '#006600',
+      '--muted': '#006600',
+      '--text': '#54ff80',
+      '--text-dim': '#009d23',
+    },
+  },
+
+  amber: {
+    label: 'AMBER',
+    group: 'MONO',
+    icon: PiFlameLight,
+    vars: {
+      '--bg': '#0c0800',
+      '--surface': '#150f00',
+      '--border': '#2a1f00',
+      '--accent': '#ffaa00',
+      '--accent2': '#ffdd44',
+      '--dim': '#7c5c00',
+      '--muted': '#664400',
+      '--text': '#ffddaa',
+      '--text-dim': '#aa8833',
+    },
+  },
+
+  crimson: {
+    label: 'CRIMSON',
+    group: 'MONO',
+    icon: BsHexagonFill,
+    vars: {
+      '--bg': '#0a0008',
+      '--surface': '#120010',
+      '--border': '#2a0020',
+      '--accent': '#ff0044',
+      '--accent2': '#ff88aa',
+      '--dim': '#7a0040',
+      '--muted': '#882255',
+      '--text': '#f0d0d8',
+      '--text-dim': '#cc8899',
+    },
+  },
+
+  indigo: {
+    label: 'INDIGO',
+    group: 'MONO',
+    icon: BsHexagonFill,
+    vars: {
+      '--bg': '#00050f',
+      '--surface': '#000d1f',
+      '--border': '#001a3d',
+      '--accent': '#4488ff',
+      '--accent2': '#88bbff',
+      '--dim': '#1a3366',
+      '--muted': '#223355',
+      '--text': '#cce0ff',
+      '--text-dim': '#6699cc',
+    },
+  },
 };
 
 export const DEFAULT_THEME = 'dark';

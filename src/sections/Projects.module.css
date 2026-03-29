@@ -1,4 +1,4 @@
-/* ── Desktop section ─────────────────────────────────────────────────────────── */
+/* ── Desktop section (base) ─────────────────────────────────────────────────── */
 .desktopSection {
   height: 100dvh;
   display: flex;
@@ -7,10 +7,9 @@
   overflow: hidden;
   padding: var(--section-pad-y) 0;
   touch-action: none;
-  /* user-select: none; */
 }
 
-/* ── Mobile section ──────────────────────────────────────────────────────────── */
+/* ── Mobile section (base) ──────────────────────────────────────────────────── */
 .projects {
   padding: var(--section-pad-y) 0;
   overflow: hidden;
@@ -32,6 +31,7 @@
 }
 
 .label {
+  margin-top: 24px;
   font-family: var(--mono);
   font-weight: 600;
   font-size: 12px;
@@ -90,7 +90,6 @@
   transform: rotate(180deg);
 }
 
-/* Dropdown slides in from the right over the preview */
 .dropdown {
   position: absolute;
   top: calc(100% + 28px);
@@ -166,19 +165,18 @@
 /* ── Scroll viewport + track ─────────────────────────────────────────────────── */
 .scrollViewport {
   width: 100%;
-  /* overflow: hidden; */
 }
 
 .scrollTrack {
   display: flex;
   gap: 32px;
-  align-items: center;
+  /* align-items: center; */
   padding-left: calc(50vw - min(40vw, 800px));
   padding-right: calc(50vw - min(40vw, 800px));
   will-change: transform;
 }
 
-/* ── Card ─────────────────────────────────────────────────────── */
+/* ── Card ────────────────────────────────────────────────────────────────────── */
 .card {
   flex-shrink: 0;
   width: min(80vw, 1600px);
@@ -189,7 +187,6 @@
   border: 1px solid var(--border);
   box-shadow: 0px 0px 2px 1px var(--accent);
   transform-origin: center center;
-  /* cursor: default; */
 }
 
 /* ── Info panel (30%) ────────────────────────────────────────────────────────── */
@@ -204,6 +201,7 @@
   pointer-events: all;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 /* ── Preview panel (70%) ─────────────────────────────────────────────────────── */
@@ -246,6 +244,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .cardTopLeft {
@@ -323,12 +322,14 @@
   opacity: 0.4;
 }
 
-/* ── Card mid ────────────────────────────────────────────────────────────────── */
+/* ── Card mid (name + desc + ScreenSlides) ───────────────────────────────────── */
 .cardMid {
   display: flex;
   flex-direction: column;
   gap: 12px;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .cardName {
@@ -339,80 +340,72 @@
   color: var(--text);
   line-height: 1.05;
   margin: 0;
+  flex-shrink: 0;
 }
 
-/* ── Dual desc panels ────────────────────────────────────────────────────────── */
-.descWrapper {
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  flex: 1;
-}
-
-.descInner {
+.cardDescWrapper {
   display: flex;
-  width: 200%;
-  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.descFlipped {
-  transform: translateX(-50%);
+  position: relative;
+  height: calc(1.7em * 4);
+  font-size: clamp(12px, 0.95vw, 18px);
+  flex-shrink: 0;
 }
 
 .cardDesc {
   font-family: var(--body);
-  font-size: clamp(12px, 1vw, 14px);
-  line-height: 1.75;
+  font-size: inherit;
+  line-height: 1.7;
   color: var(--text-dim);
   margin: 0;
-  width: 50%;
-  flex-shrink: 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
   padding-right: 12px;
 }
 
-.cardDescAlt {
-  color: var(--text-dim);
-  padding-right: 0;
+.cardDesc::-webkit-scrollbar {
+  display: none;
 }
 
-/* desc dot indicators */
-.descDots {
-  display: flex;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.descDot {
-  width: 14px;
-  height: 2px;
-  border-radius: 1px;
+.descScrollTrack {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
   background: var(--border);
-  transition: background 0.2s, width 0.2s;
+  border-radius: 2px;
 }
 
-.descDotActive {
+.descScrollThumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
   background: var(--accent);
-  width: 20px;
+  border-radius: 2px;
+  transition: top 0.1s ease;
+  box-shadow: 0 0 4px var(--accent);
 }
 
-/* ── Card bottom ─────────────────────────────────────────────────────────────── */
+/* ── Card bottom (tags) ──────────────────────────────────────────────────────── */
 .cardBottom {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  flex-shrink: 0;
   margin-top: auto;
   padding-top: 16px;
 }
 
 .tag {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: clamp(10px, 0.75vw, 14px);
   font-weight: 500;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   color: var(--accent);
-  /* border: 1px solid var(--accent); */
-  box-shadow: 0 0 2px 1px var(--accent);
-  padding: 3px 8px;
+  box-shadow: 0 0 1px 1px var(--accent);
+  padding: 3px 6px;
   border-radius: 3px;
   text-transform: uppercase;
 }
@@ -476,6 +469,7 @@
   border-right: none;
   border-top: 1px solid var(--border);
   padding: 18px;
+  overflow: visible;
 }
 
 .mobileCardActive {
@@ -483,8 +477,58 @@
   transform: scale(1);
 }
 
-/* ── Mobile overrides ────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+/* ── Responsive: medium desktop (1024–1300px) ────────────────────────────────── */
+@media (min-width: 1024px) and (max-width: 1300px) {
+  .header {
+    width: min(88vw, 1600px);
+    margin-left: calc(50vw - min(44vw, 800px));
+    margin-bottom: 20px;
+  }
+
+  .scrollTrack {
+    padding-left: calc(50vw - min(44vw, 800px));
+    padding-right: calc(50vw - min(44vw, 800px));
+  }
+
+  .card {
+    flex-direction: column;
+    width: min(88vw, 1600px);
+    /* Height fills the section between header (~80px) and dots (~56px) */
+    height: calc(100dvh - calc(var(--section-pad-y) * 2) - 136px);
+    max-height: 860px;
+    overflow: hidden;
+  }
+
+  /* Preview occupies top 42% of card height; image crops with object-fit */
+  .cardPreview {
+    flex: 0 0 42%;
+    aspect-ratio: unset;
+    min-height: 0;
+  }
+
+  /* Info occupies remaining 58% and scrolls if content overflows */
+  .cardInfo {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    padding: 20px 28px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .cardName {
+    font-size: clamp(22px, 2.8vw, 38px);
+  }
+
+  .cardDesc {
+    font-size: clamp(13px, 1.1vw, 16px);
+  }
+}
+
+/* ── Mobile overrides (<768px) ───────────────────────────────────────────────── */
+@media (max-width: 767px) {
   .header {
     width: 100%;
     margin-left: 0;

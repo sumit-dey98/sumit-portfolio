@@ -2,76 +2,88 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import styles from './CurtainTransition.module.css';
 
-// -------------------------------------------------------------------------------------------------
-// EDGE CURVE PRESETS
-//
-// edgeCurve controls the shape of the leading edge of each curtain panel.
-//
-// Each preset is a function:  (nx: number) => number
-//   - nx   : normalised x position across the screen width, range [0, 1]
-//             0 = left edge, 0.5 = centre, 1 = right edge
-//   - return: y-offset multiplier applied to vDepth at that x position
-//             Typical useful range is roughly [-2, 0]
-//             Negative  -> edge bows in the direction of travel (e.g. upward for toTop)
-//             Positive  -> edge bows against the direction of travel
-//             0         -> perfectly straight edge
-//
-// Preset names (pass as string to edgeCurve prop):
-//   'gaussian'       - responsive bell curve, centre leads (default)
-//   'arc'            - parabolic arc, clean and symmetric
-//   'sine'           - half sine period, softer than arc
-//   'wave'           - full sine wave, flowing/organic
-//   'straight'       - no curve, flat wipe
-//   'cubicIn'        - asymmetric cubic, deepens left->right
-//   'cubicSymmetric' - symmetric cubic, more angular than arc
-//
-// Custom function:
-//   edgeCurve={(nx) => Math.sin(nx * Math.PI * 2) * -0.8}
-//   edgeCurve={(nx) => -(nx ** 3 + nx ** 2) * 0.6}
-// -------------------------------------------------------------------------------------------------
+/**
+ * EDGE CURVE PRESETS
+ *
+ * edgeCurve controls the shape of the leading edge of each curtain panel.
+ * Each preset is a factory:  (W: number) => (nx: number) => number
+ *   W  : screen width in px (used for responsive logic inside presets)
+ *   nx : normalised x position [0, 1]  — 0 = left edge, 1 = right edge
+ *   return: y-offset multiplier applied to vDepth at that x position
+ *           Negative → edge bows in direction of travel  |  0 → straight  |  Positive → bows against
+ *
+ * Preset names (pass as string to `edgeCurve` prop):
+ *   'gaussian'       – responsive bell curve, centre leads (default)
+ *   'arc'            – parabolic arc, clean and symmetric
+ *   'sine'           – half sine period, softer than arc
+ *   'wave'           – full sine wave, flowing/organic
+ *   'straight'       – no curve, flat wipe
+ *   'cubicIn'        – asymmetric cubic, deepens left→right
+ *   'cubicSymmetric' – symmetric cubic, more angular than arc
+ *
+ * Custom function:
+ *   edgeCurve={(nx) => Math.sin(nx * Math.PI * 2) * -0.8}
+ *   edgeCurve={(nx) => -(nx ** 3 + nx ** 2) * 0.6}
+ *
+ * ---
+ *
+ * CurtainTransition props:
+ *
+ * @prop {function}             onComplete     Called when the animation finishes.
+ * @prop {'toTop'|'toBottom'}   direction      Which way the curtain travels. Default: 'toTop'.
+ * @prop {string|function}      edgeCurve      Shape of the leading edge. Preset name or
+ *                                             custom (nx: 0→1) => number. Default: 'gaussian'.
+ * @prop {Array}                layers         Layer descriptors rendered back→front (index 0 = back).
+ *   layer shape:
+ *   {
+ *     color : string  — hex/rgb ('#276bff') or CSS var name ('--accent'). Required.
+ *     depth : number  — warp depth as 0→1 fraction of screen height. Default: 0.6.
+ *     delay : number  — ms offset from animation start. Default: 0.
+ *                       Layers with larger delay start later and lag behind leading layers.
+ *   }
+ * @prop {boolean}              spinner        Show the loading spinner. Default: true.
+ * @prop {object}               spinnerProps   All keys optional (merged with defaults):
+ *   {
+ *     mode       : 'follow' | 'fixed'
+ *                  'follow' – spinner rides the edge of the most-lagging layer (largest delay).
+ *                  'fixed'  – spinner stays at a fixed screen position.
+ *     position   : 'center' | 'top' | 'bottom' | [x, y]
+ *                  Only used when mode='fixed'. [x, y] are absolute px coordinates.
+ *     offset     : number (px)
+ *                  'follow': distance from the layer's leading edge.
+ *                  'fixed' : distance from the position anchor.
+ *                  Default: responsive — 28px desktop, 24px tablet, 0px mobile.
+ *     size       : number  – spinner arc radius in px. Default: 24.
+ *     stroke     : number  – stroke width in px. Default: 5.
+ *     edgeOffset : number  – multiplier on the lagging layer's normalised time t.
+ *                  Values slightly above 1.0 push the spinner just ahead of the edge.
+ *                  Default: 1.05.
+ *   }
+ */
+
 export const EDGE_CURVES = {
-  // Responsive gaussian bell - narrow on mobile, wider on desktop.
   gaussian: (W) => (nx) => {
     const CURVATURE = W >= 1023 ? -0.25 : W >= 576 ? 0.5 : 0.4;
     const BELL_WIDTH = W >= 1023 ? 3 : W >= 576 ? 2 : 1.5;
     return -1.25 + CURVATURE * Math.exp(-Math.pow((nx - 0.5) * BELL_WIDTH, 2));
   },
-  // Parabolic arc - centre bows furthest, edges flush.
   arc: () => (nx) => -1.5 * 4 * nx * (1 - nx),
-  // Half sine period - softer falloff than arc.
   sine: () => (nx) => -1.5 * Math.sin(nx * Math.PI),
-  // Full sine wave - centre and edges bow in opposite directions.
   wave: () => (nx) => -0.8 * Math.sin(nx * Math.PI * 2),
-  // Straight edge - no curve.
   straight: () => () => 0,
-  // Asymmetric cubic - deepens left->right.
   cubicIn: () => (nx) => -(nx * nx * nx) * 1.5,
-  // Symmetric cubic - peaks at centre, tapers at edges.
   cubicSymmetric: () => (nx) => {
     const c = nx - 0.5;
     return -1.5 * (1 - 4 * c * c) * Math.abs(1 - 4 * c * c);
   },
 };
 
-// -------------------------------------------------------------------------------------------------
-// HELPERS
-// -------------------------------------------------------------------------------------------------
-
-/**
- * Resolves a color value - accepts either a hex/rgb string or a CSS var name.
- *   resolveColor('--accent')   -> getComputedStyle value of --accent
- *   resolveColor('#276bff')    -> '#276bff'
- */
 const resolveColor = (value, cs) => {
   if (!value) return null;
   if (value.startsWith('--')) return cs.getPropertyValue(value).trim();
   return value;
 };
 
-/**
- * Resolves edgeCurve - accepts a preset name string or a raw (nx) => number function.
- * Preset factories receive W so responsive logic can live inside them.
- */
 const resolveCurve = (edgeCurve, W) => {
   if (typeof edgeCurve === 'function') return edgeCurve;
   const preset = EDGE_CURVES[edgeCurve];
@@ -82,77 +94,21 @@ const resolveCurve = (edgeCurve, W) => {
   return preset(W);
 };
 
-// -------------------------------------------------------------------------------------------------
-// DEFAULT PROPS
-// -------------------------------------------------------------------------------------------------
-
 const DEFAULT_LAYERS = [
   { color: '--accent2', depth: 1.0, delay: 0 },
   { color: '--accent', depth: 0.85, delay: 105 },
   { color: '--accent2', depth: 0.6, delay: 150 },
 ];
 
-/**
- * Default spinner props. Merged with any user-supplied spinnerProps so
- * partial overrides work - e.g. { size: 32 } only changes size.
- */
 const DEFAULT_SPINNER_PROPS = {
-  mode: 'follow',     // 'follow' | 'fixed'
-  position: 'center', // 'center' | 'top' | 'bottom' | [x, y] - only used when mode='fixed'
-  offset: null,       // null = responsive default (28/24/0), or explicit px value
-  size: 24,           // arc radius in px
-  stroke: 5,          // stroke width in px
-  edgeOffset: 1.05,   // multiplier on the lagging layer's t - slightly ahead of its edge
+  mode: 'follow',
+  position: 'center',
+  offset: null,
+  size: 24,
+  stroke: 5,
+  edgeOffset: 1.05,
 };
 
-// -------------------------------------------------------------------------------------------------
-// COMPONENT
-// -------------------------------------------------------------------------------------------------
-
-/**
- * CurtainTransition
- *
- * @prop {function}             onComplete    - called when the animation finishes
- * @prop {'toTop'|'toBottom'}   direction     - which way the curtain travels (default: 'toTop')
- * @prop {string|function}      edgeCurve     - shape of the leading edge. preset name or
- *                                              custom (nx: 0->1) => number. default: 'gaussian'
- *
- * @prop {Array}  layers        - array of layer descriptors, rendered back->front (index 0 = back).
- *                                Any number of layers ≥ 1 is supported.
- *   layer shape:
- *   {
- *     color : string  - hex/rgb ('#276bff') or CSS var name ('--accent'). required.
- *     depth : number  - warp depth as a 0->1 fraction of screen height. default: 0.6
- *     delay : number  - ms offset from animation start. default: 0
- *                       layers with larger delay start later and lag behind leading layers.
- *   }
- *
- * @prop {boolean}  spinner     - show the loading spinner (default: true)
- *
- * @prop {object}   spinnerProps - optional, all keys are optional (merged with defaults):
- *   {
- *     mode       : 'follow' | 'fixed'
- *                  'follow' - spinner rides the edge of the most-lagging layer (largest delay)
- *                  'fixed'  - spinner stays at a fixed screen position
- *
- *     position   : 'center' | 'top' | 'bottom' | [x, y]
- *                  only used when mode='fixed'.
- *                  [x, y] are absolute px coordinates.
- *
- *     offset     : number (px)
- *                  'follow': distance from the layer's leading edge.
- *                  'fixed' : distance from the position anchor (e.g. px from top/bottom).
- *                  default: responsive - 28px desktop, 24px tablet, 0px mobile.
- *
- *     size       : number - spinner arc radius in px. default: 24
- *     stroke     : number - stroke width in px. default: 5
- *
- *     edgeOffset : number - multiplier on the lagging layer's normalised time t.
- *                  values slightly above 1.0 push the spinner just ahead of the edge,
- *                  making it look like it's cresting the wave rather than trailing it.
- *                  default: 1.05
- *   }
- */
 export default function CurtainTransition({
   onComplete,
   direction = 'toTop',
@@ -167,7 +123,7 @@ export default function CurtainTransition({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const W = window.innerWidth;
+    const W = Math.min(window.innerWidth, document.documentElement.clientWidth);
     const H = window.innerHeight;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
@@ -179,9 +135,6 @@ export default function CurtainTransition({
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
-    // ---------------------------------------------------------------------------------------
-    // GLOBAL ANIMATION PARAMETERS
-    // ---------------------------------------------------------------------------------------
     const DURATION = 2500;
     const STEPS = 60;
     const RISE_FRACTION = 0.5;
@@ -191,9 +144,6 @@ export default function CurtainTransition({
     const WARP_DISSOLVE_START = 0.44;
     const WARP_DISSOLVE_DURATION = 0.32;
 
-    // ---------------------------------------------------------------------------------------
-    // SPINNER CONFIG  (merge user props over defaults)
-    // ---------------------------------------------------------------------------------------
     const sp = { ...DEFAULT_SPINNER_PROPS, ...spinnerProps };
 
     const SPINNER_RADIUS = sp.size;
@@ -201,30 +151,20 @@ export default function CurtainTransition({
     const SPINNER_ARC_FRAC = 0.28;
     const SPINNER_SPEED = 1.1;
     const SPINNER_EDGE_OFFSET = sp.edgeOffset;
-
-    // Responsive offset default - overridden if sp.offset is explicitly set
     const SPINNER_OFFSET = sp.offset !== null
       ? sp.offset
       : (W >= 1023 ? 28 : W >= 576 ? 24 : 0);
-
     const SPINNER_FADE_OUT_START = 0.68;
     const SPINNER_FADE_DURATION = 0.12;
 
-    // ---------------------------------------------------------------------------------------
-    // EASINGS
-    // ---------------------------------------------------------------------------------------
     const easeRise = gsap.parseEase('power2.in');
     const easeWarpIn = gsap.parseEase('power4.out');
     const easeWarpOut = gsap.parseEase('power2.in');
 
-    // ---------------------------------------------------------------------------------------
-    // COLORS
-    // ---------------------------------------------------------------------------------------
     const cs = getComputedStyle(document.documentElement);
     const spinnerColor = cs.getPropertyValue('--bg').trim() || '#ffffff';
     const spinnerColorDim = cs.getPropertyValue('--surface').trim() || '#a4a4ca';
 
-    // Resolve each layer's color (CSS var or direct value), with fallback
     const resolvedLayers = layers.map((layer, i) => ({
       ...layer,
       depth: layer.depth ?? 0.6,
@@ -232,22 +172,15 @@ export default function CurtainTransition({
       fillColor: resolveColor(layer.color, cs) || (i % 2 === 0 ? '#00ffcc' : '#276bff'),
     }));
 
-    // The spinner tracks the layer with the largest delay (most lagging = last to arrive)
     const lagIndex = resolvedLayers.reduce(
       (maxIdx, layer, i, arr) => layer.delay >= arr[maxIdx].delay ? i : maxIdx,
       0
     );
 
-    // ---------------------------------------------------------------------------------------
-    // CURVE / BELL LUT
-    // ---------------------------------------------------------------------------------------
     const curveFn = resolveCurve(edgeCurve, W);
     const bellLUT = new Float32Array(STEPS + 1);
     for (let i = 0; i <= STEPS; i++) bellLUT[i] = curveFn(i / STEPS);
 
-    // ---------------------------------------------------------------------------------------
-    // GEOMETRY
-    // ---------------------------------------------------------------------------------------
     const getPanelShape = (t, depth) => {
       const riseProgress = easeRise(Math.min(t / RISE_FRACTION, 1));
 
@@ -286,16 +219,12 @@ export default function CurtainTransition({
       ctx.fill();
     };
 
-    // ---------------------------------------------------------------------------------------
-    // SPINNER
-    // ---------------------------------------------------------------------------------------
     const drawSpinner = (tLag, elapsed, opacity) => {
       if (!spinner || opacity <= 0) return;
 
       let cx, cy;
 
       if (sp.mode === 'follow') {
-        // Ride the edge of the lagging layer at screen centre x
         const { panelBottom, vDepth } = getPanelShape(tLag, resolvedLayers[lagIndex].depth);
         const bellAtCenter = bellLUT[Math.round(STEPS / 2)];
 
@@ -308,12 +237,9 @@ export default function CurtainTransition({
           ? edgeY + SPINNER_RADIUS + SPINNER_OFFSET
           : edgeY - SPINNER_RADIUS - SPINNER_OFFSET;
 
-        // Cull once off-screen
         if (direction === 'toTop' && cy + SPINNER_RADIUS < 0) return;
         if (direction === 'toBottom' && cy - SPINNER_RADIUS > H) return;
-
       } else {
-        // Fixed position
         const pos = sp.position;
         if (Array.isArray(pos)) {
           [cx, cy] = pos;
@@ -324,7 +250,6 @@ export default function CurtainTransition({
           cx = W / 2;
           cy = H - SPINNER_OFFSET - SPINNER_RADIUS;
         } else {
-          // 'center' (default)
           cx = W / 2;
           cy = H / 2;
         }
@@ -335,7 +260,6 @@ export default function CurtainTransition({
 
       ctx.save();
 
-      // Track ring (dim)
       ctx.beginPath();
       ctx.arc(cx, cy, SPINNER_RADIUS, 0, Math.PI * 2);
       ctx.strokeStyle = spinnerColorDim;
@@ -343,7 +267,6 @@ export default function CurtainTransition({
       ctx.globalAlpha = opacity * 0.25;
       ctx.stroke();
 
-      // Spinning arc (bright)
       ctx.beginPath();
       ctx.arc(cx, cy, SPINNER_RADIUS, rotation, rotation + arcLen);
       ctx.strokeStyle = spinnerColor;
@@ -355,9 +278,6 @@ export default function CurtainTransition({
       ctx.restore();
     };
 
-    // ---------------------------------------------------------------------------------------
-    // RENDER LOOP
-    // ---------------------------------------------------------------------------------------
     let startTime = null;
     let rafId;
 
@@ -368,23 +288,19 @@ export default function CurtainTransition({
 
       ctx.clearRect(0, 0, W, H);
 
-      // Compute normalised time t for each layer, accounting for its delay
       const layerTs = resolvedLayers.map(({ delay }) =>
         Math.min(Math.max(elapsed - delay, 0) / DURATION, 1)
       );
 
-      // Draw layers back->front (array order)
       resolvedLayers.forEach(({ fillColor, depth }, i) => {
         drawLayer(layerTs[i], fillColor, depth);
       });
 
-      // Spinner follows the lagging layer, slightly ahead via edgeOffset
       const tLag = Math.min(layerTs[lagIndex] * SPINNER_EDGE_OFFSET, 1);
       const fadeProgress = Math.max(0, (globalT - SPINNER_FADE_OUT_START) / SPINNER_FADE_DURATION);
       const spinnerOpacity = Math.max(0, 1 - fadeProgress);
       drawSpinner(tLag, elapsed, spinnerOpacity);
 
-      // Animation ends when the leading layer (smallest delay = index with min delay) completes
       const leadIndex = resolvedLayers.reduce(
         (minIdx, layer, i, arr) => layer.delay < arr[minIdx].delay ? i : minIdx,
         0
