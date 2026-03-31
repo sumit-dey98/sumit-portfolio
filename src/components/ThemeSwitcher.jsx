@@ -50,7 +50,7 @@ function ListSubMenu({ group, entries, activeKey, onSelect }) {
   const hasActive = entries.some(([key]) => key === activeKey);
 
   return (
-    <div className={styles.listSubmenuWrapper}>
+    <>
       <button
         className={`${styles.listItem} ${hasActive ? styles.listActive : ''}`}
         onClick={() => setOpen(o => !o)}
@@ -68,6 +68,7 @@ function ListSubMenu({ group, entries, activeKey, onSelect }) {
       <AnimatePresence>
         {open && (
           <motion.div
+            className={styles.listSubmenuWrapper}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -75,12 +76,10 @@ function ListSubMenu({ group, entries, activeKey, onSelect }) {
             style={{ overflow: 'hidden' }}
           >
             {entries.map(([key]) => (
-              <motion.button
+              <button
                 key={key}
-                className={`${styles.listItem} ${styles.listSubItem} ${activeKey === key ? styles.listActive : ''}`}
+                className={`${styles.listItem} ${activeKey === key ? styles.listActive : ''}`}
                 onClick={() => onSelect(key)}
-                whileHover={{ x: 4 }}
-                transition={{ duration: 0.300 }}
               >
                 <span className={styles.optionIcon} style={{
                   color: THEMES[key].vars['--accent'],
@@ -96,12 +95,12 @@ function ListSubMenu({ group, entries, activeKey, onSelect }) {
                     <span className={styles.statusDot} />
                   </span>
                 )}
-              </motion.button>
+              </button>
             ))}
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
 
@@ -134,43 +133,47 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
     return (
       <div className={styles.list}>
         <p className={styles.listLabel}>THEME</p>
-        {Object.entries(grouped).map(([group, entries]) => {
-          if (group === '__top__') {
-            return entries.map(([key]) => (
-              <motion.button
-                key={key}
-                className={`${styles.listItem} ${themeKey === key ? styles.listActive : ''}`}
-                onClick={() => setTheme(key)}
-                whileHover={{ x: 4 }}
-                transition={{ duration: 0.15 }}
-              >
-                <span className={styles.optionIcon} style={{
-                  color: THEMES[key].vars['--accent'],
-                  backgroundColor: THEMES[key].vars['--bg'],
-                  outline: `1px solid ${THEMES[key].vars['--accent']}`,
-                  outlineOffset: '-1px'
-                }}>
-                  <ThemeIcon icon={THEMES[key].icon} />
-                </span>
-                <span className={styles.optionLabel}>{THEMES[key].label}</span>
-                {themeKey === key && (
-                  <span className={styles.check} style={{ color: THEMES[key].vars['--accent2'] }}>
-                    <span className={styles.statusDot} />
+
+        <div className={styles.listShell}>
+          {Object.entries(grouped).map(([group, entries]) => {
+            if (group === '__top__') {
+              return entries.map(([key]) => (
+                <motion.button
+                  key={key}
+                  className={`${styles.listItem} ${themeKey === key ? styles.listActive : ''}`}
+                  onClick={() => setTheme(key)}
+                  whileHover={{ x: 4 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <span className={styles.optionIcon} style={{
+                    color: THEMES[key].vars['--accent'],
+                    backgroundColor: THEMES[key].vars['--bg'],
+                    outline: `1px solid ${THEMES[key].vars['--accent']}`,
+                    outlineOffset: '-1px'
+                  }}>
+                    <ThemeIcon icon={THEMES[key].icon} />
                   </span>
-                )}
-              </motion.button>
-            ));
-          }
-          return (
-            <ListSubMenu
-              key={group}
-              group={group}
-              entries={entries}
-              activeKey={themeKey}
-              onSelect={setTheme}
-            />
-          );
-        })}
+                  <span className={styles.optionLabel}>{THEMES[key].label}</span>
+                  {themeKey === key && (
+                    <span className={styles.check} style={{ color: THEMES[key].vars['--accent2'] }}>
+                      <span className={styles.statusDot} />
+                    </span>
+                  )}
+                </motion.button>
+              ));
+            }
+
+            return (
+              <ListSubMenu
+                key={group}
+                group={group}
+                entries={entries}
+                activeKey={themeKey}
+                onSelect={setTheme}
+              />
+            );
+          })}
+        </div>
       </div>
     );
   }

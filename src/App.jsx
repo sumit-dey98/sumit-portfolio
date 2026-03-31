@@ -21,7 +21,6 @@ import Contact from './sections/Contact';
 import MobileLayout from './components/MobileLayout';
 import './index.css';
 
-/* ─── Project routes ──────────────────────── */
 const PROJECT_ROUTES = {
   'connect4': {
     logo: <img src="/projects/connect4/connect4-logo.svg" width={256} height={256} loading="lazy" />,
@@ -43,8 +42,6 @@ const PROJECT_ROUTES = {
   },
 };
 
-/* ─── Mobile breakpoint hook ──────────────── */
-/* Hoisted above PortfolioInner so it's defined before use */
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.innerWidth <= 767
@@ -58,7 +55,6 @@ function useIsMobile() {
   return isMobile;
 }
 
-/* ─── Main portfolio component ────────────── */
 function PortfolioInner() {
   const [phase, setPhase] = useState('loader');
   const [userPrefs, setUserPrefs] = useState(null);
@@ -73,7 +69,6 @@ function PortfolioInner() {
   const bodyRef = useRef(null);
   const navRef = useRef(null);
 
-  /* ── Phase handlers ── */
   const handleSpinnerReady = useCallback(() => setPhase('genie'), []);
   const handleLoaderComplete = (prefs) => { setUserPrefs(prefs); setPhase('spinner'); };
 
@@ -84,12 +79,10 @@ function PortfolioInner() {
     setPhase('sliding');
   };
 
-  /* ── Cursor ── */
   useEffect(() => {
     document.body.classList.toggle('hide-cursor', cursorEnabled);
   }, [cursorEnabled]);
 
-  /* ── Body slide-in animation ── */
   useEffect(() => {
     if (phase !== 'sliding' || !bodyRef.current) return;
     bodyRef.current.classList.remove('body-slider-init');
@@ -102,12 +95,15 @@ function PortfolioInner() {
         ease: 'ease.in',
         force3D: true,
         onComplete: () => {
+          if (bodyRef.current) {
+            bodyRef.current.style.transform = '';
+            bodyRef.current.style.webkitTransform = '';
+          }
           document.body.style.overflow = '';
           document.documentElement.style.removeProperty('scroll-snap-type');
           window.scrollTo(0, 0);
           setPhase('landing');
 
-          /* Animate desktop nav in */
           if (navRef.current && !isMobile) {
             gsap.fromTo(
               navRef.current,
@@ -132,8 +128,6 @@ function PortfolioInner() {
   const showGenie = phase === 'genie' || phase === 'sliding';
   const showBody = phase === 'sliding' || phase === 'landing';
 
-  /* ── Mobile sections object ── */
-  /* Defined here so userPrefs is in scope */
   const mobileSections = {
     intro: <Intro userPrefs={userPrefs} />,
     about: <About />,
@@ -143,21 +137,17 @@ function PortfolioInner() {
     contact: <Contact />,
   };
 
-  /* ── Mobile nav — passed into MobileLayout ── */
   const mobileNav = (
-    <Nav cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
+    <Nav alwaysVisible cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
       <ThemeSwitcher variant="dropdown" />
     </Nav>
   );
 
   return (
     <>
-      {/* Custom cursor (hidden on touch devices via CSS) */}
       <div className="cursor" ref={cursorRef} />
       <div className="cursor-ring" ref={ringRef} />
 
-      {/* Genie anchor point — must be outside bodyRef
-          so position:fixed works against the true viewport */}
       <div
         ref={anchorRef}
         style={{
@@ -172,25 +162,15 @@ function PortfolioInner() {
         }}
       />
 
-      {/* Genie renders outside bodyRef — unaffected by body transform */}
-      {showGenie && (
-        <Genie anchorRef={anchorRef} onComplete={handleGenieComplete} />
-      )}
+      {showGenie && <Genie anchorRef={anchorRef} onComplete={handleGenieComplete} />}
 
-      {/* Loader / spinner */}
       {phase === 'loader' && <Loader onComplete={handleLoaderComplete} />}
       {phase === 'spinner' && <SpinnerScreen onReady={handleSpinnerReady} />}
 
-      {/* Desktop nav — lives outside bodyRef so it's truly fixed */}
       {showBody && !isMobile && (
         <div
           ref={navRef}
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0,
-            zIndex: 8000,
-            opacity: 0,
-          }}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 8000, opacity: 0 }}
         >
           <Nav cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
             <ThemeSwitcher variant="dropdown" />
@@ -198,22 +178,10 @@ function PortfolioInner() {
         </div>
       )}
 
-      {/* Invisible navRef target for mobile (gsap still needs the ref) */}
       {showBody && isMobile && (
         <div ref={navRef} style={{ position: 'fixed', opacity: 0, pointerEvents: 'none' }} />
       )}
 
-      {/* ── Sliding body ──────────────────────────
-          Starts off-screen (translateY 100vh).
-          GSAP animates it to y:0.
-          
-          CRITICAL: Do NOT put position:fixed children
-          inside this div. Fixed descendants of a
-          transformed ancestor get positioned relative
-          to the transform context, not the viewport —
-          they'll appear on-screen during the genie
-          animation. MobileLayout uses flexbox instead.
-      ─────────────────────────────────────────── */}
       {showBody && (
         <div
           ref={bodyRef}
@@ -224,14 +192,12 @@ function PortfolioInner() {
             transform: 'translateY(100vh)',
           }}
         >
-          {/* Landing is always rendered in both layouts */}
           <Landing
             ready={phase === 'landing'}
             onEnter={() => scrollTo('intro')}
             onSkip={() => scrollTo('projects')}
           />
 
-          {/* After Landing: tab layout on mobile, stacked sections on desktop */}
           {isMobile ? (
             <MobileLayout sections={mobileSections} nav={mobileNav} />
           ) : (
@@ -250,7 +216,6 @@ function PortfolioInner() {
   );
 }
 
-/* ─── Router ──────────────────────────────── */
 function AppInner() {
   return (
     <>

@@ -157,44 +157,61 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);
   z-index: 200;
 }
 
-/* ---- Sidebar ---- */
-.sidebar {
+.drawer {
   position: fixed;
   top: 0;
+  left: 0;
   right: 0;
-  height: 100dvh;
-  width: min(320px, 85vw);
-  background: var(--surface);
-  border-left: 1px solid var(--border);
   z-index: 250;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0 0 20px 20px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: -20px 0 60px color-mix(in srgb, var(--surface), transparent 30%);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
-.sidebarHeader {
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px 0 8px;
+}
+
+.drawerSettingsBtn {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--dim);
+  padding: 12px 16px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 24px 28px;
-  border-bottom: 1px solid var(--border);
-  min-height: 68px;
+  gap: 10px;
+  transition: border-color 0.2s, color 0.2s;
 }
 
-.sidebarLogo {
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 3px;
-  color: var(--accent2);
+.drawerSettingsBtn:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
-.backBtn {
+.drawerArrow {
+  margin-left: auto;
+}
+
+.drawerBackBtn {
   background: none;
   border: none;
   font-family: var(--mono);
@@ -205,129 +222,145 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0;
+  padding: 8px 20px 4px;
   transition: color 0.2s;
 }
 
-.backBtn:hover {
+.drawerBackBtn:hover {
   color: var(--text);
 }
 
-/* ---- Sidebar body (full height, clips panels) ---- */
-.sidebarBody {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-
-/* ---- Nav view ---- */
-.sidebarNavView {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.sidebarLinks {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 0;
-  flex: 1;
-}
-
-.sidebarLink {
-  width: 100%;
+.drawerHandle {
+  height: 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px 28px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-transform: uppercase;
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 3px;
-  color: var(--muted);
-  transition: color 0.2s, background 0.2s, padding-left 0.2s;
-  position: relative;
+  justify-content: center;
 }
 
-.sidebarLink::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 2px;
-  background: var(--accent2);
-  transform: scaleY(0);
-  transition: transform 0.2s ease;
+.drawerPill {
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
 }
 
-.sidebarLink:hover,
-.sidebarLinkActive {
-  color: var(--accent);
-  background: var(--bg);
-  padding-left: 36px;
+/* ---- Mobile tabs ---- */
+.mobileTopBar {
+  display: none;
 }
 
-.sidebarLink:hover::before,
-.sidebarLinkActive::before {
-  transform: scaleY(1);
-}
+@media (max-width: 767px) {
+  .mobileTopBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 20px;
+    z-index: 8000;
+    display: flex;
+    flex-direction: column;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid var(--border);
+    border-radius: 0 0 20px 20px;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
 
-.sidebarNum {
-  font-size: 10px;
-  color: var(--dim);
-  min-width: 24px;
-  transition: color 0.2s;
-}
+  .mobileTopBarTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    flex-shrink: 0;
+    padding-top: 8px;
+  }
 
-.sidebarLink:hover .sidebarNum,
-.sidebarLinkActive .sidebarNum {
-  color: var(--accent);
-}
+  .mobileTopBarRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-/* ---- Sidebar footer ---- */
-.sidebarFooter {
-  padding: 20px 28px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+  .trigger {
+    overflow: hidden !important;
+  }
 
-/* ---- Preferences button in sidebar ---- */
-.sidebarSettingsBtn {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 3px;
-  color: var(--dim);
-  padding: 10px 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: border-color 0.2s, color 0.2s;
-  width: 100%;
-}
+  .drawerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 20px 0 8px;
+  }
 
-.sidebarSettingsBtn:hover {
-  border-color: var(--accent);
-  color: var(--text);
-}
+  .drawerHandle {
+    height: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
-.sidebarSettingsArrow {
-  margin-left: auto;
-}
+  .drawerPill {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+  }
 
-/* ---- Settings inline view ---- */
-.sidebarSettingsView {
-  height: 100%;
-  overflow-y: auto;
+  .drawerSettingsBtn {
+    width: 100%;
+    margin-top: 20px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--dim);
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .drawerSettingsBtn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .drawerArrow {
+    margin-left: auto;
+  }
+
+  .drawerBackBtn {
+    background: none;
+    border: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 20px 8px;
+    transition: color 0.2s;
+  }
+
+  .drawerBackBtn:hover {
+    color: var(--text);
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 7999;
+  }
 }

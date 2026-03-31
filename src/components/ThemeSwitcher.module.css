@@ -195,6 +195,13 @@
   margin-bottom: 8px;
 }
 
+.listShell {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
 .listItem {
   width: 100%;
   display: flex;
@@ -225,7 +232,10 @@
 }
 
 .listSubmenuWrapper {
-  width: 100%;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .submenuArrow {
@@ -233,4 +243,54 @@
   display: inline-flex;
   align-items: center;
   color: var(--muted);
+}
+
+@media (max-width: 767px) {
+  .list {
+    gap: 0;
+  }
+
+  .listLabel {
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    padding: 0 4px;
+  }
+
+  .listItem {
+    padding: 8px 10px;
+    gap: 8px;
+    width: 100%;
+    will-change: auto;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .listActive {
+    transform: none;
+  }
+
+  .listSubItem {
+    padding-left: 18px;
+  }
+
+  .optionIcon {
+    width: 18px;
+    height: 18px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+
+  .optionLabel {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+
+  .arrow {
+    font-size: 0.85rem;
+  }
+
+  .statusDot {
+    width: 5px;
+    height: 5px;
+  }
 }

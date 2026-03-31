@@ -1,178 +1,269 @@
-/* ─── content area ──────────────────────────── */
-.content {
-  /* push content up so it's never hidden behind the bar */
-  padding-bottom: var(--tab-h, 64px);
+@media (min-width: 768px) {
+  .wrapper {
+    display: contents;
+  }
+
+  .nav,
+  .sheet {
+    display: none;
+  }
+
+  .body {
+    display: contents;
+  }
+
+  .pane {
+    display: contents;
+  }
 }
 
-/* ─── bottom sheet ──────────────────────────── */
-.sheet {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 9000;
+@media (max-width: 767px) {
+  body[style*="padding-right"] {
+    padding-right: 0 !important;
+  }
 
-  height: var(--collapsed-h, 64px);
-  transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
 
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  .nav {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
 
-  border-top: 1px solid var(--border);
-  border-radius: 20px 20px 0 0;
+    .body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+  
+    .navSlot {
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+  
+    .paneArea {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+  
+    .pane {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(calc(var(--dir, 1) * 32px));
+      transition:
+        opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  .paneActive {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
 
-  /* keep it snappy on drag */
-  will-change: height;
-}
+  .paneExit {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(calc(var(--dir, 1) * -32px));
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
+  }
 
-.sheetExpanded {
-  height: var(--expanded-h, 96px);
-}
+  .pane section,
+  .pane>* {
+    scroll-snap-align: none !important;
+    height: auto;
+    min-height: 100%;
+  }
 
-/* disable transition while finger is moving */
-.sheetDragging {
-  transition: none;
-}
+  .sheet {
+    flex-shrink: 0;
+    height: var(--collapsed-h, 64px);
+    transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: height;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-top: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    position: relative;
+    z-index: 100;
+  }
 
-/* ── pull handle ───────────────────────────── */
-.handle {
-  flex-shrink: 0;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-}
+  .sheetExpanded {
+    height: var(--expanded-h, 96px);
+  }
 
-.handle:active {
-  cursor: grabbing;
-}
+  .sheetDragging {
+    transition: none;
+  }
 
-.handlePill {
-  display: block;
-  width: 36px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
-  transition: background 0.2s, width 0.2s;
-}
+  .handle {
+    flex-shrink: 0;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
 
-.sheetExpanded .handlePill {
-  width: 28px;
-  background: var(--dim);
-}
+  .handle:active {
+    cursor: grabbing;
+  }
 
-/* ── tab row ───────────────────────────────── */
-.tabs {
-  flex: 1;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-around;
-  padding: 4px 8px 0;
-  gap: 0;
-}
+  .handlePill {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: width 0.22s, background 0.22s;
+  }
 
-/* ── individual tab ────────────────────────── */
-.tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
+  .sheetExpanded .handlePill {
+    width: 24px;
+    background: var(--dim);
+  }
 
-  padding: 6px 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  color: var(--muted);
-  transition: color 0.18s;
-  position: relative;
+  .tabs {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding: 4px 4px 0;
+  }
 
-  /* prevent layout shift */
-  min-width: 0;
-}
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 6px 2px 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 0;
+    position: relative;
+    color: var(--muted);
+    transition: color 0.18s;
+  }
 
-.tab:active {
-  opacity: 0.7;
-}
+  .tab:active {
+    opacity: 0.65;
+  }
 
-.tabActive {
-  color: var(--accent2);
-}
+  .tabActive {
+    color: var(--accent2);
+  }
 
-/* icon */
-.tabIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  transition: transform 0.18s;
-  position: relative;
-}
+  .tabIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
 
-.tabActive .tabIcon {
-  transform: translateY(-2px);
-}
+  .tabActive .tabIcon {
+    transform: translateY(-3px) scale(1.08);
+  }
 
-/* active dot indicator when collapsed */
-.tabIcon::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%) scale(0);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent2);
-  transition: transform 0.18s;
-}
+  .tabLabel {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(5px);
+    pointer-events: none;
+    transition: opacity 0.2s 0s, transform 0.2s 0s;
+  }
 
-.tabActive .tabIcon::after {
-  transform: translateX(-50%) scale(1);
-}
+  .sheetExpanded .tab:nth-child(1) .tabLabel {
+    transition-delay: 0.06s;
+  }
 
-/* hide dot when expanded (labels are visible) */
-.sheetExpanded .tabIcon::after {
-  transform: translateX(-50%) scale(0);
-}
+  .sheetExpanded .tab:nth-child(2) .tabLabel {
+    transition-delay: 0.09s;
+  }
 
-/* label — hidden when collapsed, visible when expanded */
-.tabLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  max-width: 100%;
-  text-overflow: ellipsis;
+  .sheetExpanded .tab:nth-child(3) .tabLabel {
+    transition-delay: 0.12s;
+  }
 
-  /* animate in/out with height change */
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.22s 0s, transform 0.22s 0s;
-  pointer-events: none;
-}
+  .sheetExpanded .tab:nth-child(4) .tabLabel {
+    transition-delay: 0.15s;
+  }
 
-.sheetExpanded .tabLabel {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.22s 0.12s, transform 0.22s 0.12s;
-}
+  .sheetExpanded .tab:nth-child(5) .tabLabel {
+    transition-delay: 0.18s;
+  }
 
-/* ── safe area (notch / home bar) ──────────── */
-.sheet {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  .sheetExpanded .tab:nth-child(6) .tabLabel {
+    transition-delay: 0.21s;
+  }
+
+  .sheetExpanded .tabLabel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tabPip {
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent2);
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+
+  .tabActive .tabPip {
+    transform: translateX(-50%) scale(1);
+  }
+
+  .sheetExpanded .tabPip {
+    transform: translateX(-50%) scale(0);
+  }
 }
