@@ -10,13 +10,41 @@ const ease = [0.16, 1, 0.3, 1];
  * variant="popup"  - floating popup, desktop nav (default)
  * variant="inline" - fills sidebar settings panel, no overlay
  */
-export default function SettingsPopup({ onClose, variant = 'popup' }) {
+
+function CursorSetting({ localCursor, setLocalCursor }) {
+  return (
+    <div className={styles.settingRow}>
+      <span className={styles.settingLabel}>Pretty Cursor</span>
+      <button
+        className={`${styles.toggle} ${localCursor === 'yes' ? styles.toggleOn : ''}`}
+        onClick={() => setLocalCursor(localCursor === 'yes' ? 'no' : 'yes')}
+        role="switch"
+        aria-checked={localCursor === 'yes'}
+      >
+        <span className={styles.toggleTrack}>
+          <motion.span
+            className={styles.toggleThumb}
+            animate={{ x: localCursor === 'yes' ? 18 : 0 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          />
+        </span>
+      </button>
+    </div>
+  );
+}
+
+export default function SettingsPopup({ onClose, variant = 'popup', cursorEnabled, onCursorChange }) {
   const { prefs, savePrefs } = useUserPrefs();
   const [name, setName] = useState(prefs?.name || '');
   const [mode, setMode] = useState(prefs?.mode || null);
+  const [localCursor, setLocalCursor] = useState(() => {
+    return localStorage.getItem('pretty-cursor') ?? 'yes';
+  });
 
   const handleSave = () => {
     savePrefs({ name: name.trim(), mode });
+    localStorage.setItem('pretty-cursor', localCursor);
+    onCursorChange?.(localCursor === 'yes');
     onClose?.();
   };
 
@@ -52,7 +80,7 @@ export default function SettingsPopup({ onClose, variant = 'popup' }) {
         </div>
 
         {/* Mode */}
-        <div className={styles.field}>
+        {/* <div className={styles.field}>
           <label className={styles.label}>EXPERIENCE MODE</label>
           <div className={styles.modeRow}>
             {[
@@ -76,16 +104,18 @@ export default function SettingsPopup({ onClose, variant = 'popup' }) {
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
+
+        {/* Cursor */}
+        <CursorSetting localCursor={localCursor} setLocalCursor={setLocalCursor} />               
       </div>
 
       <div className={styles.footer}>
         <Button className={styles.saveBtn} onClick={handleSave}>
-          <span className={styles.saveBg} />
-          <span >SAVE CHANGES</span>
+          SAVE CHANGES
         </Button>
         {variant === 'popup' && (
-          <button className={styles.cancelBtn} onClick={onClose}>cancel</button>
+          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
         )}
       </div>
     </div>

@@ -30,13 +30,14 @@
   display: grid;
   grid-template-columns: 1fr 340px;
   gap: 80px;
-  align-items: center;
+  align-items: start;
 }
 
 .text {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  height: 100%;
 }
 
 .headline {
@@ -57,18 +58,43 @@
   line-height: 1.6;
   color: var(--text-dim);
   font-weight: 400;
-  max-width: 520px;
 }
 
 .location {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  font-weight: 400;
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-top: auto;
 }
 
 .location span {
   font-family: var(--display);
   letter-spacing: 0.5px;
+}
+
+.location svg {
+  overflow: visible;
+}
+
+.bounce {
+  animation: bounce 2s infinite;
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
 .links {

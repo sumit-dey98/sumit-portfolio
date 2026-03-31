@@ -12,7 +12,7 @@ import styles from './Nav.module.css';
 const SECTIONS = ['landing', 'intro', 'about', 'projects', 'skills' , 'services', 'contact'];
 const ease = [0.16, 1, 0.3, 1];
 
-export default function Nav({ children }) {
+export default function Nav({ children, cursorEnabled, onCursorChange }) {
   const [active, setActive] = useState('landing');
   const [visible, setVisible] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -71,7 +71,11 @@ export default function Nav({ children }) {
       {/* ---- Desktop settings popup ---- */}
       <AnimatePresence>
         {settingsOpen && (
-          <SettingsPopup onClose={() => setSettingsOpen(false)} />
+          <SettingsPopup
+            onClose={() => setSettingsOpen(false)}
+            cursorEnabled={cursorEnabled}
+            onCursorChange={onCursorChange}
+          />
         )}
       </AnimatePresence>
 
@@ -236,7 +240,12 @@ export default function Nav({ children }) {
                       exit={{ opacity: 0, x: -24 }}
                       transition={{ duration: 0.22, ease }}
                     >
-                      <SettingsPopup variant="inline" onClose={() => setSidebarView('nav')} />
+                      <SettingsPopup
+                        variant="inline"
+                        onClose={() => setSidebarView('nav')}
+                        cursorEnabled={cursorEnabled}
+                        onCursorChange={onCursorChange}
+                      />
                     </motion.div>
                   )}
 

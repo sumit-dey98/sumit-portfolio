@@ -109,7 +109,7 @@ export default function ScreenSlides({ screens }) {
             <div key={i} className={styles.cell} onClick={handleCellClick}>
               <img src={src} alt={`Screen ${i + 1}`} className={styles.cellImg} draggable={false} />
               <div className={styles.cellOverlay}>
-                <FiMaximize2 size={14} />
+                <FiMaximize2 size={16} />
               </div>
             </div>
           ))}
@@ -147,7 +147,7 @@ export default function ScreenSlides({ screens }) {
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               >
                 <button className={styles.closeBtn} onClick={handleClose}>
-                  <FiMinimize2 size={13} />
+                  <FiMinimize2 size={16} strokeWidth={2}/>
                 </button>
 
                 <div

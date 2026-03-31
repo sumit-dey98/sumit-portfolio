@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useCursor } from './hooks/useCursor';
-import { ThemeProvider, useThemeContext } from './theme/ThemeContext';
+import { ThemeProvider } from './theme/ThemeContext';
 import Loader from './sections/Loader';
 import SpinnerScreen from './components/SpinnerScreen';
 import Genie from './components/Genie';
@@ -18,8 +18,10 @@ import Skills from './sections/Skills';
 import Services from './sections/Services';
 import About from './sections/About';
 import Contact from './sections/Contact';
+import MobileLayout from './components/MobileLayout';
 import './index.css';
 
+/* ─── Project routes ──────────────────────── */
 const PROJECT_ROUTES = {
   'connect4': {
     logo: <img src="/projects/connect4/connect4-logo.svg" width={256} height={256} loading="lazy" />,
@@ -41,24 +43,39 @@ const PROJECT_ROUTES = {
   },
 };
 
+/* ─── Mobile breakpoint hook ──────────────── */
+/* Hoisted above PortfolioInner so it's defined before use */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= 767
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isMobile;
+}
+
+/* ─── Main portfolio component ────────────── */
 function PortfolioInner() {
   const [phase, setPhase] = useState('loader');
   const [userPrefs, setUserPrefs] = useState(null);
+  const isMobile = useIsMobile();
 
-  const { cursorRef, ringRef } = useCursor();
+  const [cursorEnabled, setCursorEnabled] = useState(
+    () => localStorage.getItem('pretty-cursor') !== 'no'
+  );
+  const { cursorRef, ringRef } = useCursor(cursorEnabled);
 
   const anchorRef = useRef(null);
   const bodyRef = useRef(null);
   const navRef = useRef(null);
 
-  const handleSpinnerReady = useCallback(() => {
-    setPhase('genie');
-  }, []);
-
-  const handleLoaderComplete = (prefs) => {
-    setUserPrefs(prefs);
-    setPhase('spinner');
-  };
+  /* ── Phase handlers ── */
+  const handleSpinnerReady = useCallback(() => setPhase('genie'), []);
+  const handleLoaderComplete = (prefs) => { setUserPrefs(prefs); setPhase('spinner'); };
 
   const handleGenieComplete = () => {
     window.scrollTo(0, 0);
@@ -67,14 +84,18 @@ function PortfolioInner() {
     setPhase('sliding');
   };
 
+  /* ── Cursor ── */
   useEffect(() => {
-    if (phase !== 'sliding') return;
-    if (!bodyRef.current) return;
+    document.body.classList.toggle('hide-cursor', cursorEnabled);
+  }, [cursorEnabled]);
+
+  /* ── Body slide-in animation ── */
+  useEffect(() => {
+    if (phase !== 'sliding' || !bodyRef.current) return;
     bodyRef.current.classList.remove('body-slider-init');
 
     const t = setTimeout(() => {
       if (!bodyRef.current) return;
-
       gsap.to(bodyRef.current, {
         y: 0,
         duration: 0.8,
@@ -84,10 +105,10 @@ function PortfolioInner() {
           document.body.style.overflow = '';
           document.documentElement.style.removeProperty('scroll-snap-type');
           window.scrollTo(0, 0);
-
           setPhase('landing');
-      
-          if (navRef.current) {
+
+          /* Animate desktop nav in */
+          if (navRef.current && !isMobile) {
             gsap.fromTo(
               navRef.current,
               { opacity: 0, y: -12 },
@@ -103,7 +124,7 @@ function PortfolioInner() {
       document.body.style.overflow = '';
       document.documentElement.style.removeProperty('scroll-snap-type');
     };
-  }, [phase]);
+  }, [phase, isMobile]);
 
   const scrollTo = (id) =>
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -111,12 +132,32 @@ function PortfolioInner() {
   const showGenie = phase === 'genie' || phase === 'sliding';
   const showBody = phase === 'sliding' || phase === 'landing';
 
+  /* ── Mobile sections object ── */
+  /* Defined here so userPrefs is in scope */
+  const mobileSections = {
+    intro: <Intro userPrefs={userPrefs} />,
+    about: <About />,
+    projects: <Projects />,
+    skills: <Skills />,
+    services: <Services />,
+    contact: <Contact />,
+  };
+
+  /* ── Mobile nav — passed into MobileLayout ── */
+  const mobileNav = (
+    <Nav cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
+      <ThemeSwitcher variant="dropdown" />
+    </Nav>
+  );
+
   return (
     <>
+      {/* Custom cursor (hidden on touch devices via CSS) */}
       <div className="cursor" ref={cursorRef} />
       <div className="cursor-ring" ref={ringRef} />
 
-      {/* -- Genie anchor - always in DOM ------------------------------- */}
+      {/* Genie anchor point — must be outside bodyRef
+          so position:fixed works against the true viewport */}
       <div
         ref={anchorRef}
         style={{
@@ -131,44 +172,48 @@ function PortfolioInner() {
         }}
       />
 
-      {/* -- Genie ----------------------------------------------------- */}
+      {/* Genie renders outside bodyRef — unaffected by body transform */}
       {showGenie && (
-        <Genie
-          anchorRef={anchorRef}
-          onComplete={handleGenieComplete}
-        />
+        <Genie anchorRef={anchorRef} onComplete={handleGenieComplete} />
       )}
 
-      {/* -- Loader ----------------------------------------------------- */}
-      {phase === 'loader' && (
-        <Loader onComplete={handleLoaderComplete} />
-      )}
+      {/* Loader / spinner */}
+      {phase === 'loader' && <Loader onComplete={handleLoaderComplete} />}
+      {phase === 'spinner' && <SpinnerScreen onReady={handleSpinnerReady} />}
 
-      {/* -- Spinner ---------------------------------------------------- */}
-      {phase === 'spinner' && (
-        <SpinnerScreen onReady={handleSpinnerReady} />
-      )}
-
-      {/* -- Nav -------------------------------------------------------- */}
-      {showBody && (
+      {/* Desktop nav — lives outside bodyRef so it's truly fixed */}
+      {showBody && !isMobile && (
         <div
           ref={navRef}
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
+            top: 0, left: 0, right: 0,
             zIndex: 8000,
             opacity: 0,
           }}
         >
-          <Nav>
+          <Nav cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
             <ThemeSwitcher variant="dropdown" />
           </Nav>
         </div>
       )}
 
-      {/* -- Body -------------------------------------------------------- */}
+      {/* Invisible navRef target for mobile (gsap still needs the ref) */}
+      {showBody && isMobile && (
+        <div ref={navRef} style={{ position: 'fixed', opacity: 0, pointerEvents: 'none' }} />
+      )}
+
+      {/* ── Sliding body ──────────────────────────
+          Starts off-screen (translateY 100vh).
+          GSAP animates it to y:0.
+          
+          CRITICAL: Do NOT put position:fixed children
+          inside this div. Fixed descendants of a
+          transformed ancestor get positioned relative
+          to the transform context, not the viewport —
+          they'll appear on-screen during the genie
+          animation. MobileLayout uses flexbox instead.
+      ─────────────────────────────────────────── */}
       {showBody && (
         <div
           ref={bodyRef}
@@ -176,27 +221,36 @@ function PortfolioInner() {
             position: 'relative',
             zIndex: 7000,
             background: 'var(--bg)',
-            // willChange: 'transform',
-            transform: 'translateY(100vh)', 
+            transform: 'translateY(100vh)',
           }}
         >
+          {/* Landing is always rendered in both layouts */}
           <Landing
             ready={phase === 'landing'}
             onEnter={() => scrollTo('intro')}
             onSkip={() => scrollTo('projects')}
           />
-          <Intro userPrefs={userPrefs} />
-          <About />
-          <Projects />
-          <Skills />
-          <Services />
-          <Contact />
+
+          {/* After Landing: tab layout on mobile, stacked sections on desktop */}
+          {isMobile ? (
+            <MobileLayout sections={mobileSections} nav={mobileNav} />
+          ) : (
+            <>
+              <Intro userPrefs={userPrefs} />
+              <About />
+              <Projects />
+              <Skills />
+              <Services />
+              <Contact />
+            </>
+          )}
         </div>
       )}
     </>
   );
 }
 
+/* ─── Router ──────────────────────────────── */
 function AppInner() {
   return (
     <>

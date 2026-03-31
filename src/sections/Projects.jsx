@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { FiArrowUpRight, FiChevronDown } from 'react-icons/fi';
+import { FiArrowUpRight, FiChevronDown, FiPlay, FiPause } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import ScreenSlides from './../components/ScreenSlides';
 import styles from './Projects.module.css';
@@ -218,46 +218,54 @@ function CardDesc({ text }) {
 
 // ── Desktop card ───────────────────────────────────────────────────────────────
 function ProjectCard({ project, progress }) {
-  const [hovered, setHovered] = useState(false);
   const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const opacity = useTransform(progress, [0, 0.5, 1], [0.25, 0.6, 1]);
   const scale = useTransform(progress, [0, 0.5, 1], [0.92, 0.96, 1]);
 
-  useEffect(() => {
+  const togglePlay = () => {
     const vid = videoRef.current;
     if (!vid) return;
-    if (hovered) { vid.currentTime = 0; vid.play().catch(() => { }); }
-    else { vid.pause(); vid.currentTime = 0; }
-  }, [hovered]);
+
+    if (isPlaying) {
+      vid.pause();
+      setIsPlaying(false);
+    } else {
+      vid.play().catch(() => {
+        // If play fails (e.g., autoplay blocked), keep isPlaying false
+        setIsPlaying(false);
+      });
+      setIsPlaying(true);
+    }
+  };
 
   return (
-    <motion.div
-      className={styles.card}
-      style={{ opacity, scale }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* ── Info panel ── */}
+    <motion.div className={styles.card} style={{ opacity, scale }}>
+      {/* Info panel remains unchanged */}
       <div className={styles.cardInfo}>
         <div className={styles.cardTop}>
           <div className={styles.cardTopLeft}>
             <span className={styles.cardNum}>{project.id}</span>
             <span className={styles.cardSlash}>/</span>
-            <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
+            <span className={styles.cardTotal}>
+              {String(PROJECTS.length).padStart(2, '0')}
+            </span>
           </div>
           {project.link ? (
             <Link
               to={project.link}
               target="_blank"
               className={styles.cardDemoBtn}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <span className={styles.cardDemoBtnLabel}>DEMO</span>
               <FiArrowUpRight className={styles.cardDemoBtnArrow} />
             </Link>
           ) : (
-            <span className={styles.cardDemoBtnDisabled}><span>SOON</span></span>
+            <span className={styles.cardDemoBtnDisabled}>
+              <span>SOON</span>
+            </span>
           )}
         </div>
 
@@ -268,29 +276,49 @@ function ProjectCard({ project, progress }) {
         </div>
 
         <div className={styles.cardBottom}>
-          {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+          {project.tags.map((t) => (
+            <span key={t} className={styles.tag}>
+              {t}
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* ── Preview panel ── */}
-      <div className={styles.cardPreview}>
+      {/* Preview panel – now toggles video on click */}
+      <div className={styles.cardPreview} onClick={togglePlay}>
         <img
           src={project.preview}
           alt={project.name}
-          className={`${styles.cardImg} ${hovered && project.videoSrc ? styles.cardImgHidden : ''}`}
+          className={`${styles.cardImg} ${isPlaying ? styles.cardImgHidden : ''}`}
         />
         {project.videoSrc && (
-          <video
-            ref={videoRef}
-            className={`${styles.cardVideo} ${hovered ? styles.cardVideoVisible : ''}`}
-            src={project.videoSrc}
-            muted loop playsInline
-          />
+          <>
+            <video
+              ref={videoRef}
+              className={`${styles.cardVideo} ${isPlaying ? styles.cardVideoVisible : ''}`}
+              src={project.videoSrc}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <button
+              className={isPlaying ? styles.stopBtn : styles.playBtn}
+              onClick={(e) => {
+                e.stopPropagation(); // prevent container click from toggling twice
+                togglePlay();
+              }}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? <FiPause /> : <FiPlay />}
+            </button>
+          </>
         )}
       </div>
     </motion.div>
   );
 }
+
 
 // ── View-all dropdown ──────────────────────────────────────────────────────────
 function ViewAllDropdown({ onSelect, activeIndex }) {
@@ -472,7 +500,12 @@ function DesktopScroller() {
 
       <div className={styles.dots}>
         {PROJECTS.map((_, i) => (
-          <span key={i} className={`${styles.dot} ${activeIndex === i ? styles.dotActive : ''}`} />
+          <span
+            key={i}
+            className={`${styles.dot} ${activeIndex === i ? styles.dotActive : ''}`}
+            onClick={() => snapToIndex(i)}
+            style={{ cursor: 'pointer' }}
+          />
         ))}
       </div>
     </section>
@@ -528,12 +561,16 @@ export default function Projects() {
             ))}
           </div>
           <div className={styles.dots}>
-            {PROJECTS.map((_, i) => (
-              <span
-                key={i}
-                className={`${styles.dot} ${carouselIndex === i ? styles.dotActive : ''}`}
-              />
-            ))}
+            <div className={styles.dots}>
+              {PROJECTS.map((_, i) => (
+                <span
+                  key={i}
+                  className={`${styles.dot} ${carouselIndex === i ? styles.dotActive : ''}`}
+                  onClick={() => setCarouselIndex(i)}
+                  style={{ cursor: 'pointer' }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
-/* @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap'); */
-/* @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 
@@ -10,12 +8,14 @@
   font-weight: normal;
   src: local('Divergentes Regular'), url('/fonts/Divergentes-zrd2a.woff') format('woff');
 }
+
 @font-face {
   font-family: 'Rushford Clean Regular';
   font-style: normal;
   font-weight: normal;
   src: local('Rushford Clean Regular'), url('/fonts/Rushfordclean-rgz89.woff') format('woff');
 }
+
 @font-face {
   font-family: 'Rockstar';
   font-style: normal;
@@ -30,6 +30,7 @@
   src: local('Impact'), url('/fonts/impact.woff') format('woff');
 }
 
+/* ─── Design tokens ───────────────────────── */
 :root {
   --bg: #080810;
   --surface: #0e0e1a;
@@ -51,17 +52,13 @@
   --section-pad-x: 48px;
 }
 
+/* ─── Reset ───────────────────────────────── */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-html {
-  scroll-behavior: auto;
-  scroll-snap-type: y mandatory;
 }
 
 html,
@@ -71,20 +68,49 @@ body,
   min-height: 100dvh;
 }
 
+/* ─── Scroll snap ─────────────────────────── */
+/*
+  Both mobile and desktop use scroll-snap.
+  
+  Desktop: every section snaps (full-page scroll experience).
+  
+  Mobile:  Landing section snaps, then MobileLayout snaps
+           once (via .ml-wrapper in MobileLayout.css).
+           Inside MobileLayout, switching sections is
+           handled by the tab bar — no further snapping.
+*/
+html {
+  scroll-behavior: auto;
+  scroll-snap-type: y mandatory;
+}
+
+/* ─── Body ────────────────────────────────── */
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--body);
   overflow-x: hidden;
-  cursor: none;
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
 }
 
-/* font legibility optimization */
+body.hide-cursor,
+body.hide-cursor * {
+  cursor: none;
+  user-select: none;
+}
+
+input,
+textarea,
+p,
+h1,
+h2,
+h3 {
+  user-select: text;
+}
+
 :is(code, pre, [class*="mono"], [style*="--mono"]) {
   font-variant-ligatures: none;
   font-feature-settings: 'liga' 0;
@@ -102,7 +128,7 @@ h3 {
   text-rendering: geometricPrecision;
 }
 
-/* Custom cursor */
+/* ─── Custom cursor ───────────────────────── */
 .cursor {
   position: fixed;
   width: 10px;
@@ -114,7 +140,7 @@ h3 {
   z-index: 9999;
   transform: translate(-50%, -50%);
   transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
-  /* mix-blend-mode: screen; */
+  will-change: transform;
 }
 
 .cursor-ring {
@@ -128,10 +154,13 @@ h3 {
   z-index: 9998;
   transform: translate(-50%, -50%);
   transition: transform 0.08s ease, width 0.2s ease, height 0.2s ease, opacity 0.3s ease;
+  will-change: transform;
   opacity: 0.6;
 }
 
+/* Hide cursor on touch devices */
 @media (pointer: coarse) {
+
   .cursor,
   .cursor-ring {
     opacity: 0;
@@ -139,12 +168,13 @@ h3 {
   }
 }
 
+/* ─── Selection ───────────────────────────── */
 ::selection {
   background: var(--accent);
   color: var(--bg);
 }
 
-/* Scrollbar */
+/* ─── Scrollbar ───────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -158,16 +188,54 @@ h3 {
   border-radius: 2px;
 }
 
-/* Section base */
+/* ─── Section base ────────────────────────── */
+/*
+  Desktop: sections are full-height snap targets.
+  Mobile:  Landing section snaps.
+           Sections inside MobileLayout's ml-body are
+           position:absolute — they don't participate
+           in scroll snap at all. Height/snap overrides
+           are handled in MobileLayout.css.
+*/
 section {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  height: 100dvh;
   width: 100%;
   position: relative;
 }
 
-/* Noise overlay */
+@media (min-width: 768px) {
+  section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    height: 100dvh;
+  }
+}
+
+@media (max-width: 767px) {
+
+  /* Only Landing snaps on mobile.
+     ml-wrapper (MobileLayout) also snaps — see MobileLayout.css.
+     Sections inside ml-body are absolute-positioned and do NOT snap. */
+  section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    height: 100dvh;
+  }
+
+  /* Sections inside MobileLayout panes: fill the pane, don't snap */
+  .ml-body section {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: unset !important;
+    height: auto;
+    min-height: 100%;
+  }
+
+  :root {
+    --section-pad-y: clamp(24px, 12vw, 48px);
+    --section-pad-x: 24px;
+  }
+}
+
+/* ─── Noise overlay ───────────────────────── */
 body::after {
   content: '';
   position: fixed;
@@ -176,16 +244,4 @@ body::after {
   opacity: 0.02;
   pointer-events: none;
   z-index: 10000;
-}
-
-/* responsive rules */
-@media (max-width: 767px) {
-  :root {
-      --section-pad-y: clamp(24px, 12vw, 48px);
-      --section-pad-x: 24px;
-    }
-
-  section {
-    height: 100dvh;
-  }
 }

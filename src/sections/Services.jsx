@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Services.module.css';
 
-const LERP = 0.08;
+const LERP = 0.2;
 const INTRO_DURATION = 700; 
 
-const DEAD_ZONE = 250;
-const CARD_MOVE = 400;
+const DEAD_ZONE = 100;
+const CARD_MOVE = 800;
 
 const SERVICES = [
   {
