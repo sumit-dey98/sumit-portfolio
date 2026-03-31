@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { motion, useAnimationControls } from 'framer-motion';
+import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import DotGrid from '../components/DotGrid';
 import Button from '../components/Button';
@@ -12,18 +12,37 @@ import styles from './Landing.module.css';
 
 const LINE = ['Front-end web developer'];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.4,
+      ease: 'easeOut',
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
+};
+
+const fadeVariant = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } },
+};
+
+const wordVariant = {
+  hidden: { y: '100%' },
+  visible: { y: '0%', transition: { duration: 0.65, ease: 'easeOut' } },
+};
+
 export default function Landing({ ready = false, onEnter, onSkip }) {
   const { getCssVar } = useThemeContext();
-
-  const wrapperControls = useAnimationControls();
-  const eyebrowControls = useAnimationControls();
-  const word0Controls = useAnimationControls();
-  const word1Controls = useAnimationControls();
-  const word2Controls = useAnimationControls();
-  const roleControls = useAnimationControls();
-  const buttonsControls = useAnimationControls();
-  const scrollControls = useAnimationControls();
-  const wordControlsRef = useRef([word0Controls, word1Controls, word2Controls]);
+  const firedRef = useRef(false);
 
   const { display, start: startDecrypt } = useDecryptedText('INITIALIZING PORTFOLIO...', {
     speed: 50,
@@ -40,38 +59,11 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
     paused: !ready,
   });
 
-  const firedRef = useRef(false);
-
   useEffect(() => {
     if (!ready || firedRef.current) return;
     firedRef.current = true;
-
-    wrapperControls.start({ opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } });
     startDecryptRef.current?.();
-
-    setTimeout(() => {
-      eyebrowControls.start({ opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } });
-    }, 100);
-
-    wordControlsRef.current.forEach((ctrl, i) => {
-      setTimeout(() => {
-        ctrl.start({ y: '0%', transition: { duration: 0.7, ease: 'easeOut' } });
-      }, 150 + i * 80);
-    });
-
-    setTimeout(() => {
-      roleControls.start({ opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } });
-    }, 550);
-
-    setTimeout(() => {
-      buttonsControls.start({ opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } });
-    }, 700);
-
-    setTimeout(() => {
-      scrollControls.start({ opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } });
-    }, 850);
-
-  }, [ready]); 
+  }, [ready]);
 
   return (
     <section id="landing" className={styles.landing}>
@@ -88,48 +80,34 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
           returnDuration={1.5}
         />
       </div>
+
       <motion.div
         className={styles.content}
-        initial={{ opacity: 0 }}
-        animate={wrapperControls}
+        variants={containerVariants}
+        initial="hidden"
+        animate={ready ? 'visible' : 'hidden'}
       >
-        <motion.p
-          className={styles.pre}
-          initial={{ opacity: 0, y: 8 }}
-          animate={eyebrowControls}
-        >
+        <motion.p className={styles.pre} variants={fadeUpVariant}>
           <span className={styles.prompt}>&gt;</span> {display}
         </motion.p>
 
         <h1 className={styles.headline}>
-          {['SUMIT', 'HILLOL', 'DEY'].map((word, i) => (
+          {['SUMIT', 'HILLOL', 'DEY'].map((word) => (
             <span key={word} style={{ display: 'block', overflow: 'hidden' }}>
-              <motion.span
-                style={{ display: 'inline-block' }}
-                initial={{ y: '100%' }}
-                animate={wordControlsRef.current[i]}
-              >
+              <motion.span style={{ display: 'inline-block' }} variants={wordVariant}>
                 {word}
               </motion.span>
             </span>
           ))}
         </h1>
 
-        <motion.p
-          className={styles.role}
-          initial={{ opacity: 0 }}
-          animate={roleControls}
-        >
+        <motion.p className={styles.role} variants={fadeVariant}>
           <span className={styles.typed}>
             {typed}<span className={styles.cursor}>▌</span>
           </span>
         </motion.p>
 
-        <motion.div
-          className={styles.buttons}
-          initial={{ opacity: 0, y: 12 }}
-          animate={buttonsControls}
-        >
+        <motion.div className={styles.buttons} variants={fadeUpVariant}>
           <Button variant="fill" icon={IoArrowForwardSharp}>VIEW CV</Button>
           <SvgButton
             color={getCssVar('--accent')}
@@ -150,12 +128,8 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
           </SvgButton>
         </motion.div>
 
-        <motion.div
-          className={styles.scrollHint}
-          initial={{ opacity: 0 }}
-          animate={scrollControls}
-        >
-          <span>SCROLL</span>
+        <motion.div className={styles.scrollHint} variants={fadeVariant}>
+          <span>SWIPE</span>
           <div className={styles.scrollLine} />
         </motion.div>
       </motion.div>

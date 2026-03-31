@@ -46,7 +46,6 @@ export default function MobileLayout({ sections = {}, nav }) {
     setVisited(v => new Set([...v, id]));
     setPrevTab(activeTab);
     setActiveTab(id);
-    setExpanded(false);
   }, [activeTab]);
 
   const startDrag = useCallback((clientY) => {
@@ -96,6 +95,7 @@ export default function MobileLayout({ sections = {}, nav }) {
     >
       <div className={styles.body} aria-live="polite">
         {nav && <div className={styles.navSlot}>{nav}</div>}
+
         <div className={styles.paneArea}>
           {TABS.map(({ id }) => {
             if (!visited.has(id)) return null;
@@ -112,6 +112,7 @@ export default function MobileLayout({ sections = {}, nav }) {
                 aria-hidden={!isActive}
                 {...(!isActive ? { inert: '' } : {})}
               >
+                {/* All tabs rendered identically — no special-casing for services */}
                 {sections[id]}
               </div>
             );
@@ -139,14 +140,16 @@ export default function MobileLayout({ sections = {}, nav }) {
           {TABS.map(({ id, label, icon }) => (
             <button
               key={id}
-              className={[styles.tab, activeTab === id && styles.tabActive].filter(Boolean).join(' ')}
+              className={[
+                styles.tab,
+                activeTab === id && styles.tabActive,
+              ].filter(Boolean).join(' ')}
               onClick={() => switchTab(id)}
               aria-label={label}
               aria-current={activeTab === id ? 'page' : undefined}
             >
               <span className={styles.tabIcon}>{icon}</span>
               <span className={styles.tabLabel}>{label}</span>
-              <span className={styles.tabPip} aria-hidden="true" />
             </button>
           ))}
         </nav>

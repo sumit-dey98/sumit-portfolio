@@ -30,7 +30,7 @@
   src: local('Impact'), url('/fonts/impact.woff') format('woff');
 }
 
-/* ─── Design tokens ───────────────────────── */
+/* ─── Design tokens ───────────────────────────── */
 :root {
   --bg: #080810;
   --surface: #0e0e1a;
@@ -52,7 +52,7 @@
   --section-pad-x: 48px;
 }
 
-/* ─── Reset ───────────────────────────────── */
+/* ─── Reset ───────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -68,23 +68,18 @@ body,
   min-height: 100dvh;
 }
 
-/* ─── Scroll snap ─────────────────────────── */
-/*
-  Both mobile and desktop use scroll-snap.
-  
-  Desktop: every section snaps (full-page scroll experience).
-  
-  Mobile:  Landing section snaps, then MobileLayout snaps
-           once (via .ml-wrapper in MobileLayout.css).
-           Inside MobileLayout, switching sections is
-           handled by the tab bar — no further snapping.
-*/
+/* ─── Scroll snap — desktop only ─────────────── */
 html {
   scroll-behavior: auto;
-  scroll-snap-type: y mandatory;
 }
 
-/* ─── Body ────────────────────────────────── */
+@media (min-width: 1024px) {
+  html {
+    scroll-snap-type: y mandatory;
+  }
+}
+
+/* ─── Body ────────────────────────────────────── */
 body {
   background: var(--bg);
   color: var(--text);
@@ -128,7 +123,7 @@ h3 {
   text-rendering: geometricPrecision;
 }
 
-/* ─── Custom cursor ───────────────────────── */
+/* ─── Custom cursor ───────────────────────────── */
 .cursor {
   position: fixed;
   width: 10px;
@@ -158,23 +153,21 @@ h3 {
   opacity: 0.6;
 }
 
-/* Hide cursor on touch devices */
 @media (pointer: coarse) {
 
   .cursor,
   .cursor-ring {
     opacity: 0;
-    transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease;
   }
 }
 
-/* ─── Selection ───────────────────────────── */
+/* ─── Selection ───────────────────────────────── */
 ::selection {
   background: var(--accent);
   color: var(--bg);
 }
 
-/* ─── Scrollbar ───────────────────────────── */
+/* ─── Scrollbar ───────────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -188,21 +181,13 @@ h3 {
   border-radius: 2px;
 }
 
-/* ─── Section base ────────────────────────── */
-/*
-  Desktop: sections are full-height snap targets.
-  Mobile:  Landing section snaps.
-           Sections inside MobileLayout's ml-body are
-           position:absolute — they don't participate
-           in scroll snap at all. Height/snap overrides
-           are handled in MobileLayout.css.
-*/
+/* ─── Section base ────────────────────────────── */
 section {
   width: 100%;
   position: relative;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   section {
     scroll-snap-align: start;
     scroll-snap-stop: always;
@@ -210,32 +195,22 @@ section {
   }
 }
 
-@media (max-width: 767px) {
-
-  /* Only Landing snaps on mobile.
-     ml-wrapper (MobileLayout) also snaps — see MobileLayout.css.
-     Sections inside ml-body are absolute-positioned and do NOT snap. */
-  section {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    height: 100dvh;
-  }
-
-  /* Sections inside MobileLayout panes: fill the pane, don't snap */
-  .ml-body section {
-    scroll-snap-align: none !important;
-    scroll-snap-stop: unset !important;
-    height: auto;
-    min-height: 100%;
-  }
-
+@media (max-width: 1023px) {
   :root {
     --section-pad-y: clamp(24px, 12vw, 48px);
     --section-pad-x: 24px;
   }
+
+  section:not(#landing) {
+    padding: 80px 16px 24px !important;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start !important;
+  }
 }
 
-/* ─── Noise overlay ───────────────────────── */
+/* ─── Noise overlay ───────────────────────────── */
 body::after {
   content: '';
   position: fixed;

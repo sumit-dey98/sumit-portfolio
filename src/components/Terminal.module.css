@@ -196,6 +196,10 @@
 }
 
 @media (max-width: 767px) {
+  .terminal {
+    max-height: 70vh;
+  }
+
   .terminalBody {
     padding: clamp(16px, 3vw, 32px);
     gap: clamp(16px, 3vw, 32px);
@@ -213,4 +217,8 @@
   .item {
     font-size: 11px;
   }
+
+    .fileIcon {
+      display: none;
+    }
 }

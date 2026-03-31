@@ -1,19 +1,15 @@
-/* ── Section ─────────────────────────────────────────────────────────────────── */
+/* ── Desktop section ─────────────────────────────────────────────────────────── */
 .section {
   height: 100dvh;
   width: 100%;
   position: relative;
-  /* required for absolute children */
   overflow: hidden;
-  /* required: prevents content bleed during hijack */
   display: flex;
   flex-direction: column;
   padding: var(--section-pad-y) 0;
-  /* scroll-snap-align + stop inherited from global `section` rule in index.css */
   touch-action: none;
 }
 
-/* ── Header label ────────────────────────────────────────────────────────────── */
 .header {
   width: min(80vw, 1600px);
   margin-left: calc(50vw - min(40vw, 800px));
@@ -37,26 +33,6 @@
   margin-right: 6px;
 }
 
-/* ── Big centred title ───────────────────────────────────────────────────────── */
-.bigTitle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  /* transform set via inline style */
-  font-family: var(--display);
-  font-size: clamp(52px, 8vw, 112px);
-  font-weight: 400;
-  letter-spacing: 2px;
-  color: var(--text);
-  white-space: nowrap;
-  transform-origin: center center;
-  will-change: transform, opacity;
-  pointer-events: none;
-  user-select: none;
-  z-index: 5;
-}
-
-/* ── Keep scrolling ──────────────────────────────────────────────────────────── */
 .keepScrolling {
   position: absolute;
   bottom: clamp(40px, 8dvh, 80px);
@@ -112,17 +88,9 @@
   }
 }
 
-/* ── Stack area ──────────────────────────────────────────────────────────────── */
-/*
- * Anchors the top-left corner of card[0].
- * All cards are position:absolute children, placed via translate().
- * Left-aligned with the Projects section header.
- * Vertically centred in the available space below the header.
- */
 .stackArea {
   position: absolute;
   left: calc(50vw - min(40vw, 800px));
-  /* Centre vertically in the section, nudged up slightly to account for header */
   top: 24%;
   transform: translateY(-40%);
   width: 0;
@@ -130,7 +98,6 @@
   z-index: 1;
 }
 
-/* ── Individual card ─────────────────────────────────────────────────────────── */
 .card {
   position: absolute;
   top: 0;
@@ -146,7 +113,6 @@
   transform-origin: top left;
 }
 
-/* ── Card inner ──────────────────────────────────────────────────────────────── */
 .cardInner {
   width: 100%;
   height: 100%;
@@ -155,6 +121,7 @@
   padding: 48px 28px;
 }
 
+/* ── Shared card internals ───────────────────────────────────────────────────── */
 .cardTop {
   display: flex;
   align-items: baseline;
@@ -230,37 +197,147 @@
   text-transform: uppercase;
 }
 
-/* ── Mobile ──────────────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .section {
-    touch-action: pan-y;
-    /* allow native touch scroll on mobile */
+/* ══════════════════════════════════════════════════════════════════════════════
+   MOBILE — self-contained sticky stack
+   ══════════════════════════════════════════════════════════════════════════════
+
+   Structure rendered by MobileServices:
+
+     .outerContainer          height: 100%  — fills whatever .pane gives it
+       .mobileHeader          height: 48px  — fixed, never scrolls
+       .stackContainer        height: calc(100% - 48px), overflow-y: auto
+         .stickyCard × N      position: sticky, top: 0
+                              z-index ascends so later cards cover earlier ones
+                              each card scrolls up and stacks over the previous
+
+   index.css forces `padding: 80px 16px 24px !important` on all sections.
+   .outerContainer sits inside the section as a direct child and stretches
+   to fill it — the section's padding becomes the breathing room around the
+   outer container, which is fine for desktop. On mobile we override the
+   section padding to 0 and let outerContainer fill 100%.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1023px) {
+  #services {
+    padding: 0 !important;
+    min-height: 100% !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .header {
+  .outerContainer {
+    height: 100%;
     width: 100%;
-    margin-left: 0;
-    padding: 0 var(--section-pad-x);
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .bigTitle {
-    font-size: clamp(36px, 10vw, 64px);
-    text-align: center;
+  .mobileHeader {
+    height: fit-content;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    z-index: 100;
+    margin-bottom: 20px;
   }
 
-  .keepScrolling {
-    left: var(--section-pad-x);
+  .stackContainer {
+    flex: 1;
+    min-height: 0;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    position: relative;
   }
 
-  .stackArea {
-    left: var(--section-pad-x);
-    top: 50%;
-    transform: translateY(-36%);
+  .stackContainer::-webkit-scrollbar {
+    display: none;
   }
 
-  .card {
-    width: min(calc(85vw - var(--stack-x-budget, 180px)), 420px);
-    aspect-ratio: 4 / 3;
+  /*
+   * The visible viewport for all cards.
+   * position:sticky keeps it pinned at top:0 always.
+   * overflow:hidden clips cards that are below (translateY > stageH).
+   * Height is set explicitly via JS = containerRef.clientHeight.
+   */
+  .cardStage {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    overflow: hidden;
+    height: stretch;
+  }
+
+  /* ── Per-card base styles ─────────────────────────────────────────── */
+  /* All absolute, stacked at top:0. JS drives transform entirely.      */
+  .mobileCard {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    /* box-shadow: 0 0 1px 1px var(--accent); */
+    background: var(--surface);
+    overflow: hidden;
+    will-change: transform, filter;
+    transform-origin: top center;
+  }
+
+  /* z-index layers — later cards sit on top of earlier ones */
+  .mobileCard_0 {
+    z-index: 1;
+  }
+
+  .mobileCard_1 {
+    z-index: 2;
+  }
+
+  .mobileCard_2 {
+    z-index: 3;
+  }
+
+  .mobileCard_3 {
+    z-index: 4;
+  }
+
+  /* Invisible — only provides scroll height after the stage */
+  .stackSentinel {
+    width: 100%;
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .mobileCardInner {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 16px;
+  }
+
+  .cardMid {
+    gap: 12px;
+  }
+
+  .cardTitle {
+    font-size: clamp(20px, 5vw, 30px);
+  }
+
+  .cardDesc {
+    font-size: clamp(13px, 3.5vw, 16px);
+  }
+
+  .cardBottom {
+    padding-top: 8px;
+  }
+
+  .tag {
+    font-size: 11px;
   }
 }

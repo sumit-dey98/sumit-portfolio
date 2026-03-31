@@ -22,19 +22,19 @@ import MobileLayout from './components/MobileLayout';
 import './index.css';
 
 const PROJECT_ROUTES = {
-  'connect4': {
+  connect4: {
     logo: <img src="/projects/connect4/connect4-logo.svg" width={256} height={256} loading="lazy" />,
     src: '/projects/connect4/connect4.html',
     bgColor: 'var(--surface)',
     url: 'connect4',
   },
-  'rubiks': {
+  rubiks: {
     logo: <img src="/projects/rubiks/rubiks-logo.svg" width={256} height={256} loading="lazy" />,
     src: '/projects/rubiks/rubiks.html',
     bgColor: 'var(--surface)',
     url: 'rubiks-cube',
   },
-  'interior': {
+  interior: {
     logo: <img src="/projects/interior/interior-logo.svg" width={256} height={256} loading="lazy" />,
     src: '/projects/interior/index.html',
     bgColor: '#fff',
@@ -44,15 +44,98 @@ const PROJECT_ROUTES = {
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(
-    () => typeof window !== 'undefined' && window.innerWidth <= 767
+    () => typeof window !== 'undefined' && window.innerWidth <= 1023
   );
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
+    const mq = window.matchMedia('(max-width: 1023px)');
     const handler = (e) => setIsMobile(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, []);
   return isMobile;
+}
+
+// Two-panel horizontal shell for mobile: Landing (left) | MobileLayout (right).
+// A horizontal flick/swipe slides between panels — no scroll snap involved.
+function HorizontalMobileShell({ landingPanel, tabsPanel }) {
+  const [panel, setPanel] = useState(0);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const THRESHOLD = 48;
+
+  const slideTo = useCallback((index) => {
+    setPanel(index);
+  }, []);
+
+  const onTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const onTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = touchStartX.current - e.changedTouches[0].clientX;
+    const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
+    if (dy > Math.abs(dx) || Math.abs(dx) < THRESHOLD) return;
+
+    if (dx > 0 && panel === 0) {
+      slideTo(1);
+    } else if (dx < 0 && panel === 1) {
+      if (touchStartX.current <= 32) {
+        slideTo(0);
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  const offset = panel === 0 ? '0vw' : '-100vw';
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100vw',
+        height: '100dvh',
+        overflow: 'hidden',
+      }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Landing */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100dvh',
+          transform: `translateX(${offset})`,
+          transition: 'transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)',
+          willChange: 'transform',
+        }}
+      >
+        {landingPanel(slideTo)}
+      </div>
+
+      {/* Tabs */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: '100vw',
+          width: '100vw',
+          height: '100dvh',
+          transform: `translateX(${offset})`,
+          transition: 'transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)',
+          willChange: 'transform',
+        }}
+      >
+        {tabsPanel(slideTo)}
+      </div>
+    </div>
+  );
 }
 
 function PortfolioInner() {
@@ -74,7 +157,9 @@ function PortfolioInner() {
 
   const handleGenieComplete = () => {
     window.scrollTo(0, 0);
-    document.documentElement.style.setProperty('scroll-snap-type', 'none', 'important');
+    if (!isMobile) {
+      document.documentElement.style.setProperty('scroll-snap-type', 'none', 'important');
+    }
     document.body.style.overflow = 'hidden';
     setPhase('sliding');
   };
@@ -85,7 +170,6 @@ function PortfolioInner() {
 
   useEffect(() => {
     if (phase !== 'sliding' || !bodyRef.current) return;
-    bodyRef.current.classList.remove('body-slider-init');
 
     const t = setTimeout(() => {
       if (!bodyRef.current) return;
@@ -100,7 +184,9 @@ function PortfolioInner() {
             bodyRef.current.style.webkitTransform = '';
           }
           document.body.style.overflow = '';
-          document.documentElement.style.removeProperty('scroll-snap-type');
+          if (!isMobile) {
+            document.documentElement.style.removeProperty('scroll-snap-type');
+          }
           window.scrollTo(0, 0);
           setPhase('landing');
 
@@ -118,7 +204,9 @@ function PortfolioInner() {
     return () => {
       clearTimeout(t);
       document.body.style.overflow = '';
-      document.documentElement.style.removeProperty('scroll-snap-type');
+      if (!isMobile) {
+        document.documentElement.style.removeProperty('scroll-snap-type');
+      }
     };
   }, [phase, isMobile]);
 
@@ -178,10 +266,6 @@ function PortfolioInner() {
         </div>
       )}
 
-      {showBody && isMobile && (
-        <div ref={navRef} style={{ position: 'fixed', opacity: 0, pointerEvents: 'none' }} />
-      )}
-
       {showBody && (
         <div
           ref={bodyRef}
@@ -190,18 +274,38 @@ function PortfolioInner() {
             zIndex: 7000,
             background: 'var(--bg)',
             transform: 'translateY(100vh)',
+            ...(isMobile ? { height: '100dvh', overflow: 'hidden' } : {}),
           }}
         >
-          <Landing
-            ready={phase === 'landing'}
-            onEnter={() => scrollTo('intro')}
-            onSkip={() => scrollTo('projects')}
-          />
-
           {isMobile ? (
-            <MobileLayout sections={mobileSections} nav={mobileNav} />
+            <div style={{ position: 'relative', width: '100vw', height: '100dvh', overflow: 'hidden' }}>
+              {/* Nav floats above both panels */}
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 200 }}>
+                <Nav alwaysVisible cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
+                  <ThemeSwitcher variant="dropdown" />
+                </Nav>
+              </div>
+
+              <HorizontalMobileShell
+                landingPanel={(slideTo) => (
+                  <Landing
+                    ready={phase === 'landing'}
+                    onEnter={() => slideTo(1)}
+                    onSkip={() => slideTo(1)}
+                  />
+                )}
+                tabsPanel={() => (
+                  <MobileLayout sections={mobileSections} />
+                )}
+              />
+            </div>
           ) : (
             <>
+              <Landing
+                ready={phase === 'landing'}
+                onEnter={() => scrollTo('intro')}
+                onSkip={() => scrollTo('projects')}
+              />
               <Intro userPrefs={userPrefs} />
               <About />
               <Projects />
@@ -221,9 +325,9 @@ function AppInner() {
     <>
       <Routes>
         <Route path="/" element={<PortfolioInner />} />
-        <Route path="/project/connect4" element={<SingleProject {...PROJECT_ROUTES['connect4']} />} />
-        <Route path="/project/rubiks-cube" element={<SingleProject {...PROJECT_ROUTES['rubiks']} />} />
-        <Route path="/project/interior" element={<SingleProject {...PROJECT_ROUTES['interior']} />} />
+        <Route path="/project/connect4" element={<SingleProject {...PROJECT_ROUTES.connect4} />} />
+        <Route path="/project/rubiks-cube" element={<SingleProject {...PROJECT_ROUTES.rubiks} />} />
+        <Route path="/project/interior" element={<SingleProject {...PROJECT_ROUTES.interior} />} />
       </Routes>
       <Analytics />
       <SpeedInsights />

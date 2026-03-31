@@ -32,7 +32,7 @@ import gsap from 'gsap';
  */
 
 const DURATION = 2000;
-const isMobile = window.innerWidth <= 768;
+const isMobile = window.innerWidth <= 1;
 const EASE_RISE = gsap.parseEase(isMobile ? 'power1.in' : 'power2.out');
 const EASE_TOP_W = gsap.parseEase('power1.inOut');
 const EASE_BOT_W = gsap.parseEase(isMobile ? 'expo.in' : 'power1.in');

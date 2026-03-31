@@ -1,4 +1,4 @@
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .wrapper {
     display: contents;
   }
@@ -17,7 +17,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   body[style*="padding-right"] {
     padding-right: 0 !important;
   }
@@ -40,41 +40,41 @@
     z-index: 10;
   }
 
-    .body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      min-height: 0;
-    }
-  
-    .navSlot {
-      flex-shrink: 0;
-      position: relative;
-      z-index: 10;
-    }
-  
-    .paneArea {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      min-height: 0;
-    }
-  
-    .pane {
-      position: absolute;
-      inset: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateX(calc(var(--dir, 1) * 32px));
-      transition:
-        opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+  .body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .navSlot {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .paneArea {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .pane {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(calc(var(--dir, 1) * 32px));
+    transition:
+      opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
   .paneActive {
     opacity: 1;
@@ -94,7 +94,6 @@
   .pane section,
   .pane>* {
     scroll-snap-align: none !important;
-    height: auto;
     min-height: 100%;
   }
 
@@ -215,6 +214,7 @@
     transform: translateY(5px);
     pointer-events: none;
     transition: opacity 0.2s 0s, transform 0.2s 0s;
+    will-change: transform, opacity;
   }
 
   .sheetExpanded .tab:nth-child(1) .tabLabel {
@@ -244,26 +244,5 @@
   .sheetExpanded .tabLabel {
     opacity: 1;
     transform: translateY(0);
-  }
-
-  .tabPip {
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%) scale(0);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--accent2);
-    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-    pointer-events: none;
-  }
-
-  .tabActive .tabPip {
-    transform: translateX(-50%) scale(1);
-  }
-
-  .sheetExpanded .tabPip {
-    transform: translateX(-50%) scale(0);
   }
 }

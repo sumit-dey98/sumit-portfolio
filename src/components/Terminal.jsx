@@ -46,32 +46,34 @@ const groupVariants = {
   hidden: { opacity: 0, x: -10 },
   visible: (custom) => ({
     opacity: 1,
-    transition: { delay: custom * 0.1, duration: 0.4 }
-  })
+    transition: { delay: custom * 0.1, duration: 0.4 },
+  }),
 };
 
 const itemVariants = {
   hidden: { opacity: 0 },
   visible: (custom) => ({
     opacity: 1,
-    transition: { delay: custom * 0.04, duration: 0.3 }
-  })
+    transition: { delay: custom * 0.04, duration: 0.3 },
+  }),
 };
+
+const MOBILE_BREAKPOINT = 1023;
 
 export default function Terminal({ isFullscreen, onExpand, data }) {
   const terminalRef = useRef(null);
   const isInView = useInView(terminalRef, { once: true });
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT;
+
+  const effectiveFullscreen = isMobile ? false : isFullscreen;
 
   return (
     <motion.div
       ref={terminalRef}
       className={styles.terminal}
-      animate={isFullscreen ? {
+      animate={effectiveFullscreen ? {
         position: 'absolute',
-        top: 14,
-        left: 14,
-        right: 14,
-        bottom: 14,
+        top: 14, left: 14, right: 14, bottom: 14,
         width: '100%',
         maxWidth: 'calc(100% - 28px)',
         height: '100%',
@@ -80,10 +82,7 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         borderRadius: 12,
       } : {
         position: 'relative',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: 0, left: 0, right: 0, bottom: 0,
         width: '100%',
         maxWidth: '100%',
         maxHeight: '100%',
@@ -102,19 +101,20 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         </span>
         <span
           className={styles.termDot}
-          style={{ background: '#28c840' }}
-          onClick={onExpand}
+          style={{ background: '#28c840', ...(isMobile ? { pointerEvents: 'none', opacity: 0.4 } : {}) }}
+          onClick={isMobile ? undefined : onExpand}
         >
           <ExpandIcon color="#000" size={8} style={{ rotate: '-90deg' }} />
         </span>
         <span className={styles.termTitle}>sumit@portfolio: ~/stack/{data.group}</span>
       </div>
 
-      <div className={`${styles.terminalBody} ${isFullscreen ? styles.terminalBodyFullscreen : ''}`}>
-        <p className={styles.termCmd}>
-          <span className={styles.termPrompt}>sumit@portfolio:~$</span> ls -la ./{data.group}
-        </p>
-
+      <div className={`${styles.terminalBody} ${effectiveFullscreen ? styles.terminalBodyFullscreen : ''}`}>
+        {!isMobile && 
+          <p className={styles.termCmd}>
+            <span className={styles.termPrompt}>sumit@portfolio:~$</span> ls -la ./{data.group}
+          </p>
+        }
         <motion.div
           className={styles.group}
           variants={groupVariants}
@@ -131,7 +131,7 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
                 variants={itemVariants}
                 custom={ii}
                 isInView={isInView}
-                isFullscreen={isFullscreen}
+                isFullscreen={effectiveFullscreen}
               />
             ))}
           </div>

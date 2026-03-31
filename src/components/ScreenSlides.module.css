@@ -220,3 +220,8 @@
   fill: var(--accent2);
 }
 
+@media (max-width: 1023px) {
+  .overlay {
+    padding: 0 12px !important;
+  }
+}

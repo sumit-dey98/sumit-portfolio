@@ -216,7 +216,7 @@ function CardDesc({ text }) {
   );
 }
 
-// ── Desktop card ───────────────────────────────────────────────────────────────
+//  Desktop card 
 function ProjectCard({ project, progress }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -320,7 +320,7 @@ function ProjectCard({ project, progress }) {
 }
 
 
-// ── View-all dropdown ──────────────────────────────────────────────────────────
+//  View-all dropdown 
 function ViewAllDropdown({ onSelect, activeIndex }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -372,42 +372,96 @@ function ViewAllDropdown({ onSelect, activeIndex }) {
   );
 }
 
-// ── Mobile carousel card ───────────────────────────────────────────────────────
-function MobileCard({ project, active }) {
+//  Mobile carousel card 
+// MobileCard inside Projects.jsx — replace the existing MobileCard component
+
+function MobileCard({ project }) {
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const togglePlay = () => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (isPlaying) {
+      vid.pause();
+      setIsPlaying(false);
+    } else {
+      vid.play().catch(() => setIsPlaying(false));
+      setIsPlaying(true);
+    }
+  };
+
   return (
-    <div className={`${styles.mobileCard} ${active ? styles.mobileCardActive : ''}`}>
-      <div className={styles.cardPreview}>
-        <img src={project.mobileSrc} alt={project.name} className={styles.cardImg} />
+    <div className={styles.mobileCard}>
+      {/* Carousel + video overlay */}
+      <div className={styles.mobilePreview}>
+        <img
+          src={project.mobileSrc}
+          alt={project.name}
+          className={`${styles.cardImg} ${isPlaying ? styles.cardImgHidden : ''}`}
+        />
+        {project.videoSrc && (
+          <video
+            ref={videoRef}
+            className={`${styles.cardVideo} ${isPlaying ? styles.cardVideoVisible : ''}`}
+            src={project.videoSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        )}
+
+        {/* Demo btn — top right overlay */}
+        {project.link && (
+          <Link
+            to={project.link}
+            target="_blank"
+            className={styles.mobileDemoBtn}
+            onClick={e => e.stopPropagation()}
+          >
+            <span>DEMO</span>
+            <FiArrowUpRight size={13} />
+          </Link>
+        )}
+
+        {/* Play/pause — bottom right overlay */}
+        {project.videoSrc && (
+          <button
+            className={styles.mobilePlayBtn}
+            onClick={togglePlay}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? <FiPause size={13} /> : <FiPlay size={13} />}
+          </button>
+        )}
       </div>
-      <div className={styles.cardInfo}>
-        <div className={styles.cardTop}>
-          <div className={styles.cardTopLeft}>
-            <span className={styles.cardNum}>{project.id}</span>
-            <span className={styles.cardSlash}>/</span>
-            <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
-          </div>
-          {project.link ? (
-            <Link to={project.link} target="_blank" className={styles.cardDemoBtn}>
-              <span className={styles.cardDemoBtnLabel}>DEMO</span>
-              <FiArrowUpRight className={styles.cardDemoBtnArrow} />
-            </Link>
-          ) : (
-            <span className={styles.cardDemoBtnDisabled}><span>SOON</span></span>
-          )}
+
+      {/* Info */}
+      <div className={styles.mobileInfo}>
+        <div className={styles.mobileTopRow}>
+          <span className={styles.cardNum}>{project.id}</span>
+          <span className={styles.cardSlash}>/</span>
+          <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
         </div>
-        <div className={styles.cardMid}>
-          <h2 className={styles.cardName}>{project.name}</h2>
-          <p className={styles.cardDesc}>{project.desc}</p>
-        </div>
+
+        <h2 className={styles.mobileName}>{project.name}</h2>
+
+        <CardDesc text={project.desc} />
+
+        <ScreenSlides screens={project.screens} />
+
         <div className={styles.cardBottom}>
-          {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+          {project.tags.map(t => (
+            <span key={t} className={styles.tag}>{t}</span>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Desktop scroller ───────────────────────────────────────────────────────────
+//  Desktop scroller 
 function DesktopScroller() {
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
@@ -512,7 +566,7 @@ function DesktopScroller() {
   );
 }
 
-// ── Main ───────────────────────────────────────────────────────────────────────
+//  Main 
 export default function Projects() {
   // Desktop scroller for ≥1024px, mobile carousel below.
   const [isMobile, setIsMobile] = useState(() =>
@@ -540,39 +594,16 @@ export default function Projects() {
 
   return (
     <section id="projects" className={styles.projects}>
-      <div className={styles.inner}>
-        <div className={styles.header}>
-          <p className={styles.label}>
-            <span className={styles.prompt}>&gt;</span> PROJECTS
-          </p>
-          <span className={styles.count}>{TOTAL} works</span>
-        </div>
-        <div
-          className={styles.carousel}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          <div
-            className={styles.carouselTrack}
-            style={{ transform: `translateX(calc(${carouselIndex * -100}% - ${carouselIndex * 16}px))` }}
-          >
-            {PROJECTS.map((p, i) => (
-              <MobileCard key={p.id} project={p} active={carouselIndex === i} />
-            ))}
-          </div>
-          <div className={styles.dots}>
-            <div className={styles.dots}>
-              {PROJECTS.map((_, i) => (
-                <span
-                  key={i}
-                  className={`${styles.dot} ${carouselIndex === i ? styles.dotActive : ''}`}
-                  onClick={() => setCarouselIndex(i)}
-                  style={{ cursor: 'pointer' }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className={styles.mobileHeader}>
+        <p className={styles.label}>
+          <span className={styles.prompt}>&gt;</span> PROJECTS
+        </p>
+        <span className={styles.count}>{TOTAL} works</span>
+      </div>
+      <div className={styles.mobileList}>
+        {PROJECTS.map(p => (
+          <MobileCard key={p.id} project={p} />
+        ))}
       </div>
     </section>
   );

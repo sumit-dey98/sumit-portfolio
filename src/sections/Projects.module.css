@@ -1,4 +1,4 @@
-/* ── Desktop section (base) ─────────────────────────────────────────────────── */
+/*  Desktop section (base)  */
 .desktopSection {
   height: 100dvh;
   display: flex;
@@ -9,7 +9,7 @@
   touch-action: none;
 }
 
-/* ── Mobile section (base) ──────────────────────────────────────────────────── */
+/*  Mobile section (base)  */
 .projects {
   padding: var(--section-pad-y) 0;
   overflow: hidden;
@@ -19,7 +19,7 @@
   width: 100%;
 }
 
-/* ── Header ──────────────────────────────────────────────────────────────────── */
+/*  Header  */
 .header {
   width: min(80vw, 1600px);
   margin-left: calc(50vw - min(40vw, 800px));
@@ -52,7 +52,7 @@
   color: var(--muted);
 }
 
-/* ── View all button + dropdown ──────────────────────────────────────────────── */
+/*  View all button + dropdown  */
 .viewAll {
   position: relative;
 }
@@ -162,7 +162,7 @@
   opacity: 1;
 }
 
-/* ── Scroll viewport + track ─────────────────────────────────────────────────── */
+/*  Scroll viewport + track  */
 .scrollViewport {
   width: 100%;
 }
@@ -176,7 +176,7 @@
   will-change: transform;
 }
 
-/* ── Card ────────────────────────────────────────────────────────────────────── */
+/*  Card  */
 .card {
   flex-shrink: 0;
   width: min(80vw, 1600px);
@@ -189,7 +189,7 @@
   transform-origin: center center;
 }
 
-/* ── Info panel (30%) ────────────────────────────────────────────────────────── */
+/*  Info panel (30%)  */
 .cardInfo {
   width: 30%;
   flex-shrink: 0;
@@ -204,7 +204,7 @@
   overflow: hidden;
 }
 
-/* ── Preview panel (70%) ─────────────────────────────────────────────────────── */
+/*  Preview panel (70%)  */
 .cardPreview {
   flex: 1;
   position: relative;
@@ -264,7 +264,7 @@
   opacity: 1 !important;
 }
 
-/* ── Card top row ────────────────────────────────────────────────────────────── */
+/*  Card top row  */
 .cardTop {
   display: flex;
   align-items: center;
@@ -348,7 +348,7 @@
   opacity: 0.4;
 }
 
-/* ── Card mid (name + desc + ScreenSlides) ───────────────────────────────────── */
+/*  Card mid (name + desc + ScreenSlides)  */
 .cardMid {
   display: flex;
   flex-direction: column;
@@ -414,7 +414,7 @@
   box-shadow: 0 0 4px var(--accent);
 }
 
-/* ── Card bottom (tags) ──────────────────────────────────────────────────────── */
+/*  Card bottom (tags)  */
 .cardBottom {
   display: flex;
   gap: 8px;
@@ -436,7 +436,7 @@
   text-transform: uppercase;
 }
 
-/* ── Progress dots ───────────────────────────────────────────────────────────── */
+/*  Progress dots  */
 .dots {
   display: flex;
   justify-content: center;
@@ -457,34 +457,152 @@
   width: 40px;
 }
 
-/* ── Mobile carousel ─────────────────────────────────────────────────────────── */
-.carousel {
-  width: 100%;
-  overflow: hidden;
-  padding: 0 var(--section-pad-x);
-  box-sizing: border-box;
+/*  Mobile carousel  */
+/* Mobile section */
+.projects {
+  padding: 0;
+  overflow: visible;
 }
 
-.carouselTrack {
+.mobileHeader {
   display: flex;
-  gap: 16px;
-  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform;
+  align-items: baseline;
+  justify-content: space-between;
+  /* padding: 0 16px; */
+  margin-bottom: 20px;
 }
 
-.mobileCard {
-  flex-shrink: 0;
-  width: 100%;
+.mobileList {
   display: flex;
   flex-direction: column;
+  gap: 32px;
+  /* padding: 0 16px; */
+}
+
+/* Mobile card */
+.mobileCard {
+  display: flex;
+  flex-direction: column;
+  /* gap: 16px; */
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--border);
-  opacity: 0.45;
-  transform: scale(0.95);
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  box-shadow: 0 0 2px 1px var(--accent);
 }
 
+/* Preview area */
+.mobilePreview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.mobilePreview .cardImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobilePreview .cardVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobilePreview .cardVideoVisible {
+  opacity: 1;
+}
+
+.mobileDemoBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--accent2);
+  box-shadow: 0 0 2px 1px var(--border);
+}
+
+.mobilePlayBtn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Info block */
+.mobileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+}
+
+.mobileTopRow {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.mobileName {
+  font-family: var(--display);
+  font-size: clamp(22px, 6vw, 32px);
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--text);
+  line-height: 1.05;
+  margin: 0;
+}
+
+/* CardDesc max-height on mobile */
+@media (max-width: 1023px) {
+  .label {
+    margin-top: 0;
+  }
+
+  .cardDescWrapper {
+    height: auto;
+    max-height: 40dvh;
+  }
+}
+
+/* Remove old carousel styles — these replace them entirely */
+.carousel,
+.carouselTrack,
+.mobileCardActive {
+  display: none;
+}
+/* 
 .mobileCard .cardPreview {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -501,9 +619,9 @@
 .mobileCardActive {
   opacity: 1;
   transform: scale(1);
-}
+} */
 
-/* ── Responsive: medium desktop (1024–1300px) ────────────────────────────────── */
+/*  Responsive: medium desktop (1024–1300px)  */
 @media (min-width: 1024px) and (max-width: 1300px) {
   .header {
     width: min(88vw, 1600px);
@@ -553,7 +671,7 @@
   }
 }
 
-/* ── Mobile overrides (<768px) ───────────────────────────────────────────────── */
+/*  Mobile overrides (<768px)  */
 @media (max-width: 767px) {
   .header {
     width: 100%;

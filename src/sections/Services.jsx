@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Services.module.css';
 
 const LERP = 0.2;
-const INTRO_DURATION = 700; 
-
+const INTRO_DURATION = 700;
 const DEAD_ZONE = 100;
 const CARD_MOVE = 800;
 
@@ -36,9 +35,8 @@ const SERVICES = [
 
 const TOTAL = SERVICES.length;
 const TOTAL_BUDGET = (TOTAL - 1) * (DEAD_ZONE + CARD_MOVE) + DEAD_ZONE;
-
-const cardStart = (si) => si * (DEAD_ZONE + CARD_MOVE) + DEAD_ZONE;
-const cardEnd = (si) => cardStart(si) + CARD_MOVE;
+const cardStart = si => si * (DEAD_ZONE + CARD_MOVE) + DEAD_ZONE;
+const cardEnd = si => cardStart(si) + CARD_MOVE;
 
 const getStep = () => {
   if (typeof window === 'undefined') return { x: 100, y: 34 };
@@ -48,32 +46,247 @@ const getStep = () => {
   };
 };
 
-// ── Component ─────────────────────────────────────────────────────────────────
-export default function Services() {
-  const sectionRef = useRef(null);
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= 1023
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)');
+    const h = e => setIsMobile(e.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, []);
+  return isMobile;
+}
 
+// ── Mobile ────────────────────────────────────────────────────────────────────
+//
+// Layout:
+//   outerContainer  — height:100%, no overflow, fills the .pane
+//     header        — fixed height (HEADER_H), never scrolls
+//     stackContainer — height:calc(100% - HEADER_H), overflow-y:auto
+//                      padding-bottom gives extra scroll room
+//       card × N    — position:sticky, top:0, z-index ascends
+//                      each card scrolls up and stacks over the previous
+//
+// The header is a sibling of stackContainer — scroll inside stackContainer
+// cannot affect it in any way.
+
+const HEADER_H = 36; // px — must match .mobileHeader height in CSS
+
+// ─── MOBILE PARAMS ────────────────────────────────────────────────────────────
+const M = {
+  SCROLL_PER_CARD: 320,  // px of scroll to bring each card fully to rest
+  CARD_OFFSET_Y: 64,  // px peek — card i rests at i * CARD_OFFSET_Y
+  SCALE_PER_DEPTH: 0.04,  // scale lost per card stacked above (e.g. 0.04 = 4%)
+  MAX_BLUR_PER_DEPTH: 0.4, // px of blur added per depth level
+  LERP: 0.10, // smoothing — lower = lazier, higher = snappier
+  BOTTOM_PAD: 360,  // extra sentinel px so last card has scroll room
+};
+
+/*
+ * Explicit per-card definitions — easy to override per-card if needed.
+ *
+ * card 0 : base card. Always at rest at y=0. Never animates in.
+ * card i : enters from below over scroll window [scrollStart, scrollEnd].
+ *          Rests at translateY(i * CARD_OFFSET_Y).
+ *
+ * scrollStart = (i-1) * SCROLL_PER_CARD
+ * scrollEnd   = (i)   * SCROLL_PER_CARD
+ */
+const CARD_DEFS = SERVICES.map((_, i) => ({
+  restY: i * M.CARD_OFFSET_Y,
+  scrollStart: i === 0 ? 0 : (i - 1) * M.SCROLL_PER_CARD,
+  scrollEnd: i === 0 ? 0 : i * M.SCROLL_PER_CARD,
+  isBase: i === 0,
+}));
+
+function MobileServices() {
+  const containerRef = useRef(null);   // the scroll container
+  const stageRef = useRef(null);   // sticky card viewport
+  const cardRefs = useRef([]);     // one ref per card
+  const rafRef = useRef(null);
+  const scrollY = useRef(0);      // lerped scroll value
+  const targetY = useRef(0);      // raw scrollTop
+  const stageH = useRef(0);      // measured height of stage/container
+
+  const N = SERVICES.length;
+  const sentinelH = (N - 1) * M.SCROLL_PER_CARD + M.BOTTOM_PAD;
+
+  // ── Measure container → set stage height ──────────────────────────────────
+  // Stage must exactly match the container's visible height so that
+  // translateY(stageH) = just below the clipping boundary.
+  useEffect(() => {
+    const container = containerRef.current;
+    const stage = stageRef.current;
+    if (!container || !stage) return;
+
+    const measure = () => {
+      const h = container.clientHeight;
+      stageH.current = h;
+      stage.style.height = `${h}px`;
+    };
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
+    measure(); // immediate first measurement
+    return () => ro.disconnect();
+  }, []);
+
+  // ── Per-frame animation ────────────────────────────────────────────────────
+  const applyFrames = useCallback((s) => {
+    const CH = stageH.current;
+    if (!CH) return;
+
+    CARD_DEFS.forEach((def, i) => {
+      const el = cardRefs.current[i];
+      if (!el) return;
+
+      // ── Entry progress for this card (0 → 1) ──────────────────────────────
+      let p;
+      if (def.isBase) {
+        p = 1; // card 0: always fully at rest
+      } else {
+        const range = def.scrollEnd - def.scrollStart;
+        p = range <= 0 ? 1 : Math.max(0, Math.min(1, (s - def.scrollStart) / range));
+      }
+
+      // Ease-out cubic: fast entry, soft landing
+      const pe = 1 - Math.pow(1 - p, 3);
+
+      // translateY: from CH (below clip boundary) → restY (at rest position)
+      const translateY = def.isBase
+        ? def.restY
+        : CH + (def.restY - CH) * pe;
+
+      // ── Depth: how many cards are sitting on top of this one ───────────────
+      // Continuous — fractional as each card slides in, not a discrete jump.
+      let depth = 0;
+      for (let j = i + 1; j < N; j++) {
+        const jd = CARD_DEFS[j];
+        const range = jd.scrollEnd - jd.scrollStart;
+        const jp = range <= 0 ? 1 : Math.max(0, Math.min(1, (s - jd.scrollStart) / range));
+        const jpe = 1 - Math.pow(1 - jp, 3); // same easing so depth matches visual
+        depth += jpe;
+      }
+
+      const scale = Math.max(0.72, 1 - depth * M.SCALE_PER_DEPTH);
+      const blur = depth * M.MAX_BLUR_PER_DEPTH;
+
+      el.style.transform = `translateY(${translateY.toFixed(2)}px) scale(${scale.toFixed(4)})`;
+      el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : '';
+    });
+  }, [N]);
+
+  // ── RAF loop + scroll listener ─────────────────────────────────────────────
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const onScroll = () => { targetY.current = container.scrollTop; };
+    container.addEventListener('scroll', onScroll, { passive: true });
+
+    const tick = () => {
+      const diff = targetY.current - scrollY.current;
+      scrollY.current = Math.abs(diff) > 0.05
+        ? scrollY.current + diff * M.LERP
+        : targetY.current;
+      applyFrames(scrollY.current);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      container.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [applyFrames]);
+
+  return (
+    <section id="services" className={styles.section}>
+      <div className={styles.outerContainer}>
+
+        <div className={styles.mobileHeader}>
+          <p className={styles.label}>
+            <span className={styles.prompt}>&gt;</span> WHAT I OFFER
+          </p>
+        </div>
+
+        <div className={styles.stackContainer} ref={containerRef}>
+
+          {/*
+           * cardStage: sticky at top:0, height = containerRef.clientHeight (set by JS).
+           * overflow:hidden clips cards whose translateY exceeds stage height.
+           * This is the "viewport" — cards live and are clamped inside it.
+           */}
+          <div className={styles.cardStage} ref={stageRef}>
+            {SERVICES.map((service, i) => (
+              <div
+                key={service.id}
+                className={`${styles.mobileCard} ${styles[`mobileCard_${i}`]}`}
+                ref={el => (cardRefs.current[i] = el)}
+              >
+                <div className={styles.mobileCardInner}>
+                  <div className={styles.cardTop}>
+                    <span className={styles.cardNum}>{service.id}</span>
+                    <span className={styles.cardTotal}>
+                      /{String(TOTAL).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <div className={styles.cardBody}>
+                    <div className={styles.cardMid}>
+                      <h2 className={styles.cardTitle}>{service.title}</h2>
+                      <p className={styles.cardDesc}>{service.desc}</p>
+                    </div>
+                    <div className={styles.cardBottom}>
+                      {service.tags.map(t => (
+                        <span key={t} className={styles.tag}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/*
+           * Sentinel: sits after the stage in normal flow.
+           * Its height = (N-1)*SCROLL_PER_CARD + BOTTOM_PAD.
+           * This is the only thing that creates scroll budget —
+           * max scrollTop = sentinelH.
+           */}
+          <div
+            className={styles.stackSentinel}
+            style={{ height: `${sentinelH}px` }}
+          />
+
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Desktop (unchanged) ───────────────────────────────────────────────────────
+function DesktopServices() {
+  const sectionRef = useRef(null);
   const rawTargetRef = useRef(0);
   const rawDisplayRef = useRef(0);
-  const [raw, setRaw] = useState(0); 
-
+  const [raw, setRaw] = useState(0);
   const rafRef = useRef(null);
   const [step, setStep] = useState(getStep);
   const hijackingRef = useRef(false);
   const releaseTimerRef = useRef(null);
-
   const [introP, setIntroP] = useState(0);
   const introStartRef = useRef(null);
   const introRunningRef = useRef(false);
   const introDoneRef = useRef(false);
 
-  // ── Resize ────────────────────────────────────────────────────────────────
   useEffect(() => {
     const onResize = () => setStep(getStep());
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // ── CSS stack budget var ──────────────────────────────────────────────────
   useEffect(() => {
     document.documentElement.style.setProperty(
       '--stack-x-budget',
@@ -81,37 +294,31 @@ export default function Services() {
     );
   }, [step.x]);
 
-  // ── Combined RAF loop: lerp scroll + intro animation ─────────────────────
   useEffect(() => {
-    const tick = (ts) => {
+    const tick = ts => {
       const cur = rawDisplayRef.current;
       const target = rawTargetRef.current;
       const diff = target - cur;
       if (Math.abs(diff) > 0.05) {
-        const next = cur + diff * LERP;
-        rawDisplayRef.current = next;
-        setRaw(next);
+        rawDisplayRef.current = cur + diff * LERP;
+        setRaw(rawDisplayRef.current);
       }
-
       if (introRunningRef.current) {
         if (introStartRef.current === null) introStartRef.current = ts;
-        const elapsed = ts - introStartRef.current;
-        const t = Math.min(1, elapsed / INTRO_DURATION);
-        const eased = 1 - Math.pow(1 - t, 3); 
+        const t = Math.min(1, (ts - introStartRef.current) / INTRO_DURATION);
+        const eased = 1 - Math.pow(1 - t, 3);
         setIntroP(eased);
         if (t >= 1) {
           introRunningRef.current = false;
           introDoneRef.current = true;
         }
       }
-
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  // ── Intro trigger via IntersectionObserver ────────────────────────────────
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -128,7 +335,6 @@ export default function Services() {
     return () => observer.disconnect();
   }, []);
 
-  // ── Snap helpers ──────────────────────────────────────────────────────────
   const disableSnap = useCallback(() => {
     document.documentElement.style.scrollSnapType = 'none';
   }, []);
@@ -137,7 +343,7 @@ export default function Services() {
     document.documentElement.style.scrollSnapType = '';
   }, []);
 
-  const snapOut = useCallback((direction) => {
+  const snapOut = useCallback(direction => {
     hijackingRef.current = false;
     enableSnap();
     const section = sectionRef.current;
@@ -149,12 +355,11 @@ export default function Services() {
     }
   }, [enableSnap]);
 
-  // ── Wheel handler ─────────────────────────────────────────────────────────
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const onWheel = (e) => {
+    const onWheel = e => {
       const rect = section.getBoundingClientRect();
       const inView = rect.top > -2 && rect.top < 2;
       if (!inView) return;
@@ -162,15 +367,8 @@ export default function Services() {
       const t = rawTargetRef.current;
       const dir = e.deltaY;
 
-      // Boundary release
-      if (t <= 0 && dir < 0) {
-        if (hijackingRef.current) snapOut(-1);
-        return;
-      }
-      if (t >= TOTAL_BUDGET && dir > 0) {
-        if (hijackingRef.current) snapOut(1);
-        return;
-      }
+      if (t <= 0 && dir < 0) { if (hijackingRef.current) snapOut(-1); return; }
+      if (t >= TOTAL_BUDGET && dir > 0) { if (hijackingRef.current) snapOut(1); return; }
 
       e.preventDefault();
       e.stopPropagation();
@@ -198,19 +396,12 @@ export default function Services() {
     };
   }, [disableSnap, enableSnap, snapOut]);
 
-  const card01P = () => {
-    if (!introRunningRef.current && !introDoneRef.current) return 0;
-    return introP;
-  };
-
-  const scrollCardP = (i) => {
+  const card01P = () => (!introRunningRef.current && !introDoneRef.current) ? 0 : introP;
+  const scrollCardP = i => {
     const si = i - 1;
-    const s = cardStart(si);
-    const e = cardEnd(si);
-    return Math.max(0, Math.min(1, (raw - s) / (e - s)));
+    return Math.max(0, Math.min(1, (raw - cardStart(si)) / (cardEnd(si) - cardStart(si))));
   };
-
-  const effectiveP = (i) => (i === 0 ? card01P() : scrollCardP(i));
+  const effectiveP = i => (i === 0 ? card01P() : scrollCardP(i));
 
   const keepScrollDrive = Math.min(1, raw / (DEAD_ZONE * 0.6));
   const keepOpacity = introP * Math.max(0, 1 - keepScrollDrive * 2);
@@ -218,29 +409,19 @@ export default function Services() {
   const keepX = -keepScrollDrive * 68;
   const keepY = keepScrollDrive * 32;
 
-  // ── Card styles ───────────────────────────────────────────────────────────
   const getCardStyle = (i, p) => {
     const { x: sx, y: sy } = step;
-
-    const restX = i * sx;
-    const restY = i * sy;
-
     const extraX = (1 - p) * (sx * 2.0 + 48);
     const extraY = (1 - p) * (sy * 2.0 + 24);
-    const opacity = Math.min(1, p * 1.4); 
-
+    const opacity = Math.min(1, p * 1.4);
     let blurPx = 0;
-    const BASE_BLUR = 1;
     for (let j = i + 1; j < TOTAL; j++) {
       const jp = effectiveP(j);
-      if (jp <= 0.001) break;           
-      const depth = j - i;            
-      const ramp = Math.min(1, jp / 0.5); 
-      blurPx += ramp * BASE_BLUR * (1 + (depth - 1) * 0.08);
+      if (jp <= 0.001) break;
+      blurPx += Math.min(1, jp / 0.5) * 1 * (1 + (j - i - 1) * 0.08);
     }
-
     return {
-      transform: `translate(${restX + extraX}px, ${restY + extraY}px)`,
+      transform: `translate(${i * sx + extraX}px, ${i * sy + extraY}px)`,
       opacity,
       zIndex: i + 1,
       filter: blurPx > 0.05 ? `blur(${blurPx.toFixed(2)}px)` : undefined,
@@ -249,15 +430,12 @@ export default function Services() {
 
   return (
     <section ref={sectionRef} id="services" className={styles.section}>
-
-      {/* ── Static header label ─────────────────────────────────────────── */}
       <div className={styles.header}>
         <p className={styles.label}>
           <span className={styles.prompt}>&gt;</span> WHAT I OFFER
         </p>
       </div>
 
-      {/* ── Keep scrolling ──────────────────────────────────────────────── */}
       <div
         className={styles.keepScrolling}
         style={{
@@ -269,17 +447,12 @@ export default function Services() {
         <span className={styles.keepArrow}>↓</span>
       </div>
 
-      {/* ── Card stack ──────────────────────────────────────────────────── */}
       <div className={styles.stackArea}>
         {SERVICES.map((service, i) => {
           const p = effectiveP(i);
           if (p <= 0.001) return null;
           return (
-            <div
-              key={service.id}
-              className={styles.card}
-              style={getCardStyle(i, p)}
-            >
+            <div key={service.id} className={styles.card} style={getCardStyle(i, p)}>
               <div className={styles.cardInner}>
                 <div className={styles.cardTop}>
                   <span className={styles.cardNum}>{service.id}</span>
@@ -301,7 +474,12 @@ export default function Services() {
           );
         })}
       </div>
-
     </section>
   );
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+export default function Services() {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileServices /> : <DesktopServices />;
 }
