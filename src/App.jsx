@@ -63,9 +63,7 @@ function HorizontalMobileShell({ landingPanel, tabsPanel }) {
   const touchStartY = useRef(null);
   const THRESHOLD = 48;
 
-  const slideTo = useCallback((index) => {
-    setPanel(index);
-  }, []);
+  const slideTo = useCallback((index) => setPanel(index), []);
 
   const onTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
@@ -76,18 +74,13 @@ function HorizontalMobileShell({ landingPanel, tabsPanel }) {
     if (touchStartX.current === null) return;
     const dx = touchStartX.current - e.changedTouches[0].clientX;
     const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
-    if (dy > Math.abs(dx) || Math.abs(dx) < THRESHOLD) return;
-
-    if (dx > 0 && panel === 0) {
-      slideTo(1);
-    } else if (dx < 0 && panel === 1) {
-      if (touchStartX.current <= 32) {
-        slideTo(0);
-      }
-    }
-
     touchStartX.current = null;
     touchStartY.current = null;
+
+    if (dy > Math.abs(dx) || Math.abs(dx) < THRESHOLD) return;
+
+    // Only handle landing → tabs here. Tabs → landing is handled by MobileLayout.
+    if (panel === 0 && dx > 0) slideTo(1);
   };
 
   const offset = panel === 0 ? '0vw' : '-100vw';
@@ -103,35 +96,10 @@ function HorizontalMobileShell({ landingPanel, tabsPanel }) {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* Landing */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100dvh',
-          transform: `translateX(${offset})`,
-          transition: 'transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'transform',
-        }}
-      >
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100dvh', transform: `translateX(${offset})`, transition: 'transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)', willChange: 'transform' }}>
         {landingPanel(slideTo)}
       </div>
-
-      {/* Tabs */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: '100vw',
-          width: '100vw',
-          height: '100dvh',
-          transform: `translateX(${offset})`,
-          transition: 'transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'transform',
-        }}
-      >
+      <div style={{ position: 'absolute', top: 0, left: '100vw', width: '100vw', height: '100dvh', transform: `translateX(${offset})`, transition: 'transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)', willChange: 'transform' }}>
         {tabsPanel(slideTo)}
       </div>
     </div>
@@ -144,7 +112,7 @@ function PortfolioInner() {
   const isMobile = useIsMobile();
 
   const [cursorEnabled, setCursorEnabled] = useState(
-    () => localStorage.getItem('pretty-cursor') !== 'no'
+    () => localStorage.getItem('ring-cursor') !== 'no'
   );
   const { cursorRef, ringRef } = useCursor(cursorEnabled);
 
@@ -152,8 +120,19 @@ function PortfolioInner() {
   const bodyRef = useRef(null);
   const navRef = useRef(null);
 
-  const handleSpinnerReady = useCallback(() => setPhase('genie'), []);
-  const handleLoaderComplete = (prefs) => { setUserPrefs(prefs); setPhase('spinner'); };
+  const handleSpinnerReady = useCallback(() => {
+    const genieEnabled = localStorage.getItem('genie-enabled') !== 'no';
+    if (genieEnabled) {
+      setPhase('genie');
+    } else {
+      window.scrollTo(0, 0);
+      if (!isMobile) {
+        document.documentElement.style.setProperty('scroll-snap-type', 'none', 'important');
+      }
+      document.body.style.overflow = 'hidden';
+      setPhase('sliding');
+    }
+  }, [isMobile]);
 
   const handleGenieComplete = () => {
     window.scrollTo(0, 0);
@@ -164,6 +143,11 @@ function PortfolioInner() {
     setPhase('sliding');
   };
 
+  const handleLoaderComplete = useCallback((prefs) => {
+    setUserPrefs(prefs);
+    setPhase('spinner');
+  }, []);
+
   useEffect(() => {
     document.body.classList.toggle('hide-cursor', cursorEnabled);
   }, [cursorEnabled]);
@@ -173,10 +157,13 @@ function PortfolioInner() {
 
     const t = setTimeout(() => {
       if (!bodyRef.current) return;
+
+      const animProps = genieEnabled
+        ? { y: 0, duration: 0.8, ease: 'ease.in' }
+        : { opacity: 1, duration: 0.5, ease: 'power2.out' };
+
       gsap.to(bodyRef.current, {
-        y: 0,
-        duration: 0.8,
-        ease: 'ease.in',
+        ...animProps,
         force3D: true,
         onComplete: () => {
           if (bodyRef.current) {
@@ -199,7 +186,7 @@ function PortfolioInner() {
           }
         },
       });
-    }, 350);
+    }, genieEnabled ? 350 : 0);
 
     return () => {
       clearTimeout(t);
@@ -213,7 +200,8 @@ function PortfolioInner() {
   const scrollTo = (id) =>
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
-  const showGenie = phase === 'genie' || phase === 'sliding';
+  const genieEnabled = localStorage.getItem('genie-enabled') !== 'no';
+  const showGenie = genieEnabled && (phase === 'genie' || phase === 'sliding');
   const showBody = phase === 'sliding' || phase === 'landing';
 
   const mobileSections = {
@@ -273,7 +261,8 @@ function PortfolioInner() {
             position: 'relative',
             zIndex: 7000,
             background: 'var(--bg)',
-            transform: 'translateY(100vh)',
+            transform: genieEnabled ? 'translateY(100vh)' : 'none',
+            opacity: genieEnabled ? 1 : 0,
             ...(isMobile ? { height: '100dvh', overflow: 'hidden' } : {}),
           }}
         >
@@ -294,8 +283,12 @@ function PortfolioInner() {
                     onSkip={() => slideTo(1)}
                   />
                 )}
-                tabsPanel={() => (
-                  <MobileLayout sections={mobileSections} />
+                tabsPanel={(slideTo) => (
+                  <MobileLayout
+                    sections={mobileSections}
+                    nav={mobileNav}
+                    onBackToLanding={() => slideTo(0)}
+                  />
                 )}
               />
             </div>

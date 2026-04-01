@@ -18,11 +18,11 @@ const TABS = [
   { id: 'contact', label: 'Contact', icon: <IoChatbubbleOutline size={20} /> },
 ];
 
-const COLLAPSED_H = 64;
-const EXPANDED_H = 96;
+const COLLAPSED_H = 52;
+const EXPANDED_H = 64;
 const DRAG_THRESHOLD = 28;
 
-export default function MobileLayout({ sections = {}, nav }) {
+export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
   const [activeTab, setActiveTab] = useState('intro');
   const [prevTab, setPrevTab] = useState(null);
   const [direction, setDirection] = useState(1);
@@ -47,6 +47,40 @@ export default function MobileLayout({ sections = {}, nav }) {
     setPrevTab(activeTab);
     setActiveTab(id);
   }, [activeTab]);
+
+  // Swipe handling — lives here, not in HorizontalMobileShell
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const SWIPE_THRESHOLD = 128;
+
+  const onTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const onTouchEnd = useCallback((e) => {
+    if (touchStartX.current === null) return;
+    const dx = touchStartX.current - e.changedTouches[0].clientX;
+    const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    if (dy > Math.abs(dx) || Math.abs(dx) < SWIPE_THRESHOLD) return;
+
+    const currentIdx = TABS.findIndex(t => t.id === activeTab);
+
+    if (dx > 0) {
+      // swipe left → next tab
+      if (currentIdx < TABS.length - 1) switchTab(TABS[currentIdx + 1].id);
+    } else {
+      // swipe right → prev tab or back to landing
+      if (currentIdx > 0) {
+        switchTab(TABS[currentIdx - 1].id);
+      } else {
+        onBackToLanding?.(); // first tab → hand off to parent
+      }
+    }
+  }, [activeTab, switchTab, onBackToLanding]);
 
   const startDrag = useCallback((clientY) => {
     dragStartY.current = clientY;
@@ -87,11 +121,9 @@ export default function MobileLayout({ sections = {}, nav }) {
   return (
     <div
       className={styles.wrapper}
-      style={{
-        '--collapsed-h': `${COLLAPSED_H}px`,
-        '--expanded-h': `${EXPANDED_H}px`,
-        '--dir': direction,
-      }}
+      style={{ '--collapsed-h': `${COLLAPSED_H}px`, '--expanded-h': `${EXPANDED_H}px`, '--dir': direction }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       <div className={styles.body} aria-live="polite">
         {nav && <div className={styles.navSlot}>{nav}</div>}
@@ -110,9 +142,8 @@ export default function MobileLayout({ sections = {}, nav }) {
                   isExit && styles.paneExit,
                 ].filter(Boolean).join(' ')}
                 aria-hidden={!isActive}
-                {...(!isActive ? { inert: '' } : {})}
+                inert={!isActive ? true : undefined}
               >
-                {/* All tabs rendered identically — no special-casing for services */}
                 {sections[id]}
               </div>
             );

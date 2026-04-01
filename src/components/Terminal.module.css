@@ -1,6 +1,6 @@
 .terminal {
   border: 1px solid var(--accent);
-  border-radius: 12px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: var(--surface);
   box-shadow: 0 0 2px 2px var(--border);
@@ -145,7 +145,7 @@
   flex: 1;
   height: 8px;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
   position: relative;
   will-change: transform;
@@ -173,7 +173,7 @@
       transparent 8px,
       var(--bg) 9px,
       var(--bg) 10px);
-}          
+}
 
 .itemLevel {
   font-size: 12px;
@@ -218,7 +218,7 @@
     font-size: 11px;
   }
 
-    .fileIcon {
-      display: none;
-    }
+  .fileIcon {
+    display: none;
+  }
 }

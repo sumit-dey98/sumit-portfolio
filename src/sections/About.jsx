@@ -54,7 +54,7 @@ export default function About() {
             <div className={styles.location}>
               {/* <BiMapPin size={22} strokeWidth={2} stroke='var(--accent)' fill='none' /> */}
               <LocationIcon size={28} />
-              <span>Dhaka, Bangladesh</span>
+              <span>Location: Dhaka, Bangladesh</span>
             </div>
           </motion.div>
 

@@ -71,6 +71,7 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
     <motion.div
       ref={terminalRef}
       className={styles.terminal}
+      initial={isMobile ? false : undefined}
       animate={effectiveFullscreen ? {
         position: 'absolute',
         top: 14, left: 14, right: 14, bottom: 14,
@@ -79,7 +80,7 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         height: '100%',
         maxHeight: 'calc(100% - 28px)',
         zIndex: 1000,
-        borderRadius: 12,
+        borderRadius: 'var(--radius)',
       } : {
         position: 'relative',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -88,7 +89,7 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         maxHeight: '100%',
         height: '100%',
         zIndex: 1,
-        borderRadius: 12,
+        borderRadius: 'var(--radius)',
       }}
       transition={{ type: 'ease', duration: 0.2 }}
     >
@@ -101,10 +102,10 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         </span>
         <span
           className={styles.termDot}
-          style={{ background: '#28c840', ...(isMobile ? { pointerEvents: 'none', opacity: 0.4 } : {}) }}
+          style={{ background: '#28c840' }}
           onClick={isMobile ? undefined : onExpand}
         >
-          <ExpandIcon color="#000" size={8} style={{ rotate: '-90deg' }} />
+          <ExpandIcon color="#000" size={16} style={{ rotate: '-90deg', padding: '2px' }} />
         </span>
         <span className={styles.termTitle}>sumit@portfolio: ~/stack/{data.group}</span>
       </div>
@@ -118,7 +119,7 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         <motion.div
           className={styles.group}
           variants={groupVariants}
-          initial="hidden"
+          // initial="hidden"
           animate="visible"
           custom={0}
         >

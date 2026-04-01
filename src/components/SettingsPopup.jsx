@@ -14,7 +14,7 @@ const ease = [0.16, 1, 0.3, 1];
 function CursorSetting({ localCursor, setLocalCursor }) {
   return (
     <div className={styles.settingRow}>
-      <span className={styles.settingLabel}>Pretty Cursor</span>
+      <span className={styles.settingLabel}>Ring Cursor</span>
       <button
         className={`${styles.toggle} ${localCursor === 'yes' ? styles.toggleOn : ''}`}
         onClick={() => setLocalCursor(localCursor === 'yes' ? 'no' : 'yes')}
@@ -33,17 +33,44 @@ function CursorSetting({ localCursor, setLocalCursor }) {
   );
 }
 
+function GenieSetting({ localGenie, setLocalGenie }) {
+  return (
+    <div className={styles.settingRow}>
+      <span className={styles.settingLabel}>Preloader Animation</span>
+      <button
+        className={`${styles.toggle} ${localGenie === 'yes' ? styles.toggleOn : ''}`}
+        onClick={() => setLocalGenie(localGenie === 'yes' ? 'no' : 'yes')}
+        role="switch"
+        aria-checked={localGenie === 'yes'}
+      >
+        <span className={styles.toggleTrack}>
+          <motion.span
+            className={styles.toggleThumb}
+            animate={{ x: localGenie === 'yes' ? 18 : 0 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          />
+        </span>
+      </button>
+    </div>
+  );
+}
+
 export default function SettingsPopup({ onClose, variant = 'popup', cursorEnabled, onCursorChange }) {
   const { prefs, savePrefs } = useUserPrefs();
   const [name, setName] = useState(prefs?.name || '');
   const [mode, setMode] = useState(prefs?.mode || null);
   const [localCursor, setLocalCursor] = useState(() => {
-    return localStorage.getItem('pretty-cursor') ?? 'yes';
+    return localStorage.getItem('ring-cursor') ?? 'yes';
   });
+
+  const [localGenie, setLocalGenie] = useState(
+    () => localStorage.getItem('genie-enabled') ?? 'yes'
+  );
 
   const handleSave = () => {
     savePrefs({ name: name.trim(), mode });
-    localStorage.setItem('pretty-cursor', localCursor);
+    localStorage.setItem('ring-cursor', localCursor);
+    localStorage.setItem('genie-enabled', localGenie);
     onCursorChange?.(localCursor === 'yes');
     onClose?.();
   };
@@ -107,7 +134,8 @@ export default function SettingsPopup({ onClose, variant = 'popup', cursorEnable
         </div> */}
 
         {/* Cursor */}
-        <CursorSetting localCursor={localCursor} setLocalCursor={setLocalCursor} />               
+        <CursorSetting localCursor={localCursor} setLocalCursor={setLocalCursor} />        
+        <GenieSetting localGenie={localGenie} setLocalGenie={setLocalGenie} />       
       </div>
 
       <div className={styles.footer}>

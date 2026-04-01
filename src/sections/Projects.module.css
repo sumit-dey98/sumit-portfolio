@@ -97,7 +97,7 @@
   min-width: 280px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   z-index: 100;
 }
@@ -182,7 +182,7 @@
   width: min(80vw, 1600px);
   display: flex;
   flex-direction: row;
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
   box-shadow: 0px 0px 2px 1px var(--accent);
@@ -401,7 +401,7 @@
   width: 4px;
   height: 100%;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .descScrollThumb {
@@ -409,7 +409,7 @@
   left: 0;
   width: 100%;
   background: var(--accent);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   transition: top 0.1s ease;
   box-shadow: 0 0 4px var(--accent);
 }
@@ -432,7 +432,7 @@
   color: var(--accent);
   box-shadow: 0 0 1px 1px var(--accent);
   padding: 3px 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   text-transform: uppercase;
 }
 
@@ -475,7 +475,7 @@
 .mobileList {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 48px;
   /* padding: 0 16px; */
 }
 
@@ -484,10 +484,10 @@
   display: flex;
   flex-direction: column;
   /* gap: 16px; */
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: 0 0 2px 1px var(--accent);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 2px 2px var(--border);
 }
 
 /* Preview area */
@@ -532,7 +532,7 @@
   padding: 5px 10px;
   background: var(--surface);
   border: 1px solid var(--accent);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   font-family: var(--mono);
   font-size: 10px;
@@ -602,6 +602,7 @@
 .mobileCardActive {
   display: none;
 }
+
 /* 
 .mobileCard .cardPreview {
   width: 100%;
@@ -622,7 +623,7 @@
 } */
 
 /*  Responsive: medium desktop (1024–1300px)  */
-@media (min-width: 1024px) and (max-width: 1300px) {
+/* @media (min-width: 1024px) and (max-width: 1300px) {
   .header {
     width: min(88vw, 1600px);
     margin-left: calc(50vw - min(44vw, 800px));
@@ -637,20 +638,15 @@
   .card {
     flex-direction: column;
     width: min(88vw, 1600px);
-    /* Height fills the section between header (~80px) and dots (~56px) */
     height: calc(100dvh - calc(var(--section-pad-y) * 2) - 136px);
     max-height: 860px;
     overflow: hidden;
   }
-
-  /* Preview occupies top 42% of card height; image crops with object-fit */
   .cardPreview {
     flex: 0 0 42%;
     aspect-ratio: unset;
     min-height: 0;
   }
-
-  /* Info occupies remaining 58% and scrolls if content overflows */
   .cardInfo {
     flex: 1;
     min-height: 0;
@@ -669,9 +665,8 @@
   .cardDesc {
     font-size: clamp(13px, 1.1vw, 16px);
   }
-}
+} */
 
-/*  Mobile overrides (<768px)  */
 @media (max-width: 767px) {
   .header {
     width: 100%;

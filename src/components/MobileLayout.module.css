@@ -71,9 +71,10 @@
     opacity: 0;
     pointer-events: none;
     transform: translateX(calc(var(--dir, 1) * 32px));
+    will-change: transform, opacity;
     transition:
       opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-      transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .paneActive {
@@ -88,7 +89,7 @@
     transform: translateX(calc(var(--dir, 1) * -32px));
     transition:
       opacity 0.22s ease,
-      transform 0.22s ease;
+      transform 0.5s ease;
   }
 
   .pane section,
@@ -102,17 +103,27 @@
     height: var(--collapsed-h, 64px);
     transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: height;
-    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    background:
+      color-mix(in srgb, var(--surface) 80%, transparent);
+    /* background: transparent; */
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border-top: 1px solid var(--border);
-    border-radius: 20px 20px 0 0;
+    border: 1px solid var(--accent);
+    margin: 6px;
+    box-shadow: 0 0 2px 2px var(--border);
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
     align-items: stretch;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    position: relative;
+    position: fixed;
+    /* bottom: 0; */
+    bottom: 0;
+    right: 0;
+    left: 0;
+    /* inset: 4px; */
     z-index: 100;
+    /* width: 100%; */
   }
 
   .sheetExpanded {
@@ -125,7 +136,8 @@
 
   .handle {
     flex-shrink: 0;
-    height: 20px;
+    height: 4px;
+    padding-top: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,8 +155,9 @@
     display: block;
     width: 36px;
     height: 4px;
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     background: var(--border);
+    filter: contrast(0.5);
     transition: width 0.22s, background 0.22s;
   }
 
@@ -184,7 +197,7 @@
   }
 
   .tabActive {
-    color: var(--accent2);
+    color: var(--accent);
   }
 
   .tabIcon {
@@ -195,15 +208,16 @@
     height: 20px;
     flex-shrink: 0;
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
   }
 
   .tabActive .tabIcon {
-    transform: translateY(-3px) scale(1.08);
+    transform: scale(1.1);
   }
 
   .tabLabel {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: var(--xxs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     white-space: nowrap;

@@ -5,11 +5,11 @@
   align-items: center;
   justify-content: center;
   font-family: var(--mono);
-  font-size: var(--text-sm, 13px);
+  font-size: var(--sm);
   font-weight: 600;
   letter-spacing: 3px;
   padding: 14px 36px;
-  border-radius: 2px;
+  border-radius: var(--radius);
   cursor: pointer;
   border: none;
   outline: none;
@@ -30,11 +30,11 @@
   opacity: 0.5;
 }
 
-@media (max-width: 767px) {
+/* @media (max-width: 767px) {
   .btn {
     padding: 12px 24px;
   }
-}
+} */
 
 /* Shared icon */
 .iconWrap {

@@ -188,9 +188,9 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
         duration={1000}
         maxGap={0.4}
         fadeLength={0.5}
-        background={theme.vars['--bg']}
-        color={theme.vars['--border']}
-        colorHover={theme.vars['--accent']}
+        background='var(--bg)'
+        color='var(--accent)'
+        colorHover='var(--accent2)'
         className={styles.trigger}
         onClick={() => setOpen(o => !o)}
         title="Switch theme"

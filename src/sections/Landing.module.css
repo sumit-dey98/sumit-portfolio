@@ -133,19 +133,22 @@
   }
 
   .scrollHint {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
     position: relative;
     bottom: unset;
     left: unset;
+    width: 100%;
     transform: none;
-    flex-direction: column;
     font-size: 11px;
-    gap: 10px;
+    gap: 48px;
   }
 
   .scrollLine {
-    height: 32px;
-    width: 1px;
+    height: 64px;
+    width: 2px;
     translate: 0 0;
-    rotate: 0deg;
+    rotate: 90deg;
   }
 }

@@ -50,8 +50,8 @@ export default function Skills() {
     <section id="skills" className={styles.skills}>
       <div className={styles.inner}>
         <p className={styles.label}>
-          <span className={styles.prompt}>&gt;</span>
-          SKILLS
+          <span className={styles.prompt}>&gt; </span>
+           &nbsp;SKILLS
         </p>
 
         <motion.div className={styles.stacksContainer}>

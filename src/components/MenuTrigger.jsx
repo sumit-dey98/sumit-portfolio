@@ -60,8 +60,8 @@ const MenuTrigger = ({ isOpen, onClick, fixed = true }) => {
       duration={500}
       maxGap={0.3}
       fadeLength={0.4}
-      color="var(--border)"
-      colorHover="var(--accent)"
+      color="var(--accent)"
+      colorHover="var(--accent2)"
       textColor="var(--accent)"
       direction="cw"
       onClick={onClick}

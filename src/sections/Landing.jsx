@@ -12,6 +12,8 @@ import styles from './Landing.module.css';
 
 const LINE = ['Front-end web developer'];
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1023;
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -112,9 +114,9 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
           <SvgButton
             color={getCssVar('--accent')}
             colorHover={getCssVar('--accent2')}
-            width={180}
-            height={47}
-            radius={2}
+            width={186}
+            height={48}
+            radius={6}
             duration={1500}
             fadeLength={0.75}
             strokeWidth={1.5}
@@ -129,7 +131,7 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
         </motion.div>
 
         <motion.div className={styles.scrollHint} variants={fadeVariant}>
-          <span>SWIPE</span>
+          <span>{ isMobile ? 'SWIPE' : 'SCROLL'}</span>
           <div className={styles.scrollLine} />
         </motion.div>
       </motion.div>

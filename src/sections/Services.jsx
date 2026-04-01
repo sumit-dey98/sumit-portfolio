@@ -76,12 +76,13 @@ const HEADER_H = 36; // px — must match .mobileHeader height in CSS
 
 // ─── MOBILE PARAMS ────────────────────────────────────────────────────────────
 const M = {
-  SCROLL_PER_CARD: 320,  // px of scroll to bring each card fully to rest
-  CARD_OFFSET_Y: 64,  // px peek — card i rests at i * CARD_OFFSET_Y
-  SCALE_PER_DEPTH: 0.04,  // scale lost per card stacked above (e.g. 0.04 = 4%)
-  MAX_BLUR_PER_DEPTH: 0.4, // px of blur added per depth level
-  LERP: 0.10, // smoothing — lower = lazier, higher = snappier
-  BOTTOM_PAD: 360,  // extra sentinel px so last card has scroll room
+  SCROLL_PER_CARD: 800,
+  CARD_OFFSET_Y: 64,
+  SCALE_PER_DEPTH: 0.05,
+  MAX_BLUR_PER_DEPTH: 0.4,
+  LERP: 0.15,
+  BOTTOM_PAD: 0,
+  OVERLAP: 0.8,  // 0 = sequential (current), 1 = all cards move together
 };
 
 /*
@@ -94,12 +95,7 @@ const M = {
  * scrollStart = (i-1) * SCROLL_PER_CARD
  * scrollEnd   = (i)   * SCROLL_PER_CARD
  */
-const CARD_DEFS = SERVICES.map((_, i) => ({
-  restY: i * M.CARD_OFFSET_Y,
-  scrollStart: i === 0 ? 0 : (i - 1) * M.SCROLL_PER_CARD,
-  scrollEnd: i === 0 ? 0 : i * M.SCROLL_PER_CARD,
-  isBase: i === 0,
-}));
+
 
 function MobileServices() {
   const containerRef = useRef(null);   // the scroll container
@@ -111,7 +107,13 @@ function MobileServices() {
   const stageH = useRef(0);      // measured height of stage/container
 
   const N = SERVICES.length;
-  const sentinelH = (N - 1) * M.SCROLL_PER_CARD + M.BOTTOM_PAD;
+  const sentinelH = (N - 1) * M.SCROLL_PER_CARD * (1 - M.OVERLAP) + M.SCROLL_PER_CARD + M.BOTTOM_PAD;
+
+  const CARD_DEFS = SERVICES.map((_, i) => ({
+    restY: i * M.CARD_OFFSET_Y,
+    exitStart: i === 0 ? Infinity : (N - 1 - i) * M.SCROLL_PER_CARD * (1 - M.OVERLAP),
+    isBase: i === 0,
+  }));
 
   // ── Measure container → set stage height ──────────────────────────────────
   // Stage must exactly match the container's visible height so that
@@ -134,54 +136,51 @@ function MobileServices() {
   }, []);
 
   // ── Per-frame animation ────────────────────────────────────────────────────
+  // In applyFrames — invert s so decreasing scrollTop drives exits
   const applyFrames = useCallback((s) => {
     const CH = stageH.current;
     if (!CH) return;
+
+    // sInv=0 at bottom (stacked), increases as you swipe down
+    const sInv = Math.max(0, sentinelH - s);
+
+    const exitP = CARD_DEFS.map((def) => {
+      if (def.isBase) return 0;
+      const raw = Math.max(0, Math.min(1, (sInv - def.exitStart) / M.SCROLL_PER_CARD));
+      return 1 - Math.pow(1 - raw, 3);
+    });
 
     CARD_DEFS.forEach((def, i) => {
       const el = cardRefs.current[i];
       if (!el) return;
 
-      // ── Entry progress for this card (0 → 1) ──────────────────────────────
-      let p;
-      if (def.isBase) {
-        p = 1; // card 0: always fully at rest
-      } else {
-        const range = def.scrollEnd - def.scrollStart;
-        p = range <= 0 ? 1 : Math.max(0, Math.min(1, (s - def.scrollStart) / range));
-      }
-
-      // Ease-out cubic: fast entry, soft landing
-      const pe = 1 - Math.pow(1 - p, 3);
-
-      // translateY: from CH (below clip boundary) → restY (at rest position)
       const translateY = def.isBase
         ? def.restY
-        : CH + (def.restY - CH) * pe;
+        : def.restY + (CH - def.restY) * exitP[i];
 
-      // ── Depth: how many cards are sitting on top of this one ───────────────
-      // Continuous — fractional as each card slides in, not a discrete jump.
       let depth = 0;
       for (let j = i + 1; j < N; j++) {
-        const jd = CARD_DEFS[j];
-        const range = jd.scrollEnd - jd.scrollStart;
-        const jp = range <= 0 ? 1 : Math.max(0, Math.min(1, (s - jd.scrollStart) / range));
-        const jpe = 1 - Math.pow(1 - jp, 3); // same easing so depth matches visual
-        depth += jpe;
+        depth += (1 - exitP[j]);
       }
 
-      const scale = Math.max(0.72, 1 - depth * M.SCALE_PER_DEPTH);
+      const scale = Math.max(0.75, 1 - depth * M.SCALE_PER_DEPTH);
       const blur = depth * M.MAX_BLUR_PER_DEPTH;
 
       el.style.transform = `translateY(${translateY.toFixed(2)}px) scale(${scale.toFixed(4)})`;
       el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : '';
     });
-  }, [N]);
+  }, [N, sentinelH]);
 
   // ── RAF loop + scroll listener ─────────────────────────────────────────────
+  // In the RAF/scroll useEffect — initialize to bottom
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    // Start scrolled to bottom so swiping down decreases scrollTop
+    container.scrollTop = sentinelH;
+    targetY.current = sentinelH;
+    scrollY.current = sentinelH;
 
     const onScroll = () => { targetY.current = container.scrollTop; };
     container.addEventListener('scroll', onScroll, { passive: true });
@@ -200,7 +199,7 @@ function MobileServices() {
       container.removeEventListener('scroll', onScroll);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [applyFrames]);
+  }, [applyFrames, sentinelH]);
 
   return (
     <section id="services" className={styles.section}>
@@ -220,7 +219,7 @@ function MobileServices() {
            * This is the "viewport" — cards live and are clamped inside it.
            */}
           <div className={styles.cardStage} ref={stageRef}>
-            {SERVICES.map((service, i) => (
+            {[...SERVICES].reverse().map((service, i) => (
               <div
                 key={service.id}
                 className={`${styles.mobileCard} ${styles[`mobileCard_${i}`]}`}

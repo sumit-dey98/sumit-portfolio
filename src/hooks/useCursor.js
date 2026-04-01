@@ -54,6 +54,7 @@ export function useCursor(enabled = true) {
     };
 
     const onNormal = () => setSize(10, 10, 36, 36, 0.6);
+    onNormal();
     const onEnter = () => setSize(20, 20, 56, 56, 1);
     const onLeave = () => onNormal();
 

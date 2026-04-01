@@ -86,9 +86,9 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
         <div className={styles.right}>
           {children}
           <SvgButton
-            color="var(--border)"
-            colorHover="var(--accent)"
-            textColor="var(--dim)"
+            color="var(--accent)"
+            colorHover="var(--accent2)"
+            textColor="var(--accent)"
             width={36}
             height={36}
             strokeWidth={1.5}

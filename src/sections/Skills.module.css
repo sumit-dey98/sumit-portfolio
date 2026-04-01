@@ -45,6 +45,7 @@
   .stacksContainer {
     display: flex;
     flex-direction: column;
+    gap: 24px;
   }
 
   .inner {
@@ -56,7 +57,7 @@
     margin-top: 0;
   }
 
-  .stacksContainer {
+  /* .stacksContainer {
    width: unset;
-  }
+  } */
 }
