@@ -45,7 +45,7 @@
 
 .termTitle {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   font-weight: 600;
   color: var(--text);
   margin-left: 12px;
@@ -69,7 +69,7 @@
 
 .termCmd {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--sm);
   font-weight: 500;
   color: var(--text-dim);
   text-transform: lowercase;
@@ -105,7 +105,7 @@
 
 .groupName {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--sm);
   font-weight: 500;
   color: var(--accent);
   letter-spacing: 1px;
@@ -114,7 +114,7 @@
 .termDir {
   color: var(--dim);
   margin-right: 12px;
-  font-size: 11px;
+  font-size: var(--xs);
 }
 
 .items {
@@ -126,7 +126,7 @@
 
 .item {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--sm);
   font-weight: 400;
   color: var(--dim);
   letter-spacing: 1px;
@@ -176,7 +176,7 @@
 }
 
 .itemLevel {
-  font-size: 12px;
+  font-size: var(--xs);
   color: var(--accent2);
   font-weight: 500;
   min-width: 36px;
@@ -189,7 +189,7 @@
 }
 
 .fileIcon {
-  font-size: 11px;
+  font-size: var(--xs);
   font-weight: 400;
   color: var(--dim);
   min-width: 100px;
@@ -206,16 +206,16 @@
   }
 
   .termPrompt {
-    font-size: 13px;
+    font-size: var(--sm);
   }
 
   .termCmd,
   .groupName {
-    font-size: 12px;
+    font-size: var(--xs);
   }
 
   .item {
-    font-size: 11px;
+    font-size: var(--xs);
   }
 
   .fileIcon {

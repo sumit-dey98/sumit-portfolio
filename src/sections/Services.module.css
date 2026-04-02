@@ -6,7 +6,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: var(--section-pad-y) 0;
+  padding: var(--section-pad-y) 0 0 0;
   touch-action: none;
 }
 
@@ -23,7 +23,7 @@
 .label {
   font-family: var(--mono);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--xs);
   letter-spacing: 4px;
   color: var(--accent);
 }
@@ -43,13 +43,12 @@
   transform-origin: left bottom;
   will-change: transform, opacity;
   pointer-events: none;
-  user-select: none;
   z-index: 10;
 }
 
 .keepText {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--xs);
   font-weight: 600;
   letter-spacing: 4px;
   color: var(--text-dim);
@@ -57,7 +56,7 @@
 }
 
 .keepArrow {
-  font-size: 16px;
+  font-size: var(--xs);
   color: var(--accent2);
   animation: bob 1.4s ease-in-out infinite;
   display: block;
@@ -89,12 +88,11 @@
 }
 
 .stackArea {
-  position: absolute;
+position: absolute;
   left: calc(50vw - min(40vw, 800px));
-  top: 20%;
-  transform: translateY(-40%);
+  margin-top: 84px;
   width: 0;
-  height: 0;
+  height: 100%;
   z-index: 1;
 }
 
@@ -130,7 +128,7 @@
 
 .cardNum {
   font-family: var(--display);
-  font-size: 32px;
+  font-size: var(--xl);
   font-weight: 500;
   color: var(--accent2);
   letter-spacing: 2px;
@@ -138,7 +136,7 @@
 
 .cardTotal {
   font-family: var(--display);
-  font-size: 24px;
+  font-size: var(--lg);
   font-weight: 500;
   color: var(--text-dim);
   letter-spacing: 1px;
@@ -160,7 +158,7 @@
 
 .cardTitle {
   font-family: var(--display);
-  font-size: clamp(22px, 2.4vw, 38px);
+  font-size: var(--xl);
   font-weight: 400;
   letter-spacing: 1px;
   color: var(--text);
@@ -170,7 +168,7 @@
 
 .cardDesc {
   font-family: var(--body);
-  font-size: clamp(14px, 1.5vw, 20px);
+  font-size: var(--base);
   line-height: 1.5;
   color: var(--text-dim);
   margin: 0;
@@ -187,7 +185,7 @@
 
 .tag {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--sm);
   font-weight: 500;
   letter-spacing: 1.5px;
   color: var(--accent);
@@ -197,31 +195,7 @@
   text-transform: uppercase;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   MOBILE — self-contained sticky stack
-   ══════════════════════════════════════════════════════════════════════════════
-
-   Structure rendered by MobileServices:
-
-     .outerContainer          height: 100%  — fills whatever .pane gives it
-       .mobileHeader          height: 48px  — fixed, never scrolls
-       .stackContainer        height: calc(100% - 48px), overflow-y: auto
-         .stickyCard × N      position: sticky, top: 0
-                              z-index ascends so later cards cover earlier ones
-                              each card scrolls up and stacks over the previous
-
-   index.css forces `padding: 80px 16px 24px !important` on all sections.
-   .outerContainer sits inside the section as a direct child and stretches
-   to fill it — the section's padding becomes the breathing room around the
-   outer container, which is fine for desktop. On mobile we override the
-   section padding to 0 and let outerContainer fill 100%.
-   ══════════════════════════════════════════════════════════════════════════════ */
-
 @media (max-width: 1023px) {
-  .section {
-    padding-bottom: 0 !important;
-  }
-
   .outerContainer {
     height: 100%;
     width: 100%;
@@ -321,19 +295,7 @@
     gap: 12px;
   }
 
-  .cardTitle {
-    font-size: clamp(20px, 5vw, 30px);
-  }
-
-  .cardDesc {
-    font-size: clamp(13px, 3.5vw, 16px);
-  }
-
   .cardBottom {
     padding-top: 8px;
-  }
-
-  .tag {
-    font-size: 11px;
   }
 }

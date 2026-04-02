@@ -1,85 +1,30 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { FiArrowUpRight, FiChevronDown, FiPlay, FiPause } from 'react-icons/fi';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import gsap from 'gsap';
+import { FiArrowUpRight, FiChevronDown, FiPlay, FiPause, FiMaximize } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import ScreenSlides from './../components/ScreenSlides';
 import styles from './Projects.module.css';
-
-const PROJECTS = [
-  {
-    id: '01',
-    name: 'Connect 4 Game',
-    tags: ['React+Vite', 'Zustand', 'GSAP'],
-    link: '/project/connect4',
-    desc: 'A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes. A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes. ',
-    screens: [
-      '/project-connect4-thumb.jpg',
-      '/project-rubiks-thumb.jpg',
-      '/project-interior-thumb.jpg',
-    ],
-    preview: '/project-connect4-thumb.jpg',
-    mobileSrc: '/project-connect4-thumb.jpg',
-    videoSrc: '/previews/project-connect4-preview.mp4',
-  },
-  {
-    id: '02',
-    name: "Rubik's Cube",
-    tags: ['React+Vite', 'Three.js', 'Tailwind'],
-    link: '/project/rubiks-cube',
-    desc: "A 3D Rubik's Cube with realistic and customizable visuals and interactions, created with React and Three.js.",
-    screens: [
-      '/project-connect4-thumb.jpg',
-      '/project-rubiks-thumb.jpg',
-      '/project-interior-thumb.jpg',
-    ],
-    preview: '/project-rubiks-thumb.jpg',
-    mobileSrc: '/project-rubiks-thumb.jpg',
-    videoSrc: '/previews/project-rubiks-preview.mp4',
-  },
-  {
-    id: '03',
-    name: 'Interior Design Studio Clone',
-    tags: ['HTML', 'SCSS', 'JavaScript'],
-    link: '/project/interior',
-    desc: 'A front end demo website with custom scroll animations and responsive layout. A front end demo website with custom scroll animations and responsive layout. A front end demo website with custom scroll animations and responsive layout. A front end demo website with custom scroll animations and responsive layout.',
-    screens: [
-      '/project-connect4-thumb.jpg',
-      '/project-rubiks-thumb.jpg',
-      '/project-interior-thumb.jpg',
-    ],
-    preview: '/project-interior-thumb.jpg',
-    mobileSrc: '/project-interior-thumb.jpg',
-    videoSrc: '/previews/project-interior-preview.mp4',
-  },
-  {
-    id: '04',
-    name: 'Motion Design System',
-    tags: ['Framer Motion', 'Storybook', 'React'],
-    link: null,
-    desc: 'A comprehensive animation library with 60+ primitives, used across 3 production products.',
-    screens: [
-      '/project-connect4-thumb.jpg',
-      '/project-rubiks-thumb.jpg',
-      '/project-interior-thumb.jpg',
-    ],
-    preview: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
-    mobileSrc: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=80',
-    videoSrc: null,
-  },
-];
+import { PROJECTS } from '../data/data';
 
 const TOTAL = PROJECTS.length;
 const GAP = 32;
 const CARD_W = () => Math.min(window.innerWidth * 0.8, 1600);
 const MAX_X = () => (TOTAL - 1) * (CARD_W() + GAP);
 
+// ── Fullscreen helper ─────────────────────────────────────────────────────
+function requestFullscreen(el) {
+  if (el.requestFullscreen) return el.requestFullscreen();
+  if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+  if (el.webkitEnterFullscreen) return el.webkitEnterFullscreen();
+}
+
+// ── CardDesc (unchanged logic) ────────────────────────────────────────────
 function CardDesc({ text }) {
   const ref = useRef(null);
   const thumbRef = useRef(null);
   const [showScroll, setShowScroll] = useState(false);
   const [thumbHeight, setThumbHeight] = useState(0);
   const [thumbTop, setThumbTop] = useState(0);
-  const dragStart = useRef(null);
   const velocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
@@ -103,27 +48,22 @@ function CardDesc({ text }) {
     return () => ro.disconnect();
   }, [text]);
 
-  // scrollbar thumb drag
   const onThumbPointerDown = (e) => {
     e.preventDefault();
     e.stopPropagation();
     const startY = e.clientY;
     const startScrollTop = ref.current.scrollTop;
-
     const onMove = (e) => {
       e.stopPropagation();
       const el = ref.current;
       if (!el) return;
       const dy = e.clientY - startY;
-      const scrollRatio = el.scrollHeight / el.clientHeight;
-      el.scrollTop = startScrollTop + dy * scrollRatio;
+      el.scrollTop = startScrollTop + dy * (el.scrollHeight / el.clientHeight);
     };
-
     const onUp = () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
     };
-
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
   };
@@ -134,22 +74,18 @@ function CardDesc({ text }) {
     const track = e.currentTarget;
     if (!el || !track) return;
     const rect = track.getBoundingClientRect();
-    const clickY = e.clientY - rect.top;
-    const ratio = clickY / track.clientHeight;
+    const ratio = (e.clientY - rect.top) / track.clientHeight;
     el.scrollTo({ top: ratio * el.scrollHeight, behavior: 'smooth' });
   };
 
-  // flick/inertia drag on the text itself
   const onTextPointerDown = (e) => {
     e.stopPropagation();
     const el = ref.current;
     if (!el) return;
-
     cancelAnimationFrame(rafId.current);
     velocity.current = 0;
     lastY.current = e.clientY;
     lastTime.current = performance.now();
-    const startScrollTop = el.scrollTop;
     let moved = false;
 
     const onMove = (e) => {
@@ -167,12 +103,9 @@ function CardDesc({ text }) {
     const onUp = () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
-
       if (!moved) return;
-
-      // inertia
       const inertia = () => {
-        velocity.current *= 0.92; // friction
+        velocity.current *= 0.92;
         if (Math.abs(velocity.current) < 0.3) return;
         el.scrollTop -= velocity.current * 16;
         updateThumb();
@@ -197,7 +130,6 @@ function CardDesc({ text }) {
       >
         {text}
       </p>
-
       {showScroll && (
         <div
           className={styles.descScrollTrack}
@@ -216,56 +148,51 @@ function CardDesc({ text }) {
   );
 }
 
-//  Desktop card 
-function ProjectCard({ project, progress }) {
+// ── ProjectCard — GSAP replaces useMotionValue + useTransform ────────────
+function ProjectCard({ project, cardRef }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-
-  const opacity = useTransform(progress, [0, 0.5, 1], [0.25, 0.6, 1]);
-  const scale = useTransform(progress, [0, 0.5, 1], [0.92, 0.96, 1]);
 
   const togglePlay = () => {
     const vid = videoRef.current;
     if (!vid) return;
-
     if (isPlaying) {
       vid.pause();
       setIsPlaying(false);
     } else {
-      vid.play().catch(() => {
-        // If play fails (e.g., autoplay blocked), keep isPlaying false
-        setIsPlaying(false);
-      });
+      vid.play().catch(() => setIsPlaying(false));
       setIsPlaying(true);
     }
   };
 
+  const handleFullscreen = (e) => {
+    e.stopPropagation();
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (!isPlaying) {
+      vid.play().catch(() => { });
+      setIsPlaying(true);
+    }
+    requestFullscreen(vid);
+  };
+
   return (
-    <motion.div className={styles.card} style={{ opacity, scale }}>
-      {/* Info panel remains unchanged */}
+    // plain div — GSAP drives opacity/scale from DesktopScroller
+    <div ref={cardRef} className={styles.card} style={{ opacity: 0.25, scale: 0.92 }}>
       <div className={styles.cardInfo}>
         <div className={styles.cardTop}>
           <div className={styles.cardTopLeft}>
             <span className={styles.cardNum}>{project.id}</span>
             <span className={styles.cardSlash}>/</span>
-            <span className={styles.cardTotal}>
-              {String(PROJECTS.length).padStart(2, '0')}
-            </span>
+            <span className={styles.cardTotal}>{String(PROJECTS.length).padStart(2, '0')}</span>
           </div>
           {project.link ? (
-            <Link
-              to={project.link}
-              target="_blank"
-              className={styles.cardDemoBtn}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Link to={project.link} target="_blank" className={styles.cardDemoBtn} onClick={e => e.stopPropagation()}>
               <span className={styles.cardDemoBtnLabel}>DEMO</span>
               <FiArrowUpRight className={styles.cardDemoBtnArrow} />
             </Link>
           ) : (
-            <span className={styles.cardDemoBtnDisabled}>
-              <span>SOON</span>
-            </span>
+            <span className={styles.cardDemoBtnDisabled}><span>SOON</span></span>
           )}
         </div>
 
@@ -276,15 +203,10 @@ function ProjectCard({ project, progress }) {
         </div>
 
         <div className={styles.cardBottom}>
-          {project.tags.map((t) => (
-            <span key={t} className={styles.tag}>
-              {t}
-            </span>
-          ))}
+          {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
         </div>
       </div>
 
-      {/* Preview panel – now toggles video on click */}
       <div className={styles.cardPreview} onClick={togglePlay}>
         <img
           src={project.preview}
@@ -304,25 +226,32 @@ function ProjectCard({ project, progress }) {
             />
             <button
               className={isPlaying ? styles.stopBtn : styles.playBtn}
-              onClick={(e) => {
-                e.stopPropagation(); // prevent container click from toggling twice
-                togglePlay();
-              }}
+              onClick={e => { e.stopPropagation(); togglePlay(); }}
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? <FiPause /> : <FiPlay />}
             </button>
+            {/* Fullscreen button */}
+            <button
+              className={styles.fullscreenBtn}
+              onClick={handleFullscreen}
+              aria-label="Fullscreen"
+            >
+              <FiMaximize />
+            </button>
           </>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-
-//  View-all dropdown 
+// ── ViewAllDropdown — GSAP replaces AnimatePresence + motion.div ──────────
 function ViewAllDropdown({ onSelect, activeIndex }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const dropdownRef = useRef(null);
+  const tweenRef = useRef(null);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
@@ -335,46 +264,60 @@ function ViewAllDropdown({ onSelect, activeIndex }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+    } else {
+      if (!dropdownRef.current) return;
+      tweenRef.current?.kill();
+      tweenRef.current = gsap.to(dropdownRef.current, {
+        opacity: 0,
+        x: 24,
+        duration: 0.22,
+        ease: 'power2.in',
+        onComplete: () => setMounted(false),
+      });
+    }
+  }, [open]);
+
+  const dropdownAnimRef = useCallback((node) => {
+    dropdownRef.current = node;
+    if (!node) return;
+    tweenRef.current?.kill();
+    tweenRef.current = gsap.fromTo(node,
+      { opacity: 0, x: 24 },
+      { opacity: 1, x: 0, duration: 0.22, ease: 'power2.out' }
+    );
+  }, []);
+
   return (
     <div ref={wrapperRef} className={styles.viewAll}>
       <button className={styles.viewAllBtn} onClick={() => setOpen(v => !v)}>
         <span>ALL PROJECTS</span>
         <span className={styles.viewAllCount}>{TOTAL}</span>
-        <FiChevronDown
-          className={`${styles.viewAllChevron} ${open ? styles.viewAllChevronOpen : ''}`}
-        />
+        <FiChevronDown className={`${styles.viewAllChevron} ${open ? styles.viewAllChevronOpen : ''}`} />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className={styles.dropdown}
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 24 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-          >
-            {PROJECTS.map((p, i) => (
-              <button
-                key={p.id}
-                className={`${styles.dropdownItem} ${activeIndex === i ? styles.dropdownItemActive : ''}`}
-                onClick={() => { onSelect(i); setOpen(false); }}
-              >
-                <span className={styles.dropdownNum}>{p.id}</span>
-                <span className={styles.dropdownName}>{p.name}</span>
-                <FiArrowUpRight className={styles.dropdownArrow} />
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {mounted && (
+        <div ref={dropdownAnimRef} className={styles.dropdown}>
+          {PROJECTS.map((p, i) => (
+            <button
+              key={p.id}
+              className={`${styles.dropdownItem} ${activeIndex === i ? styles.dropdownItemActive : ''}`}
+              onClick={() => { onSelect(i); setOpen(false); }}
+            >
+              <span className={styles.dropdownNum}>{p.id}</span>
+              <span className={styles.dropdownName}>{p.name}</span>
+              <FiArrowUpRight className={styles.dropdownArrow} />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-//  Mobile carousel card 
-// MobileCard inside Projects.jsx — replace the existing MobileCard component
-
+// ── MobileCard — fullscreen added ─────────────────────────────────────────
 function MobileCard({ project }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -391,9 +334,19 @@ function MobileCard({ project }) {
     }
   };
 
+  const handleFullscreen = (e) => {
+    e.stopPropagation();
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (!isPlaying) {
+      vid.play().catch(() => { });
+      setIsPlaying(true);
+    }
+    requestFullscreen(vid);
+  };
+
   return (
     <div className={styles.mobileCard}>
-      {/* Carousel + video overlay */}
       <div className={styles.mobilePreview}>
         <img
           src={project.mobileSrc}
@@ -412,84 +365,92 @@ function MobileCard({ project }) {
           />
         )}
 
-        {/* Demo btn — top right overlay */}
         {project.link && (
-          <Link
-            to={project.link}
-            target="_blank"
-            className={styles.mobileDemoBtn}
-            onClick={e => e.stopPropagation()}
-          >
+          <Link to={project.link} target="_blank" className={styles.mobileDemoBtn} onClick={e => e.stopPropagation()}>
             <span>DEMO</span>
             <FiArrowUpRight size={13} />
           </Link>
         )}
 
-        {/* Play/pause — bottom right overlay */}
         {project.videoSrc && (
-          <button
-            className={styles.mobilePlayBtn}
-            onClick={togglePlay}
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying ? <FiPause size={13} /> : <FiPlay size={13} />}
-          </button>
+          <div className={styles.mobileVideoControls}>
+            <button
+              className={styles.mobilePlayBtn}
+              onClick={togglePlay}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? <FiPause size={13} /> : <FiPlay size={13} />}
+            </button>
+            <button
+              className={styles.mobileFullscreenBtn}
+              onClick={handleFullscreen}
+              aria-label="Fullscreen"
+            >
+              <FiMaximize size={13} />
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Info */}
       <div className={styles.mobileInfo}>
         <div className={styles.mobileTopRow}>
           <span className={styles.cardNum}>{project.id}</span>
           <span className={styles.cardSlash}>/</span>
           <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
         </div>
-
         <h2 className={styles.mobileName}>{project.name}</h2>
-
         <CardDesc text={project.desc} />
-
         <ScreenSlides screens={project.screens} />
-
         <div className={styles.cardBottom}>
-          {project.tags.map(t => (
-            <span key={t} className={styles.tag}>{t}</span>
-          ))}
+          {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
         </div>
       </div>
     </div>
   );
 }
 
-//  Desktop scroller 
+// ── DesktopScroller — GSAP replaces useMotionValue per card ──────────────
 function DesktopScroller() {
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
   const trackRef = useRef(null);
-  const progressValues = useRef(PROJECTS.map(() => useMotionValue(0)));
+  const cardRefs = useRef([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const xRef = useRef(0);
   const targetXRef = useRef(0);
 
-  const updateVisuals = (x) => {
+  const updateVisuals = useCallback((x) => {
     if (trackRef.current) {
       trackRef.current.style.transform = `translateX(${-x}px)`;
     }
     const cw = CARD_W();
     const paddingLeft = window.innerWidth / 2 - cw / 2;
+
     PROJECTS.forEach((_, i) => {
+      const card = cardRefs.current[i];
+      if (!card) return;
       const cardCenter = paddingLeft + i * (cw + GAP) + cw / 2;
       const viewCenter = x + window.innerWidth / 2;
       const dist = Math.abs(cardCenter - viewCenter);
       const p = Math.max(0, 1 - dist / (cw + GAP));
-      progressValues.current[i].set(p);
-    });
-    setActiveIndex(Math.max(0, Math.min(TOTAL - 1, Math.round(x / (cw + GAP)))));
-  };
 
-  const snapToIndex = idx => {
+      // replaces useTransform([0,0.5,1] → opacity [0.25,0.6,1], scale [0.92,0.96,1])
+      const opacity = p < 0.5
+        ? 0.25 + (p / 0.5) * 0.35
+        : 0.6 + ((p - 0.5) / 0.5) * 0.4;
+      const scale = p < 0.5
+        ? 0.92 + (p / 0.5) * 0.04
+        : 0.96 + ((p - 0.5) / 0.5) * 0.04;
+
+      gsap.set(card, { opacity, scale });
+    });
+
+    setActiveIndex(Math.max(0, Math.min(TOTAL - 1, Math.round(x / (CARD_W() + GAP)))));
+  }, []);
+
+  const snapToIndex = useCallback(idx => {
     targetXRef.current = Math.max(0, Math.min(MAX_X(), idx * (CARD_W() + GAP)));
-  };
+  }, []);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -533,7 +494,7 @@ function DesktopScroller() {
       viewport.removeEventListener('wheel', onWheel);
       viewport.removeEventListener('pointerdown', onPointerDown);
     };
-  }, []);
+  }, [updateVisuals]);
 
   return (
     <section ref={sectionRef} id="projects" className={styles.desktopSection}>
@@ -547,7 +508,11 @@ function DesktopScroller() {
       <div ref={viewportRef} className={styles.scrollViewport}>
         <div ref={trackRef} className={styles.scrollTrack}>
           {PROJECTS.map((p, i) => (
-            <ProjectCard key={p.id} project={p} progress={progressValues.current[i]} />
+            <ProjectCard
+              key={p.id}
+              project={p}
+              cardRef={el => cardRefs.current[i] = el}
+            />
           ))}
         </div>
       </div>
@@ -566,13 +531,11 @@ function DesktopScroller() {
   );
 }
 
-//  Main 
+// ── Main ──────────────────────────────────────────────────────────────────
 export default function Projects() {
-  // Desktop scroller for ≥1024px, mobile carousel below.
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   );
-  const [carouselIndex, setCarouselIndex] = useState(0);
   const touchStartX = useRef(0);
 
   useEffect(() => {
@@ -581,14 +544,6 @@ export default function Projects() {
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, []);
-
-  const onTouchStart = e => { touchStartX.current = e.touches[0].clientX; };
-  const onTouchEnd = e => {
-    const dx = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(dx) < 40) return;
-    if (dx > 0) setCarouselIndex(i => Math.min(i + 1, TOTAL - 1));
-    else setCarouselIndex(i => Math.max(i - 1, 0));
-  };
 
   if (!isMobile) return <DesktopScroller />;
 
@@ -601,9 +556,7 @@ export default function Projects() {
         <span className={styles.count}>{TOTAL} works</span>
       </div>
       <div className={styles.mobileList}>
-        {PROJECTS.map(p => (
-          <MobileCard key={p.id} project={p} />
-        ))}
+        {PROJECTS.map(p => <MobileCard key={p.id} project={p} />)}
       </div>
     </section>
   );

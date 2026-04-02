@@ -5,7 +5,7 @@ import styles from './SingleProject.module.css';
 import { FaLock } from 'react-icons/fa6';
 import { FiArrowLeft, FiArrowUpRight } from 'react-icons/fi';
 
-export default function SingleProject({ src, bgColor, logo, url }) {
+export default function SingleProject({ src, bgColor, logoSrc, url }) {
   const [transitioning, setTransitioning] = useState(true);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ export default function SingleProject({ src, bgColor, logo, url }) {
       {transitioning && (
         <ProjectTransition
           bgColor={bgColor}
-          logo={logo}
+          logo={<img src={logoSrc} width={256} height={256} loading="lazy" />}
           onDone={() => {
             setTransitioning(false);
             setTimeout(() => setVisible(true), 50);

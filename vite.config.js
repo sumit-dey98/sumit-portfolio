@@ -15,7 +15,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           gsap: ['gsap', '@gsap/react'],
-          motion: ['motion'],
+          flickity: ['flickity'],
+          react: ['react', 'react-dom', 'react-router-dom'],
+          icons: ['react-icons'],
         }
       }
     }

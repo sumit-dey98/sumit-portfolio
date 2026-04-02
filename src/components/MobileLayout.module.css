@@ -12,6 +12,7 @@
     display: contents;
   }
 
+  .paneTrack,
   .pane {
     display: contents;
   }
@@ -55,6 +56,7 @@
     z-index: 10;
   }
 
+  /* ── Clip window ── */
   .paneArea {
     flex: 1;
     position: relative;
@@ -62,35 +64,31 @@
     min-height: 0;
   }
 
+  /* ── Sliding track — GSAP owns transform ── */
+  .paneTrack {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    will-change: transform;
+    /* width set inline: TABS.length * 100% */
+  }
+
+  /* ── Individual pane — sits in flow inside the track ── */
   .pane {
-    position: absolute;
-    inset: 0;
+    height: 100%;
+    flex-shrink: 0;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(calc(var(--dir, 1) * 32px));
-    will-change: transform, opacity;
-    transition:
-      opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-      transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* width set inline: 100% / TABS.length */
   }
 
-  .paneActive {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(0);
+  .pane::-webkit-scrollbar {
+    display: none;
   }
 
-  .paneExit {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(calc(var(--dir, 1) * -32px));
-    transition:
-      opacity 0.22s ease,
-      transform 0.5s ease;
-  }
+  /* Remove old class-toggle animation rules — GSAP handles position */
+  /* .paneActive, .paneExit are no longer used */
 
   .pane section,
   .pane>* {
@@ -98,14 +96,13 @@
     min-height: 100%;
   }
 
+  /* ── Bottom sheet ── */
   .sheet {
     flex-shrink: 0;
     height: var(--collapsed-h, 64px);
     transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: height;
-    background:
-      color-mix(in srgb, var(--surface) 80%, transparent);
-    /* background: transparent; */
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     border: 1px solid var(--accent);
@@ -117,13 +114,10 @@
     align-items: stretch;
     padding-bottom: env(safe-area-inset-bottom, 0px);
     position: fixed;
-    /* bottom: 0; */
     bottom: 0;
     right: 0;
     left: 0;
-    /* inset: 4px; */
     z-index: 100;
-    /* width: 100%; */
   }
 
   .sheetExpanded {

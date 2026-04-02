@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import DotGrid from '../components/DotGrid';
 import Button from '../components/Button';
@@ -11,40 +10,21 @@ import { IoArrowForwardSharp } from 'react-icons/io5';
 import styles from './Landing.module.css';
 
 const LINE = ['Front-end web developer'];
-
 const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1023;
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: 'easeOut',
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const fadeUpVariant = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
-};
-
-const fadeVariant = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } },
-};
-
-const wordVariant = {
-  hidden: { y: '100%' },
-  visible: { y: '0%', transition: { duration: 0.65, ease: 'easeOut' } },
-};
 
 export default function Landing({ ready = false, onEnter, onSkip }) {
   const { getCssVar } = useThemeContext();
   const firedRef = useRef(false);
+  const tlRef = useRef(null);
+
+  // element refs — one per animated child
+  const preRef = useRef(null);
+  const word0Ref = useRef(null);
+  const word1Ref = useRef(null);
+  const word2Ref = useRef(null);
+  const roleRef = useRef(null);
+  const buttonsRef = useRef(null);
+  const hintRef = useRef(null);
 
   const { display, start: startDecrypt } = useDecryptedText('INITIALIZING PORTFOLIO...', {
     speed: 50,
@@ -61,10 +41,62 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
     paused: !ready,
   });
 
+  // Build + play timeline when ready flips true
   useEffect(() => {
     if (!ready || firedRef.current) return;
     firedRef.current = true;
     startDecryptRef.current?.();
+
+    // containerVariants: duration 0.4, staggerChildren 0.1, delayChildren 0.1
+    // fadeUpVariant:  opacity 0→1, y 10→0, duration 0.45
+    // wordVariant:    y 100%→0%,   duration 0.65
+    // fadeVariant:    opacity 0→1, duration 0.4
+
+    const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+    tlRef.current = tl;
+
+    // t=0: container fades in (opacity 0→1, duration 0.4) — we achieve
+    // this by just letting children animate in; container stays opacity:1
+
+    // delayChildren: 0.1 → all children start at t=0.1
+    // staggerChildren: 0.1 → each child offset by 0.1s from previous
+
+    // child 0 — pre (fadeUpVariant, t=0.1)
+    tl.fromTo(preRef.current,
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.45 },
+      0.1
+    );
+
+    // child 1 — headline words (wordVariant, t=0.2) staggered within themselves
+    tl.fromTo([word0Ref.current, word1Ref.current, word2Ref.current],
+      { y: '100%' },
+      { y: '0%', duration: 0.65, stagger: 0.1 },
+      0.2  // delayChildren(0.1) + 1 stagger gap(0.1)
+    );
+
+    // child 2 — role (fadeVariant, t=0.3)
+    tl.fromTo(roleRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.4 },
+      0.3
+    );
+
+    // child 3 — buttons (fadeUpVariant, t=0.4)
+    tl.fromTo(buttonsRef.current,
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.45 },
+      0.4
+    );
+
+    // child 4 — scroll hint (fadeVariant, t=0.5)
+    tl.fromTo(hintRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.4 },
+      0.5
+    );
+
+    return () => tl.kill();
   }, [ready]);
 
   return (
@@ -83,33 +115,33 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
         />
       </div>
 
-      <motion.div
-        className={styles.content}
-        variants={containerVariants}
-        initial="hidden"
-        animate={ready ? 'visible' : 'hidden'}
-      >
-        <motion.p className={styles.pre} variants={fadeUpVariant}>
+      {/* container — always visible, children start hidden via inline style */}
+      <div className={styles.content}>
+
+        <p ref={preRef} className={styles.pre} style={{ opacity: 0 }}>
           <span className={styles.prompt}>&gt;</span> {display}
-        </motion.p>
+        </p>
 
         <h1 className={styles.headline}>
-          {['SUMIT', 'HILLOL', 'DEY'].map((word) => (
+          {['SUMIT', 'HILLOL', 'DEY'].map((word, i) => (
             <span key={word} style={{ display: 'block', overflow: 'hidden' }}>
-              <motion.span style={{ display: 'inline-block' }} variants={wordVariant}>
+              <span
+                ref={i === 0 ? word0Ref : i === 1 ? word1Ref : word2Ref}
+                style={{ display: 'inline-block', transform: 'translateY(100%)' }}
+              >
                 {word}
-              </motion.span>
+              </span>
             </span>
           ))}
         </h1>
 
-        <motion.p className={styles.role} variants={fadeVariant}>
+        <p ref={roleRef} className={styles.role} style={{ opacity: 0 }}>
           <span className={styles.typed}>
             {typed}<span className={styles.cursor}>▌</span>
           </span>
-        </motion.p>
+        </p>
 
-        <motion.div className={styles.buttons} variants={fadeUpVariant}>
+        <div ref={buttonsRef} className={styles.buttons} style={{ opacity: 0 }}>
           <Button variant="fill" icon={IoArrowForwardSharp}>VIEW CV</Button>
           <SvgButton
             color={getCssVar('--accent')}
@@ -128,13 +160,14 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
           >
             SKIP INTRO
           </SvgButton>
-        </motion.div>
+        </div>
 
-        <motion.div className={styles.scrollHint} variants={fadeVariant}>
-          <span>{ isMobile ? 'SWIPE' : 'SCROLL'}</span>
+        <div ref={hintRef} className={styles.scrollHint} style={{ opacity: 0 }}>
+          <span>{isMobile ? 'SWIPE' : 'SCROLL'}</span>
           <div className={styles.scrollLine} />
-        </motion.div>
-      </motion.div>
+        </div>
+
+      </div>
     </section>
   );
 }

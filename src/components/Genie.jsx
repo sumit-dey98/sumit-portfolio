@@ -2,50 +2,28 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 
-/**
- * Genie
- *
- * Canvas-based genie-out transition. Expands from an anchor point to fill the screen.
- *
- * Rendered into document.body via a React portal so that position: fixed is always
- * relative to the true viewport. Without this, any ancestor with a CSS transform
- * (common in page-transition wrappers) would make position: fixed relative to that
- * ancestor instead, causing the canvas to animate off-screen with it.
- *
- * @prop {React.RefObject} anchorRef   Ref to the element the animation originates from.
- *                                     Falls back to bottom-centre of the screen if not provided.
- * @prop {string}          color       Fill color for the front layer (hex/rgb or CSS var).
- *                                     Falls back to --accent.
- * @prop {function}        onComplete  Called when the animation finishes.
- * @prop {string}          label       Text rendered inside the expanding shape. Default: 'HOME'.
- *
- * Module-level constants (edit here to tune the animation):
- *   DURATION         – total animation length in ms.
- *   EASE_RISE        – easing for vertical expansion (mobile: power1.in, desktop: power1.out).
- *   EASE_TOP_W       – easing for top edge width expansion.
- *   EASE_BOT_W       – easing for bottom edge width expansion.
- *   SLICES           – number of horizontal slices used to warp the shape.
- *   CONCAVE_DEPTH    – depth of the top-edge concavity (negative = convex, positive = concave).
- *   CORNER_RADIUS_PX – rounded corner size in px (0 on mobile).
- *   LAG_FRACTION     – reserved for layer timing offset.
- *   LAYER2_SPREAD    – width multiplier for the back accent layer.
- */
-
 const DURATION = 2000;
 const isMobile = window.innerWidth <= 1;
 const EASE_RISE = gsap.parseEase(isMobile ? 'power1.in' : 'power2.out');
 const EASE_TOP_W = gsap.parseEase('power1.inOut');
 const EASE_BOT_W = gsap.parseEase(isMobile ? 'expo.in' : 'power1.in');
-const SLICES = 60;
+const SLICES = 20;
 const CONCAVE_DEPTH = isMobile ? -0.6 : 0.6;
 const CORNER_RADIUS_PX = isMobile ? 0 : 6;
 const LAG_FRACTION = 0.1;
 const LAYER2_SPREAD = 1.1;
+const STRIP_H = 2;
 
-export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) {
+export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GET", label2 = "STARTED" }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    const _cs = getComputedStyle(document.documentElement);
+    const CSS_ACCENT = _cs.getPropertyValue('--accent').trim();
+    const CSS_ACCENT2 = _cs.getPropertyValue('--accent2').trim();
+    const CSS_BG = _cs.getPropertyValue('--bg').trim() || '#080810';
+    const CSS_DISPLAY = _cs.getPropertyValue('--display').trim() || 'Impact';
+    
     let startTime = null;
     let rafId;
 
@@ -66,11 +44,10 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
-    const cs = getComputedStyle(document.documentElement);
-    const fillColor = color || cs.getPropertyValue('--accent').trim() || '#276bff';
-    const fillColor2 = cs.getPropertyValue('--accent2').trim() || '#00ffcc';
-    const textColor = cs.getPropertyValue('--bg').trim() || '#080810';
-    const fontFamily = cs.getPropertyValue('--display').trim() || 'Impact';
+    const fillColor = color || CSS_ACCENT || '#276bff';
+    const fillColor2 = CSS_ACCENT2;
+    const textColor = CSS_BG;
+    const fontFamily = CSS_DISPLAY;
 
     let originX = W / 2;
     let originY = H;
@@ -84,49 +61,43 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
     const warpFn = (v, t) => {
       const WARP_STRENGTH = 0.25;
       const WARP_WIDTH = 1.5;
-      const waistCenter = 0.25 - t * 0.2;
+      const waistCenter = 1 - t * 1.5;
       const warpFade = Math.max(0, 1 - t * 1.4);
       const squeeze = WARP_STRENGTH * warpFade
         * v < waistCenter
         ? Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2))
         : Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2));
-      return isMobile ? 0.9 + squeeze : 1+ 0.25 * squeeze;
+      // return isMobile ? 0.9 + squeeze : 1 + 0.25 * squeeze;
+      return 1 + 0.3 * squeeze;
     };
 
-    const funnelFn = (v, t) => {
-      const neckPos = 0.5;
-      const neckWidth = 0.12;
-      const spoutFlare = 0.9;
-      const sharpness = 2.5;
-      const fade = Math.max(0, 1 - t * 1.4);
-      const blend = 1 / (1 + Math.exp(-(v - neckPos) * 100));
-      const taperP = v / neckPos;
-      const taper = 1 - (1 - neckWidth) * Math.pow(Math.min(taperP, 1), sharpness);
-      const flareP = (v - neckPos) / (1 - neckPos);
-      const flare = neckWidth + spoutFlare * Math.max(flareP, 0);
-      const width = taper * (1 - blend) + flare * blend;
-      const concavity = CONCAVE_DEPTH * (1 - t) * Math.exp(-v * 8);
-      return (1 - (1 - width) * fade) - concavity;
-    };
-
-    const fontSize = Math.round(W * 0.1);
+    const fontSize = Math.round(W * 0.075);
     const textCanvas = document.createElement('canvas');
     const textCtx = textCanvas.getContext('2d');
     textCtx.font = `400 ${fontSize}px ${fontFamily}`;
-    const measured = textCtx.measureText(label).width;
+
+    const measured = textCtx.measureText(label1).width;
     const textW = Math.ceil(measured * 1.5) + 128;
-    const textH = Math.ceil(fontSize * 1.6);
+    const textH = Math.ceil(fontSize * 1.6 * 2);
 
     textCanvas.width = textW;
     textCanvas.height = textH;
 
-    textCtx.clearRect(0, 0, textW, textH);
     textCtx.font = `400 ${fontSize}px ${fontFamily}`;
     textCtx.letterSpacing = '4px';
     textCtx.fillStyle = textColor;
     textCtx.textAlign = 'center';
     textCtx.textBaseline = 'middle';
-    textCtx.fillText(label, textW / 2, textH / 2);
+
+    if (label2?.trim()) {
+      const lineHeight = fontSize * 1.2;
+      const totalTextH = lineHeight * 2;
+      const startY = (textH - totalTextH) / 2 + lineHeight / 2;
+      textCtx.fillText(label1, textW / 2, startY);
+      textCtx.fillText(label2, textW / 2, startY + lineHeight);
+    } else {
+      textCtx.fillText(label1, textW / 2, textH / 2);
+    }
 
     const buildPath = (leftPts, rightPts, cornerPx, concavePx) => {
       const TL = leftPts[0];
@@ -239,32 +210,28 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
       const cornerPx = Math.min(CORNER_RADIUS_PX * (1 - t), minHalfEdge * 0.45);
       const concavePx = topHW * CONCAVE_DEPTH * (1 - t);
 
-      const t2 = t;
-
-      if (t2 > 0) {
-        const topY2 = originY - (originY + H * 0.03) * EASE_RISE(t2);
-        const topHW2 = (W / 2) * EASE_TOP_W(t2) * LAYER2_SPREAD;
-        const botY2 = originY + (H - originY) * EASE_RISE(Math.pow(t2, 2.5));
-        const botHW2 = (W / 2) * EASE_BOT_W(t2) * LAYER2_SPREAD;
-        const shapeH2 = botY2 - topY2;
+      // Layer 2 (back accent)
+      if (true) {
+        const topHW2 = (W / 2) * EASE_TOP_W(t) * LAYER2_SPREAD;
+        const botHW2 = (W / 2) * EASE_BOT_W(t) * LAYER2_SPREAD;
+        const shapeH2 = botY - topY;
 
         if (shapeH2 > 0) {
           const leftPts2 = [];
           const rightPts2 = [];
           for (let i = 0; i <= SLICES; i++) {
             const v = i / SLICES;
-            const y = topY2 + shapeH2 * v;
+            const y = topY + shapeH2 * v;
             const hw = topHW2 + (botHW2 - topHW2) * v;
-            const warpedHW = hw * warpFn(v, t2);
+            const warpedHW = hw * warpFn(v, t);
             leftPts2.push({ x: originX - warpedHW, y });
             rightPts2.push({ x: originX + warpedHW, y });
           }
           const minHalfEdge2 = Math.min(topHW2, botHW2, shapeH2 / 2);
-          const cornerPx2 = Math.min(CORNER_RADIUS_PX * (1 - t2), minHalfEdge2 * 0.45);
-          const concavePx2 = topHW2 * CONCAVE_DEPTH * (1 - t2);
+          const cornerPx2 = Math.min(CORNER_RADIUS_PX * (1 - t), minHalfEdge2 * 0.45);
+          const concavePx2 = topHW2 * CONCAVE_DEPTH * (1 - t);
 
           ctx.save();
-          ctx.globalAlpha = 1;
           buildPath(leftPts2, rightPts2, cornerPx2, concavePx2);
           ctx.fillStyle = fillColor2;
           ctx.fill();
@@ -272,58 +239,57 @@ export default function Genie({ anchorRef, color, onComplete, label = 'HOME' }) 
         }
       }
 
+      // Layer 1 — build path once, clip + fill in same path
       ctx.save();
-      ctx.globalAlpha = 1;
       buildPath(leftPts, rightPts, cornerPx, concavePx);
       ctx.fillStyle = fillColor;
       ctx.fill();
-      ctx.restore();
 
       if (t >= 1) {
-        ctx.globalAlpha = 1;
+        ctx.restore();
         ctx.fillStyle = fillColor;
         ctx.fillRect(0, 0, W, H);
         return;
       }
 
       const fadeInSpeed = 1.5;
-      const fadeOutStart = 0.95;
-      const fadeOutDur = 0.05;
+      const fadeOutStart = 0.85;
+      const fadeOutDur = 0.1;
+      const tText = Math.min(t / fadeOutStart, 1);
 
-      const textOpacity = Math.min(t * fadeInSpeed, 1)
+      const textOpacity = Math.min(tText * fadeInSpeed, 1)
         * Math.max(0, 1 - (t - fadeOutStart) / fadeOutDur);
-      if (textOpacity <= 0) return;
 
-      const visibleTop = Math.max(topY, 0);
-      const visibleBot = Math.min(botY, H);
-      const visibleCenterY = (visibleTop + visibleBot) / 2;
-      const destY = visibleCenterY - textH / 2;
+      if (textOpacity > 0) {
+        if (t < 0.98) {
+          // reuse the already-built path for clipping
+          buildPath(leftPts, rightPts, cornerPx, concavePx);
+          ctx.clip();
+        }
 
-      ctx.save();
+        ctx.globalAlpha = textOpacity;
 
-      if (t < 0.98) {
-        buildPath(leftPts, rightPts, cornerPx, concavePx);
-        ctx.clip();
-      }
+        const visibleTop = Math.max(topY, 0);
+        const visibleBot = Math.min(botY, H);
+        const visibleCenterY = (visibleTop + visibleBot) / 2;
+        const destY = visibleCenterY - textH / 2;
 
-      ctx.globalAlpha = textOpacity;
+        for (let row = 0; row < textH; row += STRIP_H) {
+          const screenY = destY + row;
+          if (screenY < 0 || screenY > H) continue;
 
-      for (let row = 0; row < textH; row++) {
-        const screenY = destY + row;
-        if (screenY < 0 || screenY > H) continue;
+          const v = (screenY - topY) / shapeH;
+          const clampedV = Math.max(0, Math.min(1, v));
+          const rowWarp = warpFn(clampedV, tText);
+          const warpedTextW = textW * rowWarp;
+          if (warpedTextW < 1) continue;
 
-        const v = (screenY - topY) / shapeH;
-        const clampedV = Math.max(0, Math.min(1, v));
-        const rowWarp = warpFn(clampedV, t);
-        const warpedTextW = textW * rowWarp;
-
-        if (warpedTextW < 1) continue;
-
-        ctx.drawImage(
-          textCanvas,
-          0, row, textW, 1,
-          originX - warpedTextW / 2, screenY, warpedTextW, 1,
-        );
+          ctx.drawImage(
+            textCanvas,
+            0, row, textW, STRIP_H,
+            originX - warpedTextW / 2, screenY, warpedTextW, STRIP_H,
+          );
+        }
       }
 
       ctx.restore();
