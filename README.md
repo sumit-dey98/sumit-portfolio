@@ -21,6 +21,7 @@ Portfolio website designed & developed by Sumit Hillol Dey, a front-end web deve
   <tr>
     <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216228/sumit-portfolio/assets/portfolio-screen-mobile-light-1.png" /></td>
     <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216229/sumit-portfolio/assets/portfolio-screen-mobile-light-2.png" /></td>
+    <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216230/sumit-portfolio/assets/portfolio-screen-mobile-light-3.png" /></td>
     <td></td>
   </tr>
 </table>
