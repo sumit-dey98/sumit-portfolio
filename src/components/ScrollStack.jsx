@@ -27,7 +27,6 @@ const ScrollStack = ({
   const rafScheduledRef = useRef(false);
   const lenisRef = useRef(null);
   const cardsRef = useRef([]);
-  // Caches: card tops + end element top, populated once after stable layout
   const cachedCardTopsRef = useRef([]);
   const cachedPinEndRef = useRef(0);
   const lastTransformsRef = useRef(new Map());
@@ -45,7 +44,6 @@ const ScrollStack = ({
     return parseFloat(value);
   }, []);
 
-  // Walk offsetParent chain relative to the scroll container (stable, no reflow)
   const getOffsetRelativeTo = useCallback((element, container) => {
     let offset = 0;
     let el = element;
@@ -56,8 +54,6 @@ const ScrollStack = ({
     return offset;
   }, []);
 
-  // Cache all card tops AND the endElement pinEnd — called once after layout
-  // and again on resize. Never called during scroll.
   const cacheOffsets = useCallback(() => {
     const container = getContainer();
     if (!container && !useWindowScroll) return;
@@ -85,8 +81,6 @@ const ScrollStack = ({
     }
   }, [useWindowScroll, getContainer, parsePercentage, stackPosition, getOffsetRelativeTo]);
 
-  // Pure write-only scroll handler — reads only from cached values and
-  // scroll position, never triggers layout.
   const updateCardTransforms = useCallback(() => {
     if (!cardsRef.current.length) return;
 
@@ -104,7 +98,6 @@ const ScrollStack = ({
       const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
       const triggerEnd = cardTop - scaleEndPositionPx;
 
-      // Scale progress
       let scaleProgress = 0;
       if (scrollTop >= pinStart && scrollTop <= triggerEnd) {
         scaleProgress = (scrollTop - pinStart) / Math.max(1, triggerEnd - pinStart);
@@ -116,7 +109,6 @@ const ScrollStack = ({
       const scale = 1 - scaleProgress * (1 - targetScale);
       const rotation = rotationAmount ? i * rotationAmount * scaleProgress : 0;
 
-      // Blur — only computed when enabled
       let blur = 0;
       if (blurAmount && scaleProgress > 0) {
         let topCardIndex = 0;
@@ -128,7 +120,6 @@ const ScrollStack = ({
         if (i < topCardIndex) blur = Math.max(0, (topCardIndex - i) * blurAmount);
       }
 
-      // Translation
       let translateY = 0;
       if (scrollTop >= pinStart && scrollTop <= pinEnd) {
         translateY = scrollTop - cardTop + stackPositionPx + itemStackDistance * i;
@@ -137,7 +128,6 @@ const ScrollStack = ({
       }
       translateY = Math.max(0, translateY);
 
-      // Round to avoid sub-pixel thrash
       const ty = Math.round(translateY * 100) / 100;
       const sc = Math.round(scale * 1000) / 1000;
       const ro = Math.round(rotation * 100) / 100;
@@ -153,14 +143,12 @@ const ScrollStack = ({
 
       if (hasChanged) {
         card.style.transform = `translate3d(0, ${ty}px, 0) scale(${sc}) rotate(${ro}deg)`;
-        // Only set filter when blur is enabled to avoid repaint overhead
         if (blurAmount) {
           card.style.filter = bl > 0 ? `blur(${bl}px)` : 'none';
         }
         lastTransformsRef.current.set(i, { ty, sc, ro, bl });
       }
 
-      // Stack completion callback on last card
       if (i === cardsRef.current.length - 1) {
         const inView = scrollTop >= pinStart && scrollTop <= pinEnd;
         if (inView && !stackCompletedRef.current) {
@@ -177,7 +165,6 @@ const ScrollStack = ({
     onStackComplete, parsePercentage, getContainer,
   ]);
 
-  // rAF-throttled scroll handler — never drops a frame, deduplicates within frame
   const handleScroll = useCallback(() => {
     if (rafScheduledRef.current) return;
     rafScheduledRef.current = true;
@@ -203,12 +190,9 @@ const ScrollStack = ({
       if (i < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
       card.style.transformOrigin = 'top center';
       card.style.transform = 'translate3d(0, 0, 0)';
-      // Explicit will-change — valid value, not empty string
       card.style.willChange = 'transform';
     });
 
-    // Wait two frames: first for layout to stabilise, second to ensure
-    // offsetTop values are fully resolved (avoids the zero-on-mount bug).
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         cacheOffsets();

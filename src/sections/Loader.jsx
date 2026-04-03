@@ -16,7 +16,6 @@ const TYPEWRITER_LINES = [
   'Your data will only be stored in your browser',
 ];
 
-// ─── Utility: fade a node out with optional y/blur, then call onComplete ───
 function animateOut(node, { y = 0, blur = false, duration = 0.4 } = {}, onComplete) {
   if (!node) { onComplete?.(); return; }
   const vars = { opacity: 0, duration, ease: 'power2.in', onComplete };
@@ -25,7 +24,6 @@ function animateOut(node, { y = 0, blur = false, duration = 0.4 } = {}, onComple
   gsap.to(node, vars);
 }
 
-// ─── Utility: fade a node in with optional y ──────────────────────────────
 function animateIn(node, { y = 0, delay = 0, duration = 0.4 } = {}) {
   if (!node) return;
   gsap.fromTo(node,
@@ -34,7 +32,6 @@ function animateIn(node, { y = 0, delay = 0, duration = 0.4 } = {}) {
   );
 }
 
-// ─── Loader-level fade (replaces outermost AnimatePresence) ──────────────
 function useLoaderFade(exiting, nodeRef) {
   useEffect(() => {
     if (!nodeRef.current) return;
@@ -46,7 +43,6 @@ function useLoaderFade(exiting, nodeRef) {
   }, [exiting]);
 }
 
-// ─── CharReveal: staggered per-char y+opacity via callback ref ────────────
 const CharReveal = ({ text, delay = 0, className = '' }) => {
   const words = text.split(' ');
 
@@ -86,7 +82,6 @@ const CharReveal = ({ text, delay = 0, className = '' }) => {
   );
 };
 
-// ─── Corner: draws horizontal + vertical lines via scaleX/scaleY ──────────
 const Corner = ({ delay }) => {
   const hRef = useCallback((node) => {
     if (!node) return;
@@ -114,7 +109,6 @@ const Corner = ({ delay }) => {
 
 const ThemeIcon = ({ icon: Icon, size = 11 }) => <Icon size={size} />;
 
-// ─── ThemeCard: spring scale-in for checkmark ────────────────────────────
 const ThemeCard = ({ themeKey: tk, t, selected, onSelect }) => {
   const checkRef = useCallback((node) => {
     if (!node) return;
@@ -170,7 +164,6 @@ const ModeCard = ({ id, tag, title, desc, selected, onSelect }) => (
   </button>
 );
 
-// ─── StaggerFade: wraps children, staggers them in on mount ───────────────
 const StaggerFade = ({ children, delayStart = 0, stagger = 0.06, className }) => {
   const ref = useCallback((node) => {
     if (!node) return;
@@ -192,7 +185,6 @@ const StaggerFade = ({ children, delayStart = 0, stagger = 0.06, className }) =>
   );
 };
 
-// ─── FadeIn: simple opacity+y fade via callback ref ───────────────────────
 const FadeIn = ({ delay = 0, y = 0, children, className, style }) => {
   const ref = useCallback((node) => {
     if (!node) return;
@@ -209,8 +201,6 @@ const FadeIn = ({ delay = 0, y = 0, children, className, style }) => {
   );
 };
 
-// ─── Panel switcher: replaces AnimatePresence mode="wait" ─────────────────
-// Animates current panel out (y-20 + blur), then swaps, animates new one in
 function usePanelTransition(step) {
   const [visibleStep, setVisibleStep] = useState(step);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -232,7 +222,6 @@ function usePanelTransition(step) {
     }
   }, [step]);
 
-  // Animate in when visibleStep changes
   const inRef = useCallback((node) => {
     panelRef.current = node;
     if (!node) return;
@@ -269,7 +258,6 @@ export default function Loader({ onComplete }) {
   const stepIndex = STEPS.indexOf(step);
   const inWizard = STEPS.includes(step);
 
-  // Loader-level fade in/out
   useEffect(() => {
     if (!loaderRef.current) return;
     if (!exiting) {
@@ -279,7 +267,6 @@ export default function Loader({ onComplete }) {
     }
   }, [exiting]);
 
-  // Returning user auto-advance
   useEffect(() => {
     if (step !== 'returning') return;
     const t = setTimeout(() => {
@@ -289,7 +276,6 @@ export default function Loader({ onComplete }) {
     return () => clearTimeout(t);
   }, [step]);
 
-  // Wizard track sliding
   useEffect(() => {
     if (!trackRef.current || !inWizard || !wizardRef.current) return;
     const containerWidth = wizardRef.current.offsetWidth;
@@ -318,7 +304,6 @@ export default function Loader({ onComplete }) {
 
   const handleSkipAll = () => handleEnter({ mode: 'lite', name: '' });
 
-  // Panel transition controller
   const { visibleStep, inRef } = usePanelTransition(
     inWizard ? 'wizard' : step
   );
@@ -348,7 +333,6 @@ export default function Loader({ onComplete }) {
       )}
 
       <div className={styles.content}>
-        {/* Single panel node — swapped by usePanelTransition */}
         <div key={visibleStep} ref={inRef} className={styles.panel} style={{ opacity: 0 }}>
 
           {visibleStep === 'welcome' && (

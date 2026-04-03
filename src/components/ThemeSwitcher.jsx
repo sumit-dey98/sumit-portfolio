@@ -45,7 +45,6 @@ function ThemeOption({ themeKey, activeKey, onSelect }) {
   );
 }
 
-// Animated chevron that rotates on open/close
 function AnimatedChevron({ open, size = 10, className }) {
   const ref = useRef(null);
   const prevOpen = useRef(open);
@@ -69,7 +68,6 @@ function AnimatedChevron({ open, size = 10, className }) {
   );
 }
 
-// Animated chevron for submenu (rotates to 90deg)
 function SubmenuChevron({ active, className }) {
   const ref = useRef(null);
   const prevActive = useRef(active);
@@ -93,7 +91,6 @@ function SubmenuChevron({ active, className }) {
   );
 }
 
-// Animated collapsible panel (replaces AnimatePresence + motion.div with height/opacity)
 function CollapsePanel({ open, children, className }) {
   const ref = useRef(null);
   const [mounted, setMounted] = useState(open);
@@ -101,7 +98,6 @@ function CollapsePanel({ open, children, className }) {
 
   useEffect(() => {
     if (open) {
-      // Mount first, then animate in on next tick once ref is valid
       setMounted(true);
     } else {
       if (!ref.current) return;
@@ -116,7 +112,6 @@ function CollapsePanel({ open, children, className }) {
     }
   }, [open]);
 
-  // Animate in only after mount gives us a real DOM node
   const panelRef = useCallback((node) => {
     ref.current = node;
     if (!node) return;
@@ -141,7 +136,6 @@ function CollapsePanel({ open, children, className }) {
   );
 }
 
-// Animated panel for the dropdown menu itself (y + opacity)
 function DropdownPanel({ open, children, className }) {
   const ref = useRef(null);
   const [mounted, setMounted] = useState(open);
@@ -177,7 +171,6 @@ function DropdownPanel({ open, children, className }) {
   return <div ref={panelRef} className={className}>{children}</div>;
 }
 
-// Animated submenu column (width + opacity)
 function SubmenuPanel({ open, children, className }) {
   const ref = useRef(null);
   const [mounted, setMounted] = useState(open);
@@ -307,7 +300,6 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
     setHoveredGroup(null);
   };
 
-  // ---- Sidebar list variant ----
   if (variant === 'list') {
     return (
       <div className={styles.list}>
@@ -356,7 +348,6 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
     );
   }
 
-  // ---- Desktop dropdown variant ----
   return (
     <div ref={wrapperRef} className={styles.wrapper}>
       <SvgButton
@@ -381,7 +372,6 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
       </SvgButton>
 
       <DropdownPanel open={open} className={styles.menu}>
-        {/* main column */}
         <ul className={styles.menuMain}>
           {Object.entries(grouped).map(([group, entries]) => {
             if (group === '__top__') {
@@ -414,7 +404,6 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
           })}
         </ul>
 
-        {/* submenu column */}
         <SubmenuPanel
           open={!!hoveredGroup && !!grouped[hoveredGroup]}
           className={styles.submenu}

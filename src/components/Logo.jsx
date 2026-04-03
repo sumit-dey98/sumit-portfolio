@@ -38,7 +38,6 @@ export default function Logo({ onClick, mobile = false, className = '' }) {
   useEffect(() => {
     if (mobile || !containerRef.current) return;
 
-    // scope all GSAP to this component's DOM subtree only
     ctxRef.current = gsap.context(() => {
       gsap.set([text1Ref.current, text2Ref.current], { x: -30, opacity: 0 });
     }, containerRef);

@@ -35,7 +35,6 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
   const touchStartX = useRef(null);
   const touchStartY = useRef(null);
 
-  // ── Slide track to a given tab index via GSAP ──────────────────────────
   const slideTo = useCallback((index) => {
     if (!trackRef.current) return;
     const paneWidth = trackRef.current.parentElement.offsetWidth;
@@ -47,7 +46,6 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
     });
   }, []);
 
-  // ── Switch tab ──────────────────────────────────────────────────────────
   const switchTab = useCallback((id) => {
     if (id === activeTab) return;
     const index = TABS.findIndex(t => t.id === id);
@@ -55,13 +53,11 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
     slideTo(index);
   }, [activeTab, slideTo]);
 
-  // ── Init: set track width and snap to index 0 with no animation ────────
   useEffect(() => {
     if (!trackRef.current) return;
     gsap.set(trackRef.current, { x: 0 });
   }, []);
 
-  // ── On resize: re-snap to current tab without animation ────────────────
   useEffect(() => {
     const onResize = () => {
       if (!trackRef.current) return;
@@ -73,7 +69,6 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
     return () => window.removeEventListener('resize', onResize);
   }, [activeTab]);
 
-  // ── Swipe gesture ───────────────────────────────────────────────────────
   const onTouchStart = useCallback((e) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -90,16 +85,13 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
 
     const currentIdx = TABS.findIndex(t => t.id === activeTab);
     if (dx > 0) {
-      // swipe left → next tab
       if (currentIdx < TABS.length - 1) switchTab(TABS[currentIdx + 1].id);
     } else {
-      // swipe right → prev tab or back to landing
       if (currentIdx > 0) switchTab(TABS[currentIdx - 1].id);
       else onBackToLanding?.();
     }
   }, [activeTab, switchTab, onBackToLanding]);
 
-  // ── Drag handle (expand/collapse sheet) ────────────────────────────────
   const startDrag = useCallback((clientY) => {
     dragStartY.current = clientY;
     setDragging(true);
@@ -149,10 +141,8 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
       <div className={styles.body} aria-live="polite">
         {nav && <div className={styles.navSlot}>{nav}</div>}
 
-        {/* Clip window — overflow hidden, full width */}
         <div className={styles.paneArea}>
 
-          {/* Track — all panes side by side, GSAP moves this */}
           <div
             ref={trackRef}
             className={styles.paneTrack}

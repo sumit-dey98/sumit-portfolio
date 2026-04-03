@@ -18,7 +18,7 @@ import Skills from './sections/Skills';
 import Services from './sections/Services';
 import About from './sections/About';
 import Contact from './sections/Contact';
-import MobileLayout from './components/MobileLayout';
+import MobileLayout from './templates/MobileLayout';
 import {PROJECT_ROUTES} from './data/data';
 import './index.css';
 

@@ -130,7 +130,7 @@ export const SERVICES = [
   {
     id: '04',
     title: 'Creative Direction',
-    desc: 'End-to-end visual strategy — brand identity, typography systems, and cohesive design languages that scale.',
-    tags: ['Branding','Typography', 'Art Direction'],
+    desc: 'End-to-end visual strategy - brand identity, typography systems, and cohesive design languages that scale.',
+    tags: ['Branding', 'Typography', 'Art Direction'],
   },
 ];

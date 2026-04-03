@@ -30,14 +30,13 @@
   src: local('Impact'), url('/fonts/impact.woff') format('woff');
 }
 
-/* ─── Design tokens ───────────────────────────── */
+/* --- Design tokens --- */
 :root {
   --bg: #080810;
   --surface: #0e0e1a;
   --border: #1a1a2e;
   --accent: #276bff;
   --accent2: #00ffcc;
-  --accent3: #5227FF;
   --dim: #7c74a7;
   --muted: #6a6a88;
   --text: #e0e0f0;
@@ -67,7 +66,7 @@
   --xxl: clamp(36px, 3.5vw, 48px);
 }
 
-/* ─── Reset ───────────────────────────────────── */
+/* --- Reset ------ */
 *,
 *::before,
 *::after {
@@ -83,7 +82,7 @@ body,
   min-height: 100dvh;
 }
 
-/* ─── Scroll snap — desktop only ─────────────── */
+/* --- Scroll snap - desktop only --------------- */
 html {
   scroll-behavior: auto;
 }
@@ -94,7 +93,7 @@ html {
   }
 }
 
-/* ─── Body ────────────────────────────────────── */
+/* --- Body ------- */
 body {
   background: var(--bg);
   color: var(--text);
@@ -138,7 +137,7 @@ h3 {
   text-rendering: geometricPrecision;
 }
 
-/* ─── Custom cursor ───────────────────────────── */
+/* --- Custom cursor --- */
 .cursor {
   position: fixed;
   width: 10px;
@@ -176,13 +175,13 @@ h3 {
   }
 }
 
-/* ─── Selection ───────────────────────────────── */
+/* --- Selection -- */
 ::selection {
   background: var(--accent);
   color: var(--bg);
 }
 
-/* ─── Scrollbar ───────────────────────────────── */
+/* --- Scrollbar -- */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -196,7 +195,7 @@ h3 {
   border-radius: var(--radius-xs);
 }
 
-/* ─── Section base ────────────────────────────── */
+/* --- Section base --- */
 section {
   width: 100%;
   position: relative;
@@ -216,7 +215,9 @@ section {
     --section-pad-x: 24px;
   }
 
-  html, body, section {
+  html,
+  body,
+  section {
     scrollbar-width: none;
   }
 
@@ -229,7 +230,7 @@ section {
   }
 }
 
-/* ─── Noise overlay ───────────────────────────── */
+/* --- Noise overlay --- */
 body::after {
   content: '';
   position: fixed;

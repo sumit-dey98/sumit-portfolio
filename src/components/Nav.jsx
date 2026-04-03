@@ -12,19 +12,17 @@ import styles from './Nav.module.css';
 const ease = 'power4.out';
 
 export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVisible = false }) {
-  const [active, setActive]           = useState('landing');
-  const [visible, setVisible]         = useState(alwaysVisible);
-  const [drawerOpen, setDrawerOpen]   = useState(false);
+  const [active, setActive] = useState('landing');
+  const [visible, setVisible] = useState(alwaysVisible);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [drawerView, setDrawerView]   = useState('menu');
+  const [drawerView, setDrawerView] = useState('menu');
 
-  // ── refs for GSAP targets ──
-  const settingsIconRef  = useRef(null);
+  const settingsIconRef = useRef(null);
   const settingsPopupRef = useRef(null);
-  const overlayRef       = useRef(null);
+  const overlayRef = useRef(null);
   const drawerContentRef = useRef(null);
 
-  // ── section observers (unchanged logic) ──
   useEffect(() => {
     if (alwaysVisible) return;
 
@@ -52,14 +50,12 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
     return () => observers.forEach(o => o?.disconnect());
   }, [alwaysVisible]);
 
-  // ── body scroll lock ──
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : '';
     if (!drawerOpen) setDrawerView('menu');
     return () => { document.body.style.overflow = ''; };
   }, [drawerOpen]);
 
-  // ── settings icon rotation ──
   useEffect(() => {
     if (!settingsIconRef.current) return;
     gsap.to(settingsIconRef.current, {
@@ -69,7 +65,6 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
     });
   }, [settingsOpen]);
 
-  // ── settings popup mount/unmount animation ──
   useEffect(() => {
     const el = settingsPopupRef.current;
     if (!el) return;
@@ -85,7 +80,7 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
         y: -6,
         duration: 0.2,
         ease: 'power2.in',
-        onComplete: () => gsap.set(el, { pointerEvents: 'none' }), // ensure it's non-interactive after close
+        onComplete: () => gsap.set(el, { pointerEvents: 'none' }),
       });
     }
   }, [settingsOpen]);
@@ -105,7 +100,6 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
     return () => document.removeEventListener('pointerdown', handleClickOutside);
   }, [settingsOpen]);
 
-  // ── mobile overlay ──
   useEffect(() => {
     const el = overlayRef.current;
     if (!el) return;
@@ -125,7 +119,6 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
     }
   }, [drawerOpen]);
 
-  // ── drawer content (menu ↔ settings view swap) ──
   useEffect(() => {
     const el = drawerContentRef.current;
     if (!el || !drawerOpen) return;
@@ -136,7 +129,6 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
     );
   }, [drawerView, drawerOpen]);
 
-  // animate drawer content out before switching view
   const switchDrawerView = (next) => {
     const el = drawerContentRef.current;
     if (!el) { setDrawerView(next); return; }
@@ -154,14 +146,13 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
 
   return (
     <>
-      {/* ── Settings popup (always mounted, GSAP controls visibility) ── */}
       <div
         ref={settingsPopupRef}
         style={{
           opacity: 0,
           pointerEvents: 'none',
-          position: 'fixed',       // was 'absolute' — needs to escape nav stacking context
-          top: 64,                 // below the nav bar
+          position: 'fixed',      
+          top: 64,             
           right: 48,
           zIndex: 1000,
         }}
@@ -173,7 +164,6 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
         />
       </div>
 
-      {/* ── Desktop nav ── */}
       <nav className={`${styles.nav} ${visible ? styles.visible : ''}`}>
         <Logo onClick={() => scrollTo('landing')} />
         <ul className={styles.links}>
@@ -203,7 +193,6 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
             onClick={() => setSettingsOpen(o => !o)}
             title="Preferences"
           >
-            {/* span is the rotation target */}
             <span
               ref={settingsIconRef}
               style={{ display: 'flex', alignItems: 'center', transformOrigin: 'center' }}
@@ -223,10 +212,8 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
         </div>
       </nav>
 
-      {/* ── Mobile top bar (tabs context only) ── */}
       {alwaysVisible && (
         <>
-          {/* overlay — always in DOM, GSAP shows/hides */}
           <div
             ref={overlayRef}
             className={styles.overlay}

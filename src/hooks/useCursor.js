@@ -9,7 +9,6 @@ export function useCursor(enabled = true) {
     const ring = ringRef.current;
     if (!cursor || !ring) return;
 
-    // hide/show based on enabled
     if (!enabled) {
       cursor.style.opacity = '0';
       cursor.style.pointerEvents = 'none';
@@ -63,7 +62,6 @@ export function useCursor(enabled = true) {
       setTimeout(onNormal, 150);
     };
 
-    // use event delegation instead of attaching to each element
     const onMouseOver = (e) => {
       if (e.target.closest('a, button, [data-cursor]')) onEnter();
     };

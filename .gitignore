@@ -9,6 +9,7 @@ lerna-debug.log*
 
 .code-backups
 node_modules
+public/screens
 dist
 dist-ssr
 *.local

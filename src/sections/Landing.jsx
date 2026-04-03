@@ -17,7 +17,6 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
   const firedRef = useRef(false);
   const tlRef = useRef(null);
 
-  // element refs — one per animated child
   const preRef = useRef(null);
   const word0Ref = useRef(null);
   const word1Ref = useRef(null);
@@ -41,55 +40,38 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
     paused: !ready,
   });
 
-  // Build + play timeline when ready flips true
   useEffect(() => {
     if (!ready || firedRef.current) return;
     firedRef.current = true;
     startDecryptRef.current?.();
 
-    // containerVariants: duration 0.4, staggerChildren 0.1, delayChildren 0.1
-    // fadeUpVariant:  opacity 0→1, y 10→0, duration 0.45
-    // wordVariant:    y 100%→0%,   duration 0.65
-    // fadeVariant:    opacity 0→1, duration 0.4
-
     const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
     tlRef.current = tl;
 
-    // t=0: container fades in (opacity 0→1, duration 0.4) — we achieve
-    // this by just letting children animate in; container stays opacity:1
-
-    // delayChildren: 0.1 → all children start at t=0.1
-    // staggerChildren: 0.1 → each child offset by 0.1s from previous
-
-    // child 0 — pre (fadeUpVariant, t=0.1)
     tl.fromTo(preRef.current,
       { opacity: 0, y: 10 },
       { opacity: 1, y: 0, duration: 0.45 },
       0.1
     );
 
-    // child 1 — headline words (wordVariant, t=0.2) staggered within themselves
     tl.fromTo([word0Ref.current, word1Ref.current, word2Ref.current],
       { y: '100%' },
       { y: '0%', duration: 0.65, stagger: 0.1 },
-      0.2  // delayChildren(0.1) + 1 stagger gap(0.1)
+      0.2  
     );
 
-    // child 2 — role (fadeVariant, t=0.3)
     tl.fromTo(roleRef.current,
       { opacity: 0 },
       { opacity: 1, duration: 0.4 },
       0.3
     );
 
-    // child 3 — buttons (fadeUpVariant, t=0.4)
     tl.fromTo(buttonsRef.current,
       { opacity: 0, y: 10 },
       { opacity: 1, y: 0, duration: 0.45 },
       0.4
     );
 
-    // child 4 — scroll hint (fadeVariant, t=0.5)
     tl.fromTo(hintRef.current,
       { opacity: 0 },
       { opacity: 1, duration: 0.4 },
@@ -115,7 +97,6 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
         />
       </div>
 
-      {/* container — always visible, children start hidden via inline style */}
       <div className={styles.content}>
 
         <p ref={preRef} className={styles.pre} style={{ opacity: 0 }}>

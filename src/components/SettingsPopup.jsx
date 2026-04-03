@@ -4,7 +4,6 @@ import { useUserPrefs } from '../hooks/useUserPrefs';
 import Button from './Button';
 import styles from './SettingsPopup.module.css';
 
-// ── Toggle thumb — spring via GSAP ───────────────────────────────────────
 function ToggleThumb({ on }) {
   const ref = useRef(null);
   const prevOn = useRef(on);
@@ -15,7 +14,7 @@ function ToggleThumb({ on }) {
     gsap.to(ref.current, {
       x: on ? 18 : 0,
       duration: 0.4,
-      ease: 'elastic.out(1, 0.5)', 
+      ease: 'elastic.out(1, 0.5)',
     });
   }, [on]);
 
@@ -64,7 +63,6 @@ function GenieSetting({ localGenie, setLocalGenie }) {
   );
 }
 
-// ── Popup with GSAP enter/exit ────────────────────────────────────────────
 export default function SettingsPopup({ onClose, variant = 'popup', onCursorChange }) {
   const { prefs, savePrefs } = useUserPrefs();
   const [name, setName] = useState(prefs?.name || '');
@@ -76,44 +74,12 @@ export default function SettingsPopup({ onClose, variant = 'popup', onCursorChan
     () => localStorage.getItem('genie-enabled') ?? 'yes'
   );
 
-  const overlayRef = useRef(null);
-  const popupRef = useRef(null);
-  const closingRef = useRef(false);
-
-
   const handleSave = () => {
     savePrefs({ name: name.trim(), mode });
     localStorage.setItem('ring-cursor', localCursor);
     localStorage.setItem('genie-enabled', localGenie);
     onCursorChange?.(localCursor === 'yes');
-    onClose?.();   
-  };
-
-  // Animate in via callback refs
-  const overlayAnimRef = useCallback((node) => {
-    overlayRef.current = node;
-    if (!node) return;
-    gsap.fromTo(node,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.18, ease: 'power2.out' }
-    );
-  }, []);
-
-  const popupAnimRef = useCallback((node) => {
-    popupRef.current = node;
-    if (!node) return;
-    gsap.fromTo(node,
-      { opacity: 0, y: -10, scale: 0.97 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: 'power3.out' }
-    );
-  }, []);
-
-  // Animate out then call onClose
-  const animateOut = () => {
-    if (closingRef.current) return;
-    closingRef.current = true;
-    onClose?.();                    // Nav's useEffect fires, animates the wrapper out
-    closingRef.current = false;     // reset so it can be reopened
+    onClose?.();
   };
 
   const inner = (

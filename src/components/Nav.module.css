@@ -1,4 +1,3 @@
-/* ---- Desktop nav ---- */
 .nav {
   position: fixed;
   top: 0;
@@ -38,7 +37,6 @@
   margin-right: 4px;
 }
 
-/* ---- Nav links ---- */
 .links {
   list-style: none;
   display: flex;
@@ -81,14 +79,12 @@
   width: 100%;
 }
 
-/* ---- Right slot ---- */
 .right {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-/* ---- Settings button ---- */
 .settingsBtn {
   background: var(--surface);
   border-radius: var(--radius);
@@ -112,7 +108,6 @@
   color: var(--accent);
 }
 
-/* ---- Side indicator dots ---- */
 .indicator {
   display: flex;
   flex-direction: column;
@@ -138,7 +133,6 @@
   transform: scale(1.4);
 }
 
-/* ---- Mobile breakpoint ---- */
 @media (max-width: 1023px) {
   .nav {
     display: none;
@@ -153,7 +147,6 @@
   }
 }
 
-/* ---- Overlay ---- */
 .overlay {
   position: fixed;
   inset: 0;
@@ -246,7 +239,6 @@
   background: var(--border);
 }
 
-/* ---- Mobile tabs ---- */
 .mobileTopBar {
   display: none;
 }

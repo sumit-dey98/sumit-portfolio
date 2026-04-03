@@ -24,8 +24,6 @@
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  /* NO transition here — JS drives transform and filter directly every frame.
-     A CSS transition on the same property causes style recalc thrash. */
 }
 
 .scroll-stack-end {

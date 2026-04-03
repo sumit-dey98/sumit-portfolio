@@ -33,7 +33,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-// ── Mobile ────────────────────────────────────────────────────────────────────
+// -- Mobile ------
 const M = {
   SCROLL_PER_CARD: 800,
   CARD_OFFSET_Y: 64,
@@ -41,19 +41,8 @@ const M = {
   MAX_BLUR_PER_DEPTH: 0.4,
   LERP: 0.15,
   BOTTOM_PAD: 0,
-  OVERLAP: 0.8,  // 0 = sequential (current), 1 = all cards move together
+  OVERLAP: 0.8, 
 };
-
-/*
- * Explicit per-card definitions — easy to override per-card if needed.
- *
- * card 0 : base card. Always at rest at y=0. Never animates in.
- * card i : enters from below over scroll window [scrollStart, scrollEnd].
- *          Rests at translateY(i * CARD_OFFSET_Y).
- *
- * scrollStart = (i-1) * SCROLL_PER_CARD
- * scrollEnd   = (i)   * SCROLL_PER_CARD
- */
 
 function MobileServices() {
   const containerRef = useRef(null);   // the scroll container
@@ -73,9 +62,6 @@ function MobileServices() {
     isBase: i === 0,
   }));
 
-  // ── Measure container → set stage height ──────────────────────────────────
-  // Stage must exactly match the container's visible height so that
-  // translateY(stageH) = just below the clipping boundary.
   useEffect(() => {
     const container = containerRef.current;
     const stage = stageRef.current;
@@ -89,17 +75,14 @@ function MobileServices() {
 
     const ro = new ResizeObserver(measure);
     ro.observe(container);
-    measure(); // immediate first measurement
+    measure(); 
     return () => ro.disconnect();
   }, []);
 
-  // ── Per-frame animation ────────────────────────────────────────────────────
-  // In applyFrames — invert s so decreasing scrollTop drives exits
   const applyFrames = useCallback((s) => {
     const CH = stageH.current;
     if (!CH) return;
 
-    // sInv=0 at bottom (stacked), increases as you swipe down
     const sInv = Math.max(0, sentinelH - s);
 
     const exitP = CARD_DEFS.map((def) => {
@@ -129,13 +112,10 @@ function MobileServices() {
     });
   }, [N, sentinelH]);
 
-  // ── RAF loop + scroll listener ─────────────────────────────────────────────
-  // In the RAF/scroll useEffect — initialize to bottom
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Start scrolled to bottom so swiping down decreases scrollTop
     container.scrollTop = sentinelH;
     targetY.current = sentinelH;
     scrollY.current = sentinelH;
@@ -171,11 +151,6 @@ function MobileServices() {
 
         <div className={styles.stackContainer} ref={containerRef}>
 
-          {/*
-           * cardStage: sticky at top:0, height = containerRef.clientHeight (set by JS).
-           * overflow:hidden clips cards whose translateY exceeds stage height.
-           * This is the "viewport" — cards live and are clamped inside it.
-           */}
           <div className={styles.cardStage} ref={stageRef}>
             {[...SERVICES].reverse().map((service, i) => (
               <div
@@ -206,12 +181,6 @@ function MobileServices() {
             ))}
           </div>
 
-          {/*
-           * Sentinel: sits after the stage in normal flow.
-           * Its height = (N-1)*SCROLL_PER_CARD + BOTTOM_PAD.
-           * This is the only thing that creates scroll budget —
-           * max scrollTop = sentinelH.
-           */}
           <div
             className={styles.stackSentinel}
             style={{ height: `${sentinelH}px` }}
@@ -223,7 +192,6 @@ function MobileServices() {
   );
 }
 
-// ── Desktop (unchanged) ───────────────────────────────────────────────────────
 function DesktopServices() {
   const sectionRef = useRef(null);
   const rawTargetRef = useRef(0);
@@ -435,7 +403,6 @@ function DesktopServices() {
   );
 }
 
-// ── Export ────────────────────────────────────────────────────────────────────
 export default function Services() {
   const isMobile = useIsMobile();
   return isMobile ? <MobileServices /> : <DesktopServices />;

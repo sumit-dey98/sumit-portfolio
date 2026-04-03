@@ -21,6 +21,7 @@ const FOLDER = 'sumit-portfolio/assets'
 const IMAGES_DIRS = [
   './public/',
   './public/previews/',
+  './public/screens/',
   './public/projects/',
   './public/projects/interior/images/',
 ]

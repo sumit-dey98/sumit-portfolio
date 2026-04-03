@@ -110,7 +110,6 @@ export default function Button({
     );
   }
 
-  // ── fallback ──────────────────────────────────────────────────────────────
   return (
     <Tag {...shared} className={`${styles.btn} ${className}`}>
       <span className={styles.btnText}>{children}</span>

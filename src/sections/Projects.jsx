@@ -402,7 +402,6 @@ function MobileCard({ project }) {
   );
 }
 
-// ── DesktopScroller — GSAP replaces useMotionValue per card ──────────────
 function DesktopScroller() {
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
@@ -427,7 +426,6 @@ function DesktopScroller() {
       const dist = Math.abs(cardCenter - viewCenter);
       const p = Math.max(0, 1 - dist / (cw + GAP));
 
-      // replaces useTransform([0,0.5,1] → opacity [0.25,0.6,1], scale [0.92,0.96,1])
       const opacity = p < 0.5
         ? 0.25 + (p / 0.5) * 0.35
         : 0.6 + ((p - 0.5) / 0.5) * 0.4;
@@ -524,7 +522,7 @@ function DesktopScroller() {
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────
+// -- Main ----
 export default function Projects() {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false

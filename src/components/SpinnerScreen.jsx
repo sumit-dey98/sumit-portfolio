@@ -6,9 +6,9 @@ export default function SpinnerScreen({ onReady }) {
   const containerRef = useRef(null);
   const arcRef = useRef(null);
   const spinTweenRef = useRef(null);
-  const readyRef = useRef(false);      
-  const hasRegisteredRef = useRef(false);       
-  const onReadyRef = useRef(onReady);   
+  const readyRef = useRef(false);
+  const hasRegisteredRef = useRef(false);
+  const onReadyRef = useRef(onReady);
   const [showLoadingText, setShowLoadingText] = useState(false);
 
   useEffect(() => {
@@ -25,7 +25,6 @@ export default function SpinnerScreen({ onReady }) {
   const cx = SIZE / 2;
   const cy = SIZE / 2;
 
-  // -- Spin tween ------------------------
   useEffect(() => {
     if (!arcRef.current) return;
     spinTweenRef.current = gsap.to(arcRef.current, {
@@ -38,7 +37,6 @@ export default function SpinnerScreen({ onReady }) {
     return () => spinTweenRef.current?.kill();
   }, []);
 
-  // ---------------------------------
   useEffect(() => {
     if (!containerRef.current) return;
     if (hasRegisteredRef.current) return;
@@ -65,7 +63,7 @@ export default function SpinnerScreen({ onReady }) {
           opacity: 0,
           duration: 0.5,
           ease: 'power2.in',
-          onComplete: () => onReadyRef.current?.(), 
+          onComplete: () => onReadyRef.current?.(),
         });
       }, 600);
     };

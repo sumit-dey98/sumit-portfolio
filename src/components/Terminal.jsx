@@ -7,13 +7,11 @@ import styles from './Terminal.module.css';
 
 const MOBILE_BREAKPOINT = 1023;
 
-// ── SkillItem ─────────────────────────────────────────────────────────────────
 function SkillItem({ item, level, custom, isInView, isFullscreen }) {
   const rowRef = useRef(null);
   const fillRef = useRef(null);
-  const tweenRef = useRef(null);   // track active progress tween so we can kill it
+  const tweenRef = useRef(null); 
 
-  // mount fade-in (opacity, no x — hover handles x separately)
   useEffect(() => {
     const el = rowRef.current;
     if (!el) return;
@@ -23,7 +21,6 @@ function SkillItem({ item, level, custom, isInView, isFullscreen }) {
     );
   }, []);
 
-  // hover: x: 4 on enter, x: 0 on leave
   useEffect(() => {
     const el = rowRef.current;
     if (!el) return;
@@ -37,7 +34,6 @@ function SkillItem({ item, level, custom, isInView, isFullscreen }) {
     };
   }, []);
 
-  // progress fill — animates when inView, re-animates when fullscreen toggles
   const animateFill = useCallback(() => {
     const el = fillRef.current;
     if (!el) return;
@@ -68,7 +64,6 @@ function SkillItem({ item, level, custom, isInView, isFullscreen }) {
   );
 }
 
-// ── Terminal ──────────────────────────────────────────────────────────────────
 export default function Terminal({ isFullscreen, onExpand, data }) {
   const terminalRef = useRef(null);
   const groupRef = useRef(null);
@@ -76,16 +71,13 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT;
   const effectiveFullscreen = isMobile ? false : isFullscreen;
 
-  // inView via react-intersection-observer (no Framer dependency)
   const { ref: inViewRef, inView } = useInView({ triggerOnce: true });
 
-  // merge both refs onto the terminal element
   const setRefs = useCallback((el) => {
     terminalRef.current = el;
     inViewRef(el);
   }, [inViewRef]);
 
-  // group fade-in on mount
   useEffect(() => {
     const el = groupRef.current;
     if (!el) return;
@@ -95,7 +87,6 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
     );
   }, []);
 
-  // fullscreen layout tween
   useEffect(() => {
     const el = terminalRef.current;
     if (!el || isMobile) return;

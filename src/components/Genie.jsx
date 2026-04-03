@@ -67,7 +67,6 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
         * v < waistCenter
         ? Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2))
         : Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2));
-      // return isMobile ? 0.9 + squeeze : 1 + 0.25 * squeeze;
       return 1 + 0.3 * squeeze;
     };
 
@@ -210,7 +209,6 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
       const cornerPx = Math.min(CORNER_RADIUS_PX * (1 - t), minHalfEdge * 0.45);
       const concavePx = topHW * CONCAVE_DEPTH * (1 - t);
 
-      // Layer 2 (back accent)
       if (true) {
         const topHW2 = (W / 2) * EASE_TOP_W(t) * LAYER2_SPREAD;
         const botHW2 = (W / 2) * EASE_BOT_W(t) * LAYER2_SPREAD;
@@ -239,7 +237,6 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
         }
       }
 
-      // Layer 1 — build path once, clip + fill in same path
       ctx.save();
       buildPath(leftPts, rightPts, cornerPx, concavePx);
       ctx.fillStyle = fillColor;
@@ -262,7 +259,6 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
 
       if (textOpacity > 0) {
         if (t < 0.98) {
-          // reuse the already-built path for clipping
           buildPath(leftPts, rightPts, cornerPx, concavePx);
           ctx.clip();
         }
