@@ -1,31 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import gsap from 'gsap';
 import Flickity from 'flickity';
 import 'flickity/dist/flickity.min.css';
-import { motion, AnimatePresence } from 'framer-motion';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import styles from './ScreenSlides.module.css';
 
-const EXIT_DURATION = 250;
+const OVERLAY_EASE = 'power2.out';
+const INNER_EASE = 'power4.out';      // maps to [0.16, 1, 0.3, 1]
+const CELL_EASE = 'power4.out';
 
 export default function ScreenSlides({ screens }) {
   const [expanded, setExpanded] = useState(false);
   const [slide, setSlide] = useState(0);
+
   const carouselRef = useRef(null);
   const expandedCarouselRef = useRef(null);
   const flktyRef = useRef(null);
   const expandedFlktyRef = useRef(null);
   const didDragRef = useRef(false);
-  const [exiting, setExiting] = useState(false);
 
-  const handleClose = () => {
-    setExiting(true);
-    setTimeout(() => {
-      setExpanded(false);
-      setExiting(false);
-    }, EXIT_DURATION);
-  };
+  // GSAP targets
+  const overlayRef = useRef(null);
+  const overlayInnerRef = useRef(null);
+  const cellInnerRefs = useRef([]);   // one ref per expanded cell
 
+  // ── Flickity helpers ──────────────────────────────────────────────
   const initFlickity = (el, ref, opts = {}) => {
     if (!el) return;
     const id = requestAnimationFrame(() => {
@@ -81,24 +81,71 @@ export default function ScreenSlides({ screens }) {
     };
   }, [expanded]);
 
+  // ── Overlay open / close ──────────────────────────────────────────
+  const openOverlay = () => {
+    setExpanded(true);
+  };
+
+  // runs after expanded=true, DOM is painted
+  useEffect(() => {
+    if (!expanded) return;
+    const overlay = overlayRef.current;
+    const inner = overlayInnerRef.current;
+    if (!overlay || !inner) return;
+
+    // set start state
+    gsap.set(overlay, { opacity: 0 });
+    gsap.set(inner, { opacity: 0, scale: 0.95 });
+
+    // animate in
+    gsap.to(overlay, { opacity: 1, duration: 0.25, ease: OVERLAY_EASE });
+    gsap.to(inner, { opacity: 1, scale: 1, duration: 0.25, ease: INNER_EASE });
+  }, [expanded]);
+
+  const closeOverlay = () => {
+    const overlay = overlayRef.current;
+    const inner = overlayInnerRef.current;
+    if (!overlay || !inner) {
+      setExpanded(false);
+      return;
+    }
+
+    // animate out, then unmount
+    gsap.to(overlay, { opacity: 0, duration: 0.25, ease: 'power2.in' });
+    gsap.to(inner, {
+      opacity: 0,
+      scale: 0.95,
+      duration: 0.25,
+      ease: 'power2.in',
+      onComplete: () => setExpanded(false),
+    });
+  };
+
+  // ── Per-cell scale based on distance from active slide ────────────
+  useEffect(() => {
+    if (!expanded) return;
+    cellInnerRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const distance = Math.abs(i - slide);
+      gsap.to(el, {
+        scale: distance === 0 ? 1 : 0.88,
+        opacity: distance === 0 ? 1 : 0.8,
+        duration: 0.35,
+        ease: CELL_EASE,
+      });
+    });
+  }, [slide, expanded]);
+
   if (!screens?.length) return null;
 
   const handleCellClick = () => {
     if (didDragRef.current) return;
-    setExpanded(true);
+    openOverlay();
   };
 
   return (
     <>
-      {/* always in place, never changes size */}
       <div className={styles.root}>
-        {/* <button
-          className={styles.expandBtn}
-          onClick={() => setExpanded(true)}
-        >
-          <FiMaximize2 size={13} />
-        </button> */}
-
         <div
           ref={carouselRef}
           className={styles.carousel}
@@ -128,73 +175,60 @@ export default function ScreenSlides({ screens }) {
         )}
       </div>
 
-      {/* expanded — portalled so it never affects layout */}
+      {/* ── Expanded overlay (portalled) ── */}
       {createPortal(
-        <AnimatePresence>
-          {(expanded || exiting) && (
-            <motion.div
-              className={styles.overlay}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: exiting ? 0 : 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <motion.div
-                className={styles.overlayInner}
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: exiting ? 0.95 : 1, opacity: exiting ? 0 : 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        expanded ? (
+          <div ref={overlayRef} className={styles.overlay}>
+            <div ref={overlayInnerRef} className={styles.overlayInner}>
+              <button className={styles.closeBtn} onClick={closeOverlay}>
+                <FiMinimize2 size={16} strokeWidth={2} />
+              </button>
+
+              <div
+                ref={expandedCarouselRef}
+                className={styles.expandedCarousel}
+                onPointerDown={e => e.stopPropagation()}
+                onWheel={e => e.stopPropagation()}
               >
-                <button className={styles.closeBtn} onClick={handleClose}>
-                  <FiMinimize2 size={16} strokeWidth={2}/>
-                </button>
-
-                <div
-                  ref={expandedCarouselRef}
-                  className={styles.expandedCarousel}
-                  onPointerDown={e => e.stopPropagation()}
-                  onWheel={e => e.stopPropagation()}
-                >
-                  {screens.map((src, i) => {
-                    const distance = Math.abs(i - slide);
-                    return (
-                      <div key={i} className={styles.expandedCell}>
-                        <motion.div
-                          className={styles.expandedCellInner}
-                          animate={{
-                            scale: distance === 0 ? 1 : 0.88,
-                            opacity: distance === 0 ? 1 : distance === 1 ? 0.8 : 0.8,
-                          }}
-                          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                          <img
-                            src={src}
-                            alt={`Screen ${i + 1}`}
-                            className={styles.expandedImg}
-                            draggable={false}
-                          />
-                        </motion.div>
+                {screens.map((src, i) => {
+                  const distance = Math.abs(i - slide);
+                  return (
+                    <div key={i} className={styles.expandedCell}>
+                      {/* ref collected into array, initial scale set inline */}
+                      <div
+                        ref={el => { cellInnerRefs.current[i] = el; }}
+                        className={styles.expandedCellInner}
+                        style={{
+                          scale: distance === 0 ? 1 : 0.88,
+                          opacity: distance === 0 ? 1 : 0.8,
+                        }}
+                      >
+                        <img
+                          src={src}
+                          alt={`Screen ${i + 1}`}
+                          className={styles.expandedImg}
+                          draggable={false}
+                        />
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-                {screens.length > 1 && (
-                  <div className={styles.dotRow}>
-                    {screens.map((_, i) => (
-                      <span
-                        key={i}
-                        className={`${styles.dot} ${slide === i ? styles.dotActive : ''}`}
-                        onClick={() => expandedFlktyRef.current?.select(i)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
+              {screens.length > 1 && (
+                <div className={styles.dotRow}>
+                  {screens.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`${styles.dot} ${slide === i ? styles.dotActive : ''}`}
+                      onClick={() => expandedFlktyRef.current?.select(i)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null,
         document.body
       )}
     </>

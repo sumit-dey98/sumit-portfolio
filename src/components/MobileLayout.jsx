@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import gsap from 'gsap';
 import {
   IoPersonOutline,
   IoDocumentTextOutline,
@@ -21,38 +22,58 @@ const TABS = [
 const COLLAPSED_H = 52;
 const EXPANDED_H = 64;
 const DRAG_THRESHOLD = 28;
+const SWIPE_THRESHOLD = 128;
 
 export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
   const [activeTab, setActiveTab] = useState('intro');
-  const [prevTab, setPrevTab] = useState(null);
-  const [direction, setDirection] = useState(1);
   const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [visited, setVisited] = useState(() => new Set(['intro']));
 
+  const trackRef = useRef(null);
+  const tweenRef = useRef(null);
   const dragStartY = useRef(null);
-
-  useEffect(() => {
-    if (!prevTab) return;
-    const t = setTimeout(() => setPrevTab(null), 340);
-    return () => clearTimeout(t);
-  }, [prevTab, activeTab]);
-
-  const switchTab = useCallback((id) => {
-    if (id === activeTab) return;
-    const fromIdx = TABS.findIndex(t => t.id === activeTab);
-    const toIdx = TABS.findIndex(t => t.id === id);
-    setDirection(toIdx > fromIdx ? 1 : -1);
-    setVisited(v => new Set([...v, id]));
-    setPrevTab(activeTab);
-    setActiveTab(id);
-  }, [activeTab]);
-
-  // Swipe handling — lives here, not in HorizontalMobileShell
   const touchStartX = useRef(null);
   const touchStartY = useRef(null);
-  const SWIPE_THRESHOLD = 128;
 
+  // ── Slide track to a given tab index via GSAP ──────────────────────────
+  const slideTo = useCallback((index) => {
+    if (!trackRef.current) return;
+    const paneWidth = trackRef.current.parentElement.offsetWidth;
+    tweenRef.current?.kill();
+    tweenRef.current = gsap.to(trackRef.current, {
+      x: -(index * paneWidth),
+      duration: 0.42,
+      ease: 'expo.out',
+    });
+  }, []);
+
+  // ── Switch tab ──────────────────────────────────────────────────────────
+  const switchTab = useCallback((id) => {
+    if (id === activeTab) return;
+    const index = TABS.findIndex(t => t.id === id);
+    setActiveTab(id);
+    slideTo(index);
+  }, [activeTab, slideTo]);
+
+  // ── Init: set track width and snap to index 0 with no animation ────────
+  useEffect(() => {
+    if (!trackRef.current) return;
+    gsap.set(trackRef.current, { x: 0 });
+  }, []);
+
+  // ── On resize: re-snap to current tab without animation ────────────────
+  useEffect(() => {
+    const onResize = () => {
+      if (!trackRef.current) return;
+      const index = TABS.findIndex(t => t.id === activeTab);
+      const paneWidth = trackRef.current.parentElement.offsetWidth;
+      gsap.set(trackRef.current, { x: -(index * paneWidth) });
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [activeTab]);
+
+  // ── Swipe gesture ───────────────────────────────────────────────────────
   const onTouchStart = useCallback((e) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -68,20 +89,17 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
     if (dy > Math.abs(dx) || Math.abs(dx) < SWIPE_THRESHOLD) return;
 
     const currentIdx = TABS.findIndex(t => t.id === activeTab);
-
     if (dx > 0) {
       // swipe left → next tab
       if (currentIdx < TABS.length - 1) switchTab(TABS[currentIdx + 1].id);
     } else {
       // swipe right → prev tab or back to landing
-      if (currentIdx > 0) {
-        switchTab(TABS[currentIdx - 1].id);
-      } else {
-        onBackToLanding?.(); // first tab → hand off to parent
-      }
+      if (currentIdx > 0) switchTab(TABS[currentIdx - 1].id);
+      else onBackToLanding?.();
     }
   }, [activeTab, switchTab, onBackToLanding]);
 
+  // ── Drag handle (expand/collapse sheet) ────────────────────────────────
   const startDrag = useCallback((clientY) => {
     dragStartY.current = clientY;
     setDragging(true);
@@ -121,33 +139,38 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
   return (
     <div
       className={styles.wrapper}
-      style={{ '--collapsed-h': `${COLLAPSED_H}px`, '--expanded-h': `${EXPANDED_H}px`, '--dir': direction }}
+      style={{
+        '--collapsed-h': `${COLLAPSED_H}px`,
+        '--expanded-h': `${EXPANDED_H}px`,
+      }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
       <div className={styles.body} aria-live="polite">
         {nav && <div className={styles.navSlot}>{nav}</div>}
 
+        {/* Clip window — overflow hidden, full width */}
         <div className={styles.paneArea}>
-          {TABS.map(({ id }) => {
-            if (!visited.has(id)) return null;
-            const isActive = id === activeTab;
-            const isExit = id === prevTab;
-            return (
+
+          {/* Track — all panes side by side, GSAP moves this */}
+          <div
+            ref={trackRef}
+            className={styles.paneTrack}
+            style={{ width: `${TABS.length * 100}%` }}
+          >
+            {TABS.map(({ id }) => (
               <div
                 key={id}
-                className={[
-                  styles.pane,
-                  isActive && styles.paneActive,
-                  isExit && styles.paneExit,
-                ].filter(Boolean).join(' ')}
-                aria-hidden={!isActive}
-                inert={!isActive ? true : undefined}
+                className={styles.pane}
+                style={{ width: `${100 / TABS.length}%` }}
+                aria-hidden={id !== activeTab}
+                {...(id !== activeTab ? { inert: '' } : {})}
               >
                 {sections[id]}
               </div>
-            );
-          })}
+            ))}
+          </div>
+
         </div>
       </div>
 

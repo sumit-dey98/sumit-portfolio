@@ -13,7 +13,7 @@
 
 .label {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   font-weight: 600;
   letter-spacing: 4px;
   color: var(--accent);
@@ -54,25 +54,34 @@
 }
 
 .bio {
-  font-size: var(--body-text);
+  font-size: var(--base);
   line-height: 1.6;
   color: var(--text-dim);
   font-weight: 400;
 }
 
+.addresses {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
 .location {
-  font-size: 20px;
+  font-size: var(--md);
   line-height: 1.6;
   color: var(--text-dim);
   font-weight: 400;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: auto;
 }
 
-.location span {
+.location span, .location a {
   font-family: var(--display);
+  color: var(--text-dim);
   letter-spacing: 0.5px;
 }
 
@@ -98,6 +107,23 @@
   }
 }
 
+.mailArrow {
+  animation: mailArrowSlide 2s infinite;
+  will-change: transform;
+}
+
+@keyframes mailArrowSlide {
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(3px, 0);
+  }
+}
+
 .links {
   display: flex;
   flex-direction: column;
@@ -107,7 +133,7 @@
 
 .link {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   font-weight: 500;
   letter-spacing: 2px;
   color: var(--muted);
@@ -178,7 +204,22 @@
     gap: 48px;
   }
 
+  .addresses {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .imageWrap {
     max-width: 280px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .text {
+    opacity: 0;
+  }
+
+  .imageWrap {
+    opacity: 0;
   }
 }

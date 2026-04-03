@@ -19,28 +19,8 @@ import Services from './sections/Services';
 import About from './sections/About';
 import Contact from './sections/Contact';
 import MobileLayout from './components/MobileLayout';
+import {PROJECT_ROUTES} from './data/data';
 import './index.css';
-
-const PROJECT_ROUTES = {
-  connect4: {
-    logo: <img src="/projects/connect4/connect4-logo.svg" width={256} height={256} loading="lazy" />,
-    src: '/projects/connect4/connect4.html',
-    bgColor: 'var(--surface)',
-    url: 'connect4',
-  },
-  rubiks: {
-    logo: <img src="/projects/rubiks/rubiks-logo.svg" width={256} height={256} loading="lazy" />,
-    src: '/projects/rubiks/rubiks.html',
-    bgColor: 'var(--surface)',
-    url: 'rubiks-cube',
-  },
-  interior: {
-    logo: <img src="/projects/interior/interior-logo.svg" width={256} height={256} loading="lazy" />,
-    src: '/projects/interior/index.html',
-    bgColor: '#fff',
-    url: 'interior-design-studio',
-  },
-};
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(
@@ -55,8 +35,6 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Two-panel horizontal shell for mobile: Landing (left) | MobileLayout (right).
-// A horizontal flick/swipe slides between panels — no scroll snap involved.
 function HorizontalMobileShell({ landingPanel, tabsPanel }) {
   const [panel, setPanel] = useState(0);
   const touchStartX = useRef(null);
@@ -79,7 +57,6 @@ function HorizontalMobileShell({ landingPanel, tabsPanel }) {
 
     if (dy > Math.abs(dx) || Math.abs(dx) < THRESHOLD) return;
 
-    // Only handle landing → tabs here. Tabs → landing is handled by MobileLayout.
     if (panel === 0 && dx > 0) slideTo(1);
   };
 
@@ -213,12 +190,6 @@ function PortfolioInner() {
     contact: <Contact />,
   };
 
-  const mobileNav = (
-    <Nav alwaysVisible cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
-      <ThemeSwitcher variant="dropdown" />
-    </Nav>
-  );
-
   return (
     <>
       <div className="cursor" ref={cursorRef} />
@@ -268,7 +239,6 @@ function PortfolioInner() {
         >
           {isMobile ? (
             <div style={{ position: 'relative', width: '100vw', height: '100dvh', overflow: 'hidden' }}>
-              {/* Nav floats above both panels */}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 200 }}>
                 <Nav alwaysVisible cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
                   <ThemeSwitcher variant="dropdown" />
@@ -286,7 +256,7 @@ function PortfolioInner() {
                 tabsPanel={(slideTo) => (
                   <MobileLayout
                     sections={mobileSections}
-                    nav={mobileNav}
+                    // nav={mobileNav}
                     onBackToLanding={() => slideTo(0)}
                   />
                 )}

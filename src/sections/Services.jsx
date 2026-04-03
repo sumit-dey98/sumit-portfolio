@@ -1,37 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Services.module.css';
+import { SERVICES } from '../data/data';
 
 const LERP = 0.2;
 const INTRO_DURATION = 700;
 const DEAD_ZONE = 100;
 const CARD_MOVE = 800;
-
-const SERVICES = [
-  {
-    id: '01',
-    title: 'UI / UX Design',
-    desc: 'Pixel-perfect interfaces crafted with intention. From wireframes to high-fidelity prototypes, every interaction is considered.',
-    tags: ['Figma', 'Prototyping', 'Design Systems'],
-  },
-  {
-    id: '02',
-    title: 'Frontend Development',
-    desc: 'Performant, accessible, and animated web experiences built with modern tooling. React, GSAP, and everything in between.',
-    tags: ['React', 'TypeScript', 'GSAP'],
-  },
-  {
-    id: '03',
-    title: 'Motion Design',
-    desc: 'Scroll-linked animations, page transitions, and micro-interactions that breathe life into static layouts.',
-    tags: ['Framer Motion', 'Lenis', 'Three.js'],
-  },
-  {
-    id: '04',
-    title: 'Creative Direction',
-    desc: 'End-to-end visual strategy — brand identity, typography systems, and cohesive design languages that scale.',
-    tags: ['Branding', 'Typography', 'Art Direction'],
-  },
-];
 
 const TOTAL = SERVICES.length;
 const TOTAL_BUDGET = (TOTAL - 1) * (DEAD_ZONE + CARD_MOVE) + DEAD_ZONE;
@@ -60,21 +34,6 @@ function useIsMobile() {
 }
 
 // ── Mobile ────────────────────────────────────────────────────────────────────
-//
-// Layout:
-//   outerContainer  — height:100%, no overflow, fills the .pane
-//     header        — fixed height (HEADER_H), never scrolls
-//     stackContainer — height:calc(100% - HEADER_H), overflow-y:auto
-//                      padding-bottom gives extra scroll room
-//       card × N    — position:sticky, top:0, z-index ascends
-//                      each card scrolls up and stacks over the previous
-//
-// The header is a sibling of stackContainer — scroll inside stackContainer
-// cannot affect it in any way.
-
-const HEADER_H = 36; // px — must match .mobileHeader height in CSS
-
-// ─── MOBILE PARAMS ────────────────────────────────────────────────────────────
 const M = {
   SCROLL_PER_CARD: 800,
   CARD_OFFSET_Y: 64,
@@ -95,7 +54,6 @@ const M = {
  * scrollStart = (i-1) * SCROLL_PER_CARD
  * scrollEnd   = (i)   * SCROLL_PER_CARD
  */
-
 
 function MobileServices() {
   const containerRef = useRef(null);   // the scroll container

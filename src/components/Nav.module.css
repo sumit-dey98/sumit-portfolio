@@ -270,7 +270,7 @@
     border: 1px solid var(--accent);
     border-radius: var(--radius);
     box-shadow: 0 0 2px 2px var(--border);
-    padding-top: env(safe-area-inset-top, 0px);
+    /* padding-top: env(safe-area-inset-top, 0px); */
   }
 
   .mobileTopBarTop {
@@ -279,7 +279,6 @@
     justify-content: space-between;
     width: 100%;
     flex-shrink: 0;
-    padding-top: 8px;
   }
 
   .mobileTopBarRight {

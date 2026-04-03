@@ -25,7 +25,7 @@
 .pre {
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 12px;
+  font-size: var(--xs);
   letter-spacing: 3px;
   color: var(--accent);
 }
@@ -47,7 +47,7 @@
 .role {
   font-family: var(--mono);
   font-weight: 400;
-  font-size: clamp(13px, 1.5vw, 16px);
+  font-size: var(--sm);
   color: var(--text-dim);
   letter-spacing: 3px;
 }
@@ -87,7 +87,7 @@
   align-items: center;
   font-family: var(--mono);
   font-weight: 400;
-  font-size: 13px;
+  font-size: var(--sm);
   letter-spacing: 4px;
   color: var(--dim);
 }
@@ -97,7 +97,7 @@
   height: 10rem;
   translate: -10.5rem 0;
   rotate: 90deg;
-  background: linear-gradient(to bottom, var(--dim), transparent);
+  background: linear-gradient(to bottom, var(--border), transparent);
   animation: scrollPulse 2s ease-in-out infinite;
 }
 
@@ -141,7 +141,7 @@
     left: unset;
     width: 100%;
     transform: none;
-    font-size: 11px;
+    font-size: var(--xs);
     gap: 48px;
   }
 

@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useCallback } from 'react';
+import gsap from 'gsap';
+import { useRevealOnView } from '../hooks/useRevealOnView';
 import styles from './Contact.module.css';
 
-const EMAIL = 'sumit@example.com';
+const EMAIL = 'work.sumit@gmail.com';
 
 export default function Contact() {
   const [copied, setCopied] = useState(false);
+  const contentRef = useRevealOnView({ duration: 0.6 });
 
   const handleCopy = async () => {
     try {
@@ -31,14 +33,7 @@ export default function Contact() {
         <p className={styles.label}>
           <span className={styles.prompt}>&gt;</span> CONTACT
         </p>
-
-        <motion.div
-          className={styles.content}
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+        <div ref={contentRef} className={styles.content}>
           <h2 className={styles.headline}>
             LET'S WORK<br />
             <span className={styles.accent}>TOGETHER.</span>
@@ -56,7 +51,7 @@ export default function Contact() {
           </button>
 
           <div className={styles.socials}>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className={styles.social}>
+            <a href="https://github.com/sumit-dey98" target="_blank" rel="noopener noreferrer" className={styles.social}>
               GitHub
             </a>
             <span className={styles.socialDiv}>/</span>
@@ -64,18 +59,17 @@ export default function Contact() {
               LinkedIn
             </a>
             <span className={styles.socialDiv}>/</span>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className={styles.social}>
-              Twitter
+            <a href="https://wa.me/8801717742550" target="_blank" rel="noopener noreferrer" className={styles.social}>
+              WhatsApp
             </a>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <div className={styles.footer}>
         <span className={styles.footerText}>
-          <span className={styles.prompt}>&gt;</span>&copy;  SUMIT HILLOL DEY | 2025
+          <span className={styles.prompt}>&gt;</span>&copy; SUMIT HILLOL DEY | 2025
         </span>
-        {/* <span className={styles.footerText}>BUILT WITH REACT + VITE</span> */}
       </div>
     </section>
   );

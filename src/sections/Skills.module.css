@@ -21,7 +21,7 @@
   margin-bottom: 20px;
   font-family: var(--mono);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--xs);
   letter-spacing: 4px;
   color: var(--accent);
 }

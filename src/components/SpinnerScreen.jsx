@@ -69,7 +69,12 @@ export default function SpinnerScreen({ onReady }) {
         });
       }, 600);
     };
-    document.fonts.ready.then(handleReady);
+    const fontFamily = getComputedStyle(document.documentElement)
+      .getPropertyValue('--display').trim() || 'Impact';
+
+    document.fonts.ready
+      .then(() => document.fonts.load(`400 64px ${fontFamily}`))
+      .then(handleReady);
 
     return () => {
       clearTimeout(slowTimer);

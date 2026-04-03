@@ -19,7 +19,7 @@
 
 .label {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   font-weight: 600;
   letter-spacing: 4px;
   color: var(--accent);
@@ -36,6 +36,18 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 28px;
+}
+
+@media (min-width: 1024px) {
+  .content {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .content {
+    opacity: 1;
+  }
 }
 
 .headline {
@@ -166,5 +178,12 @@
 
   .footer .prompt {
     display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content {
+    opacity: 0;
+    transform: translateY(30px);
   }
 }

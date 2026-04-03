@@ -149,7 +149,7 @@
 /* Typography */
 .eyebrow {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: var(--sm);
   font-weight: 700;
   letter-spacing: 4px;
   color: var(--text-dim);
@@ -182,7 +182,7 @@
 
 .stepTitle {
   font-family: var(--display);
-  font-size: clamp(26px, 4vw, 44px);
+  font-size: var(--xl);
   font-weight: 400;
   letter-spacing: 2px;
   color: var(--text);
@@ -199,7 +199,7 @@
 
 .sub {
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: var(--base);
   font-weight: 600;
   letter-spacing: 2px;
   color: var(--muted);
@@ -225,7 +225,7 @@
 
 .settingsLabel {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--xs);
   font-weight: 600;
   letter-spacing: 3px;
   color: var(--dim);
@@ -233,7 +233,7 @@
 
 .settingsValue {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--sm);
   font-weight: 600;
   letter-spacing: 2px;
   color: var(--accent);
@@ -324,7 +324,7 @@
 
 .cardName {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--xs);
   font-weight: 600;
   letter-spacing: 2px;
   color: var(--cc-text);
@@ -334,7 +334,7 @@
   position: absolute;
   bottom: 12px;
   right: 12px;
-  font-size: 10px;
+  font-size: var(--xs);
   font-family: var(--mono);
   background-color: var(--accent2);
   height: 8px;
@@ -359,7 +359,7 @@
   left: 0;
   transform: translateY(-50%);
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: var(--md);
   letter-spacing: 4px;
   color: var(--dim);
   opacity: 0.5;
@@ -386,13 +386,13 @@
 
 .inputPrompt {
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: var(--md);
   color: var(--accent2);
 }
 
 .input {
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: var(--md);
   letter-spacing: 4px;
   color: var(--text);
   border: none;
@@ -412,7 +412,7 @@
 }
 
 .inputCursor {
-  font-size: 18px;
+  font-size: var(--md);
   color: var(--accent2);
   font-weight: 900;
   animation: blink 0.7s ease infinite alternate;
@@ -462,7 +462,7 @@
 
 .modeTag {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--xs);
   letter-spacing: 4px;
   color: var(--accent);
   font-weight: 600;
@@ -470,7 +470,7 @@
 
 .modeTitle {
   font-family: var(--display);
-  font-size: 22px;
+  font-size: var(--lg);
   font-weight: 400;
   letter-spacing: 2px;
   color: var(--text);
@@ -479,7 +479,7 @@
 
 .modeDesc {
   font-family: var(--body);
-  font-size: 12px;
+  font-size: var(--xs);
   line-height: 1.65;
   color: var(--text-dim);
   font-weight: 300;
@@ -490,7 +490,7 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  font-size: 11px;
+  font-size: var(--xs);
   font-family: var(--mono);
   color: var(--accent2);
 }
@@ -514,7 +514,7 @@
 .backBtn {
   background-color: transparent;
   color: var(--accent);
-  font-size: 20px;
+  font-size: var(--lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -553,7 +553,7 @@
   background: none;
   border: none;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--xs);
   font-weight: 600;
   letter-spacing: 2px;
   color: var(--muted);
@@ -592,7 +592,7 @@
   background: var(--accent);
   border: none;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   letter-spacing: 3px;
   color: var(--bg);
   padding: 15px 36px;
@@ -634,7 +634,7 @@
   align-items: center;
   gap: 10px;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: var(--xxs);
   letter-spacing: 2px;
   color: var(--dim);
   white-space: nowrap;
@@ -710,7 +710,7 @@
 
 @media (max-width: 479px) {
   .cardName {
-    font-size: 9px;
+    font-size: var(--xxs);
   }
 
   .cardCheck {
