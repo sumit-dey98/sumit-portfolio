@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react';
-import gsap from 'gsap';
+import { useState } from 'react';
 import { useRevealOnView } from '../hooks/useRevealOnView';
 import styles from './Contact.module.css';
 

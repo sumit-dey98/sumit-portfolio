@@ -11,14 +11,12 @@ const GAP = 32;
 const CARD_W = () => Math.min(window.innerWidth * 0.8, 1600);
 const MAX_X = () => (TOTAL - 1) * (CARD_W() + GAP);
 
-// ── Fullscreen helper ─────────────────────────────────────────────────────
 function requestFullscreen(el) {
   if (el.requestFullscreen) return el.requestFullscreen();
   if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
   if (el.webkitEnterFullscreen) return el.webkitEnterFullscreen();
 }
 
-// ── CardDesc (unchanged logic) ────────────────────────────────────────────
 function CardDesc({ text }) {
   const ref = useRef(null);
   const thumbRef = useRef(null);
@@ -148,7 +146,6 @@ function CardDesc({ text }) {
   );
 }
 
-// ── ProjectCard — GSAP replaces useMotionValue + useTransform ────────────
 function ProjectCard({ project, cardRef }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -177,7 +174,6 @@ function ProjectCard({ project, cardRef }) {
   };
 
   return (
-    // plain div — GSAP drives opacity/scale from DesktopScroller
     <div ref={cardRef} className={styles.card} style={{ opacity: 0.25, scale: 0.92 }}>
       <div className={styles.cardInfo}>
         <div className={styles.cardTop}>
@@ -231,7 +227,6 @@ function ProjectCard({ project, cardRef }) {
             >
               {isPlaying ? <FiPause /> : <FiPlay />}
             </button>
-            {/* Fullscreen button */}
             <button
               className={styles.fullscreenBtn}
               onClick={handleFullscreen}
@@ -246,7 +241,6 @@ function ProjectCard({ project, cardRef }) {
   );
 }
 
-// ── ViewAllDropdown — GSAP replaces AnimatePresence + motion.div ──────────
 function ViewAllDropdown({ onSelect, activeIndex }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -317,7 +311,6 @@ function ViewAllDropdown({ onSelect, activeIndex }) {
   );
 }
 
-// ── MobileCard — fullscreen added ─────────────────────────────────────────
 function MobileCard({ project }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
