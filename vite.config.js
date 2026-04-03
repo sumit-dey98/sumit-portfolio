@@ -21,5 +21,14 @@ export default defineConfig({
         }
       }
     }
+  },
+  server: {
+    proxy: {
+      '/cdn': {
+        target: 'https://res.cloudinary.com/sumitdey',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cdn/, '')
+      }
+    }
   }
 })

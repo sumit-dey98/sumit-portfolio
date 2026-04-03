@@ -1,3 +1,5 @@
+import { CLD_ASSETS } from './cloudinary-urls';
+
 export const PROJECT_ROUTES = {
   connect4: {
     logoSrc: '/projects/connect4/connect4-logo.svg',
@@ -18,6 +20,7 @@ export const PROJECT_ROUTES = {
     url: 'interior-design-studio',
   },
 };
+
 export const SECTIONS = ['landing', 'intro', 'about', 'projects', 'skills', 'services', 'contact'];
 
 export const PROJECTS = [
@@ -27,10 +30,10 @@ export const PROJECTS = [
     tags: ['React+Vite', 'Zustand', 'GSAP'],
     link: '/project/connect4',
     desc: 'A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes. A Connect 4 game with 5-level AI, animated disc drops, customizable board, and multiple game modes. ',
-    screens: ['/project-connect4-thumb.jpg', '/project-rubiks-thumb.jpg', '/project-interior-thumb.jpg'],
-    preview: '/project-connect4-thumb.jpg',
-    mobileSrc: '/project-connect4-thumb.jpg',
-    videoSrc: '/previews/project-connect4-preview.mp4',
+    screens: [CLD_ASSETS.project_connect4_thumb, CLD_ASSETS.project_rubiks_thumb, CLD_ASSETS.project_interior_thumb],
+    preview: CLD_ASSETS.project_connect4_thumb,
+    mobileSrc: CLD_ASSETS.project_connect4_thumb,
+    videoSrc: CLD_ASSETS.project_connect4_preview,
   },
   {
     id: '02',
@@ -38,10 +41,10 @@ export const PROJECTS = [
     tags: ['React+Vite', 'Three.js', 'Tailwind'],
     link: '/project/rubiks-cube',
     desc: "A 3D Rubik's Cube with realistic and customizable visuals and interactions, created with React and Three.js.",
-    screens: ['/project-connect4-thumb.jpg', '/project-rubiks-thumb.jpg', '/project-interior-thumb.jpg'],
-    preview: '/project-rubiks-thumb.jpg',
-    mobileSrc: '/project-rubiks-thumb.jpg',
-    videoSrc: '/previews/project-rubiks-preview.mp4',
+    screens: [CLD_ASSETS.project_connect4_thumb, CLD_ASSETS.project_rubiks_thumb, CLD_ASSETS.project_interior_thumb],
+    preview: CLD_ASSETS.project_rubiks_thumb,
+    mobileSrc: CLD_ASSETS.project_rubiks_thumb,
+    videoSrc: CLD_ASSETS.project_rubiks_preview,
   },
   {
     id: '03',
@@ -49,10 +52,10 @@ export const PROJECTS = [
     tags: ['HTML', 'SCSS', 'JavaScript'],
     link: '/project/interior',
     desc: 'A front end demo website with custom scroll animations and responsive layout.',
-    screens: ['/project-connect4-thumb.jpg', '/project-rubiks-thumb.jpg', '/project-interior-thumb.jpg'],
-    preview: '/project-interior-thumb.jpg',
-    mobileSrc: '/project-interior-thumb.jpg',
-    videoSrc: '/previews/project-interior-preview.mp4',
+    screens: [CLD_ASSETS.project_connect4_thumb, CLD_ASSETS.project_rubiks_thumb, CLD_ASSETS.project_interior_thumb],
+    preview: CLD_ASSETS.project_interior_thumb,
+    mobileSrc: CLD_ASSETS.project_interior_thumb,
+    videoSrc: CLD_ASSETS.project_interior_preview,
   },
   {
     id: '04',
@@ -60,13 +63,12 @@ export const PROJECTS = [
     tags: ['Framer Motion', 'Storybook', 'React'],
     link: null,
     desc: 'A comprehensive animation library with 60+ primitives, used across 3 production products.',
-    screens: ['/project-connect4-thumb.jpg', '/project-rubiks-thumb.jpg', '/project-interior-thumb.jpg'],
+    screens: [CLD_ASSETS.project_connect4_thumb, CLD_ASSETS.project_rubiks_thumb, CLD_ASSETS.project_interior_thumb],
     preview: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
     mobileSrc: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=80',
     videoSrc: null,
   },
 ];
-
 
 export const STACKS = [
   {
@@ -129,6 +131,6 @@ export const SERVICES = [
     id: '04',
     title: 'Creative Direction',
     desc: 'End-to-end visual strategy — brand identity, typography systems, and cohesive design languages that scale.',
-    tags: ['Branding', 'Typography', 'Art Direction'],
+    tags: ['Branding','Typography', 'Art Direction'],
   },
 ];

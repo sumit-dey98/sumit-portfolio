@@ -164,8 +164,8 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
                 className={styles.pane}
                 style={{ width: `${100 / TABS.length}%` }}
                 aria-hidden={id !== activeTab}
-                {...(id !== activeTab ? { inert: '' } : {})}
-              >
+                {...(id !== activeTab ? { inert: true } : {})}             
+                >
                 {sections[id]}
               </div>
             ))}

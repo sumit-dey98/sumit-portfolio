@@ -216,6 +216,10 @@ section {
     --section-pad-x: 24px;
   }
 
+  html, body, section {
+    scrollbar-width: none;
+  }
+
   section:not(#landing) {
     padding: 100px 16px 80px;
     min-height: 100%;

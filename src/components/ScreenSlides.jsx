@@ -7,7 +7,7 @@ import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import styles from './ScreenSlides.module.css';
 
 const OVERLAY_EASE = 'power2.out';
-const INNER_EASE = 'power4.out';      // maps to [0.16, 1, 0.3, 1]
+const INNER_EASE = 'power4.out';   
 const CELL_EASE = 'power4.out';
 
 export default function ScreenSlides({ screens }) {
@@ -20,12 +20,10 @@ export default function ScreenSlides({ screens }) {
   const expandedFlktyRef = useRef(null);
   const didDragRef = useRef(false);
 
-  // GSAP targets
   const overlayRef = useRef(null);
   const overlayInnerRef = useRef(null);
-  const cellInnerRefs = useRef([]);   // one ref per expanded cell
+  const cellInnerRefs = useRef([]);   
 
-  // ── Flickity helpers ──────────────────────────────────────────────
   const initFlickity = (el, ref, opts = {}) => {
     if (!el) return;
     const id = requestAnimationFrame(() => {
@@ -81,23 +79,19 @@ export default function ScreenSlides({ screens }) {
     };
   }, [expanded]);
 
-  // ── Overlay open / close ──────────────────────────────────────────
   const openOverlay = () => {
     setExpanded(true);
   };
 
-  // runs after expanded=true, DOM is painted
   useEffect(() => {
     if (!expanded) return;
     const overlay = overlayRef.current;
     const inner = overlayInnerRef.current;
     if (!overlay || !inner) return;
 
-    // set start state
     gsap.set(overlay, { opacity: 0 });
     gsap.set(inner, { opacity: 0, scale: 0.95 });
 
-    // animate in
     gsap.to(overlay, { opacity: 1, duration: 0.25, ease: OVERLAY_EASE });
     gsap.to(inner, { opacity: 1, scale: 1, duration: 0.25, ease: INNER_EASE });
   }, [expanded]);
@@ -110,7 +104,6 @@ export default function ScreenSlides({ screens }) {
       return;
     }
 
-    // animate out, then unmount
     gsap.to(overlay, { opacity: 0, duration: 0.25, ease: 'power2.in' });
     gsap.to(inner, {
       opacity: 0,
@@ -121,7 +114,6 @@ export default function ScreenSlides({ screens }) {
     });
   };
 
-  // ── Per-cell scale based on distance from active slide ────────────
   useEffect(() => {
     if (!expanded) return;
     cellInnerRefs.current.forEach((el, i) => {
@@ -175,7 +167,6 @@ export default function ScreenSlides({ screens }) {
         )}
       </div>
 
-      {/* ── Expanded overlay (portalled) ── */}
       {createPortal(
         expanded ? (
           <div ref={overlayRef} className={styles.overlay}>
@@ -194,7 +185,6 @@ export default function ScreenSlides({ screens }) {
                   const distance = Math.abs(i - slide);
                   return (
                     <div key={i} className={styles.expandedCell}>
-                      {/* ref collected into array, initial scale set inline */}
                       <div
                         ref={el => { cellInnerRefs.current[i] = el; }}
                         className={styles.expandedCellInner}
