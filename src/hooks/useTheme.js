@@ -17,6 +17,9 @@ export function useTheme() {
 
     root.setAttribute('data-theme', themeKey);
     localStorage.setItem('portfolio-theme', themeKey);
+
+    document.querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', theme.vars['--surface'] ?? '#080810');
   }, [themeKey]);
 
   const setTheme = useCallback((key) => {

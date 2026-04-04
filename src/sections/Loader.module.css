@@ -1,8 +1,10 @@
 /*  Root  */
 .loader {
-  position: fixed;
+  position: relative;
   inset: 0;
   z-index: 9000;
+  height: 100dvh;
+  width: 100vw;
   background: var(--bg);
   display: flex;
   flex-direction: column;
@@ -131,7 +133,7 @@
 
 /*  Content  */
 .content {
-  width: 100%;
+  width: 300%;
   min-height: 440px;
   display: flex;
   align-items: center;
@@ -270,8 +272,8 @@
 }
 
 .themeCardOn {
-  border-color: var(--cc-accent) !important;
-  box-shadow: 0 0 2px 1px var(--cc-accent);
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 2px 2px var(--border);
 }
 
 .cardPreview {
@@ -479,7 +481,7 @@
 
 .modeDesc {
   font-family: var(--body);
-  font-size: var(--xs);
+  font-size: var(--base);
   line-height: 1.65;
   color: var(--text-dim);
   font-weight: 300;
@@ -519,7 +521,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--accent);
-  box-shadow: 0 0 1px 1px var(--accent);
+  box-shadow: 0 0 2px 2px var(--border);
   padding: 6px;
   margin-right: 12px;
   border-radius: 99px;
@@ -689,17 +691,40 @@
 }
 
 @media (max-width: 800px) {
-  .content {
+  /* .content {
+    justify-content: space-evenly;
     padding: 0;
+    max-width: 100%;
+  }  */
+
+  .wizardOuter {
+    max-width: 100vw;
   }
+
+  /* .wizardTrack {
+    width: 300%;
+  }
+
+  .wizardPanel {
+    max-height: 60vh;
+    width: 33.333%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  } */
 
   .themeGrid {
+    max-width: 100%;
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
+    max-height: 36dvh;
+    padding: 2px;
     gap: 16px;
+    overflow: auto;
   }
 
+
+
   .themeCard {
-    width: 100%;
     height: 100px;
   }
 
@@ -715,5 +740,13 @@
 
   .cardCheck {
     display: none;
+  }
+
+  .modeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modeCard {
+    padding: 12px;
   }
 }
