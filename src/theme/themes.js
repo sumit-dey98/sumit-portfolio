@@ -1,6 +1,8 @@
 import { BsMoonStarsFill } from 'react-icons/bs';
 import { BsSunFill, BsStars, BsSnow, BsHexagonFill, BsTerminalFill } from 'react-icons/bs';
 import { PiFlameLight } from 'react-icons/pi';  
+import { BsCloudHazeFill, BsDiamondFill } from 'react-icons/bs';
+import { PiDropFill, PiPlanetFill } from 'react-icons/pi';
 
 export const THEMES = {
   dark: {
@@ -43,7 +45,7 @@ export const THEMES = {
     icon: BsStars,
     vars: {
       '--bg': '#0D0013',
-      '--surface': '#15OO20',
+      '--surface': '#150020',
       '--border': '#2D0050',
       '--accent': '#FF00FF',
       '--accent2': '#00EEFF',
@@ -91,7 +93,7 @@ export const THEMES = {
   ash: {
     label: 'ASH',
     group: 'MONO',
-    icon: BsHexagonFill,
+    icon: BsCloudHazeFill,
     vars: {
       '--bg': '#080808',
       '--surface': '#111111',
@@ -142,7 +144,7 @@ export const THEMES = {
   crimson: {
     label: 'CRIMSON',
     group: 'MONO',
-    icon: BsHexagonFill,
+    icon: PiDropFill,
     vars: {
       '--bg': '#0A0008',
       '--surface': '#120010',
@@ -159,7 +161,7 @@ export const THEMES = {
   indigo: {
     label: 'INDIGO',
     group: 'MONO',
-    icon: BsHexagonFill,
+    icon: PiPlanetFill,
     vars: {
       '--bg': '#00050F',
       '--surface': '#000D1F',
