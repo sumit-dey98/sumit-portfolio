@@ -9,7 +9,7 @@
   width: 100%;
   gap: 8px;
   background: var(--surface);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: border-color 0.2s;
 }
@@ -20,7 +20,7 @@
 
 .icon {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   color: var(--accent);
   margin-top: 4px;
 }
@@ -28,14 +28,14 @@
 .label {
   font-family: var(--mono);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--xs);
   letter-spacing: 2px;
   color: var(--text);
 }
 
 .arrow {
   font-family: var(--mono);
-  font-size: 1rem;
+  font-size: var(--base);
   color: var(--muted);
   transition: transform 0.2s;
   display: inline-flex;
@@ -61,33 +61,50 @@
   top: calc(100% + 8px);
   right: 0;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
   list-style: none;
-  min-width: 160px;
   overflow: hidden;
   z-index: 200;
-  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 2px 1px var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.menuMain {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  min-width: 160px;
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
 }
 
 .option {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 8px 16px;
   background: none;
   border: none;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.5s;
+  height: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
 }
 
 .option:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg);
+  border: 1px solid var(--border);
 }
 
 .option.active {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg);
+  box-shadow: 0 0 3px 2px var(--border);
 }
 
 .optionIcon {
@@ -95,15 +112,14 @@
   justify-content: center;
   align-items: center;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   font-weight: 600;
   height: 20px;
   width: 20px;
-  /* min-width: 16px; */
   padding: 4px;
   border-width: 1px;
   border-style: solid;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .optionIcon svg {
@@ -112,20 +128,54 @@
 
 .optionLabel {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--xxs);
   font-weight: 500;
   letter-spacing: 2px;
   color: var(--text);
   flex: 1;
   text-align: left;
-  margin-left: 8px;
+  margin-left: 2px;
+}
+
+.groupLabel {
+  font-family: var(--mono);
+  font-size: var(--xxs);
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
+  padding: 8px 12px 4px;
+}
+
+.groupList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.submenuItem {
+  position: relative;
+  list-style: none;
+}
+
+.submenuItem>.option {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.submenu {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  border-top: 1px solid var(--accent);
+  display: flex;
+  width: 100%;
+  gap: 4px;
 }
 
 .check {
-  font-size: 10px;
   color: var(--accent2);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
 }
 
 .list {
@@ -137,22 +187,29 @@
 
 .listLabel {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--base);
   font-weight: 600;
   letter-spacing: 3px;
   color: var(--dim);
-  margin-bottom: 8px;
+}
+
+.listShell {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-items: start;
 }
 
 .listItem {
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
   background: none;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   will-change: transform, background, border-color;
   transition: background 0.15s, border-color 0.15s, transform 0.2s;
@@ -167,4 +224,71 @@
   background: rgba(255, 255, 255, 0.06);
   border-color: var(--accent);
   transform: translateX(4px);
+}
+
+.listSubItem {
+  padding-left: 24px;
+}
+
+.listSubmenuWrapper {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.submenuArrow {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+}
+
+@media (max-width: 1023px) {
+  .list {
+    gap: 0;
+  }
+
+  .listLabel {
+    font-size: var(--sm);
+    letter-spacing: 2px;
+    padding: 16px 4px;
+  }
+
+  .listItem {
+    padding: 8px 10px;
+    gap: 8px;
+    width: 100%;
+    will-change: auto;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .listActive {
+    transform: none;
+  }
+
+  .listSubItem {
+    padding-left: 18px;
+  }
+
+  .optionIcon {
+    width: 18px;
+    height: 18px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+
+  .optionLabel {
+    font-size: var(--xxs);
+    letter-spacing: 1.5px;
+  }
+
+  .arrow {
+    font-size: var(--xs);
+  }
+
+  .statusDot {
+    width: 5px;
+    height: 5px;
+  }
 }

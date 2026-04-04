@@ -9,9 +9,11 @@ lerna-debug.log*
 
 .code-backups
 node_modules
+public/screens
 dist
 dist-ssr
 *.local
+*.env
 
 # Editor directories and files
 .vscode/*

@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useRef, useEffect } from 'react';
+import gsap from 'gsap';
 import styles from './Logo.module.css';
-
-const ease = [0.16, 1, 0.3, 1];
 
 function LogoSvg() {
   return (
@@ -16,7 +14,7 @@ function LogoSvg() {
       <g transform="matrix(1,0,0,1,-704.576358,-235.147753)">
         <g>
           <g transform="matrix(1.981892,0,0,2.215611,-713.575475,-391.977932)">
-            <path d="M792.754,297.943L792.754,326.829C792.754,334.8 785.519,341.272 776.607,341.272L732.205,341.272C723.294,341.272 716.059,334.8 716.059,326.829L716.059,297.943C716.059,289.972 723.294,283.5 732.205,283.5L776.607,283.5C785.519,283.5 792.754,289.972 792.754,297.943Z" fill="var(--surface)" stroke="var(--text)" strokeWidth="2" />
+            <path d="M792.754,297.943L792.754,326.829C792.754,334.8 785.519,341.272 776.607,341.272L732.205,341.272C723.294,341.272 716.059,334.8 716.059,326.829L716.059,297.943C716.059,289.972 723.294,283.5 732.205,283.5L776.607,283.5C785.519,283.5 792.754,289.972 792.754,297.943Z" fill="var(--surface)" stroke="var(--text)" strokeWidth="3" />
           </g>
           <g transform="matrix(0.27642,0,0,0.487323,600.67161,111.731339)">
             <path d="M662.003,283.5L724.358,283.5C764.608,283.5 791.826,284.672 806.013,287.015C820.199,289.358 830.988,293.207 838.378,298.563C845.768,303.919 850.387,309.881 852.235,316.45C854.082,323.019 855.006,335.927 855.006,355.174L855.006,426.346C855.006,444.589 853.653,456.786 850.948,462.936C848.243,469.087 843.525,473.899 836.794,477.372C830.064,480.844 821.75,483.271 811.853,484.652C801.955,486.033 787.043,486.723 767.115,486.723L662.003,486.723L662.003,283.5ZM745.341,318.27L745.341,451.953C757.35,451.953 764.74,450.426 767.511,447.371C770.283,444.317 771.668,436.011 771.668,422.455L771.668,343.5C771.668,334.295 771.206,328.396 770.283,325.802C769.359,323.207 767.247,321.304 763.948,320.09C760.649,318.877 754.446,318.27 745.341,318.27Z" fill="var(--accent2)" fillRule="nonzero" />
@@ -31,59 +29,91 @@ function LogoSvg() {
 }
 
 export default function Logo({ onClick, mobile = false, className = '' }) {
-  const [hovered, setHovered] = useState(false);
+  const containerRef = useRef(null);
+  const text1Ref = useRef(null);
+  const text2Ref = useRef(null);
+  const tweens = useRef([]);
+  const ctxRef = useRef(null);
+
+  useEffect(() => {
+    if (mobile || !containerRef.current) return;
+
+    ctxRef.current = gsap.context(() => {
+      gsap.set([text1Ref.current, text2Ref.current], { x: -30, opacity: 0 });
+    }, containerRef);
+
+    return () => ctxRef.current?.revert();
+  }, [mobile]);
+
+  const handleMouseEnter = () => {
+    tweens.current.forEach(t => t.kill());
+    tweens.current = [
+      gsap.to(text1Ref.current, {
+        x: 6, opacity: 1,
+        duration: 0.45, ease: 'expo.out',
+      }),
+      gsap.to(text2Ref.current, {
+        x: 6, opacity: 1,
+        duration: 0.45, ease: 'expo.out',
+        delay: 0.08,
+      }),
+    ];
+  };
+
+  const handleMouseLeave = () => {
+    tweens.current.forEach(t => t.kill());
+    tweens.current = [
+      gsap.to(text1Ref.current, {
+        x: -30, opacity: 0,
+        duration: 0.45, ease: 'expo.out',
+      }),
+      gsap.to(text2Ref.current, {
+        x: -30, opacity: 0,
+        duration: 0.45, ease: 'expo.out',
+      }),
+    ];
+  };
 
   if (mobile) {
     return (
-      <motion.span
+      <span
         className={`${styles.logo} ${styles.mobileLogo} ${className}`}
         onClick={onClick}
         role="button"
         tabIndex={0}
-        // whileTap={{ scale: 0.88 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
         aria-label="Home"
       >
         <LogoSvg />
-      </motion.span>
+      </span>
     );
   }
 
   return (
-    <motion.span
+    <span
+      ref={containerRef}
       className={`${styles.logo} ${className}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
       aria-label="Home"
     >
       <LogoSvg />
 
       <span className={styles.textClip}>
-        <motion.span
-          className={styles.text}
-          initial={{ x: -30, opacity: 0 }}
-          animate={hovered ? { x: 6, opacity: 1 } : { x: -30, opacity: 0 }}
-          transition={{ duration: 0.45, ease }}
-        >
+        <span ref={text1Ref} className={styles.text} style={{ opacity: 0 }}>
           SUMIT
-        </motion.span>
+        </span>
       </span>
 
       <span className={styles.textClip}>
-        <motion.span
-          className={styles.text}
-          initial={{ x: -30, opacity: 0 }}
-          animate={hovered ? { x: 6, opacity: 1 } : { x: -30, opacity: 0 }}
-          transition={{ duration: 0.45, ease, delay: hovered ? 0.08 : 0 }}
-        >
+        <span ref={text2Ref} className={styles.text} style={{ opacity: 0 }}>
           <span className={styles.dot}>.</span>DEV
-        </motion.span>
+        </span>
       </span>
-    </motion.span>
+    </span>
   );
 }

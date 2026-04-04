@@ -1,138 +1,171 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, useEffect, useCallback } from 'react';
+import gsap from 'gsap';
+import { useInView } from 'react-intersection-observer';
 import { IoClose, IoRemove } from 'react-icons/io5';
 import ExpandIcon from '../assets/ExpandIcon';
-import { useThemeContext } from '../theme/ThemeContext';
 import styles from './Terminal.module.css';
 
-const SKILLS = [
-  {
-    group: 'languages',
-    items: ['JavaScript', 'PHP', 'Python'],
-  },
-  {
-    group: 'frameworks',
-    items: ['React', 'Next.js', 'Vite'],
-  },
-  {
-    group: 'graphics & animations',
-    items: ['GSAP', 'Canvas API', 'Framer Motion'],
-  },
-  {
-    group: 'tooling',
-    items: ['Tailwind', 'Wordpress', 'HubSpot'],
-  },
-];
+const MOBILE_BREAKPOINT = 1023;
 
-export default function Terminal({ isFullscreen, onClose, onMinimize, onExpand }) {
+function SkillItem({ item, level, custom, isInView, isFullscreen }) {
+  const rowRef = useRef(null);
+  const fillRef = useRef(null);
+  const tweenRef = useRef(null); 
 
-  const { getCssVar } = useThemeContext();
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    gsap.fromTo(el,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.3, delay: custom * 0.04, ease: 'power1.out' }
+    );
+  }, []);
 
-  const windowVariants = useMemo(() => ({
-    hidden: { opacity: 0, y: 50, scale: 0.9 },
-    visible: { opacity: 1, y: 0, scale: 1 },
-    fullscreen: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { type: 'spring', damping: 20, stiffness: 200 }
-    }
-  }), []);
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    const onEnter = () => gsap.to(el, { x: 4, duration: 0.15, ease: 'power1.out' });
+    const onLeave = () => gsap.to(el, { x: 0, duration: 0.15, ease: 'power1.out' });
+    el.addEventListener('mouseenter', onEnter);
+    el.addEventListener('mouseleave', onLeave);
+    return () => {
+      el.removeEventListener('mouseenter', onEnter);
+      el.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
 
-  const groupVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: (custom) => ({
-      opacity: 1,
-      x: 0,
-      transition: { delay: custom * 0.1, duration: 0.4 }
-    })
-  };
+  const animateFill = useCallback(() => {
+    const el = fillRef.current;
+    if (!el) return;
+    tweenRef.current?.kill();
+    tweenRef.current = gsap.fromTo(el,
+      { width: '0%' },
+      { width: `${level}%`, duration: 0.8, delay: custom * 0.08, ease: 'power1.inOut' }
+    );
+  }, [level, custom]);
 
-  const itemVariants = {
-    hidden: { opacity: 0 },
-    visible: (custom) => ({
-      opacity: 1,
-      transition: { delay: custom * 0.04, duration: 0.3 }
-    })
-  };
+  useEffect(() => {
+    if (isInView) animateFill();
+  }, [isInView]);
+
+  useEffect(() => {
+    if (isFullscreen) animateFill();
+  }, [isFullscreen]);
 
   return (
-    <motion.div
-      className={`${styles.terminal} ${isFullscreen ? styles.fullscreen : ''}`}
-      variants={windowVariants}
-      initial="hidden"
-      animate={isFullscreen ? 'fullscreen' : 'visible'}
-      exit="hidden"
-      layout 
-    >
+    <div ref={rowRef} className={styles.item} style={{ opacity: 0 }}>
+      <span className={styles.fileIcon}>-rw-r--r--</span>
+      <span className={styles.itemName}>{item}</span>
+      <span className={styles.progressBar}>
+        <span ref={fillRef} className={styles.progressFill} style={{ width: 0 }} />
+      </span>
+      <span className={styles.itemLevel}>{level}%</span>
+    </div>
+  );
+}
+
+export default function Terminal({ isFullscreen, onExpand, data }) {
+  const terminalRef = useRef(null);
+  const groupRef = useRef(null);
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT;
+  const effectiveFullscreen = isMobile ? false : isFullscreen;
+
+  const { ref: inViewRef, inView } = useInView({ triggerOnce: true });
+
+  const setRefs = useCallback((el) => {
+    terminalRef.current = el;
+    inViewRef(el);
+  }, [inViewRef]);
+
+  useEffect(() => {
+    const el = groupRef.current;
+    if (!el) return;
+    gsap.fromTo(el,
+      { opacity: 0, x: -10 },
+      { opacity: 1, x: 0, duration: 0.4, delay: 0, ease: 'power1.out' }
+    );
+  }, []);
+
+  useEffect(() => {
+    const el = terminalRef.current;
+    if (!el || isMobile) return;
+
+    if (effectiveFullscreen) {
+      gsap.to(el, {
+        position: 'absolute',
+        top: 14, left: 14, right: 14, bottom: 14,
+        width: 'calc(100% - 28px)',
+        maxWidth: 'calc(100% - 28px)',
+        height: 'calc(100% - 28px)',
+        maxHeight: 'calc(100% - 28px)',
+        zIndex: 1000,
+        borderRadius: 'var(--radius)',
+        duration: 0.2,
+        ease: 'power1.inOut',
+      });
+    } else {
+      gsap.to(el, {
+        position: 'relative',
+        top: 0, left: 0, right: 0, bottom: 0,
+        width: '100%',
+        maxWidth: '100%',
+        height: '100%',
+        maxHeight: '100%',
+        zIndex: 1,
+        borderRadius: 'var(--radius)',
+        duration: 0.2,
+        ease: 'power1.inOut',
+      });
+    }
+  }, [effectiveFullscreen, isMobile]);
+
+  return (
+    <div ref={setRefs} className={styles.terminal}>
       <div className={styles.terminalBar}>
-        <span
-          className={styles.termDot}
-          style={{ background: '#ff5f57' }}
-          // onClick={onClose}
-        >
+        <span className={styles.termDot} style={{ background: '#ff5f57' }}>
           <IoClose color="#000" size={16} />
         </span>
-        <span
-          className={styles.termDot}
-          style={{
-            background: '#ffbd2e',
-          }}
-          // onClick={onMinimize}
-        >
+        <span className={styles.termDot} style={{ background: '#ffbd2e' }}>
           <IoRemove color="#000" size={16} />
         </span>
         <span
           className={styles.termDot}
           style={{ background: '#28c840' }}
-          onClick={onExpand}
+          onClick={isMobile ? undefined : onExpand}
         >
-          <ExpandIcon color="#000" size={8} style={{rotate: '-90deg'}}/>
+          <ExpandIcon color="#000" size={16} style={{ rotate: '-90deg', padding: '3px' }} />
         </span>
-        <span className={styles.termTitle}>sumit@portfolio: ~/skills</span>
+        <span className={styles.termTitle}>sumit@portfolio: ~/stack/{data.group}</span>
       </div>
 
-      <div className={styles.terminalBody}>
-        <p className={styles.termCmd}>
-          <span className={styles.termPrompt}>sumit@portfolio:~$</span> ls -la ./skills
-        </p>
+      <div className={`${styles.terminalBody} ${effectiveFullscreen ? styles.terminalBodyFullscreen : ''}`}>
+        {!isMobile && (
+          <p className={styles.termCmd}>
+            <span className={styles.termPrompt}>sumit@portfolio:~$</span> ls -la ./{data.group}
+          </p>
+        )}
 
-        {SKILLS.map((group, gi) => (
-          <motion.div
-            key={group.group}
-            className={styles.group}
-            variants={groupVariants}
-            initial="hidden"
-            animate="visible"
-            custom={gi}
-          >
-            <span className={styles.groupName}>
-              <span className={styles.termDir}>drwxr-xr-x</span> ./{group.group}/
-            </span>
-            <div className={styles.items}>
-              {group.items.map((item, ii) => (
-                <motion.span
-                  key={item}
-                  className={styles.item}
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  custom={gi * 10 + ii} 
-                  whileHover={{ x: 4 }}
-                >
-                  <span className={styles.fileIcon}>-rw-r--r--</span>
-                  {item}
-                </motion.span>
-              ))}
-            </div>
-          </motion.div>
-        ))}
+        <div ref={groupRef} className={styles.group} style={{ opacity: 0 }}>
+          <div className={styles.items}>
+            {Object.entries(data.items).map(([item, level], ii) => (
+              <SkillItem
+                key={item}
+                item={item}
+                level={level}
+                custom={ii}
+                isInView={inView}
+                isFullscreen={effectiveFullscreen}
+              />
+            ))}
+          </div>
+        </div>
 
-        <p className={styles.termCmd} style={{ marginTop : '20px'}}>
+        <p className={styles.termCmd} style={{ marginTop: '20px' }}>
           <span className={styles.termPrompt}>sumit@portfolio:~$</span>
           <span className={styles.cursor}>_</span>
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }

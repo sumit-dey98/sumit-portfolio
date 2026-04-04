@@ -3,8 +3,9 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  border: solid 1px var(--border);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
 }
 
@@ -46,10 +47,12 @@
 .browserUrl {
   flex: 1;
   background: var(--surface);
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 5px 12px;
-  font-size: 12px;
+  font-size: var(--xs);
+  font-family: var(--body);
   color: var(--text);
+  letter-spacing: 0px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -61,7 +64,7 @@
 
 .browserLock {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: var(--xs);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -72,12 +75,12 @@
   align-items: center;
   justify-content: center;
   color: var(--text);
-  font-size: 16px;
+  font-size: var(--base);
   background: var(--surface);
   border: none;
   cursor: pointer;
   padding: 6px 6px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   text-decoration: none;
   flex-shrink: 0;
   will-change: color, background;

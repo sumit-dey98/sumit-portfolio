@@ -12,7 +12,7 @@
 .logo:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 
 .svg {
@@ -36,7 +36,7 @@
 .text {
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--base);
   letter-spacing: 3px;
   color: var(--text);
   display: inline-block;
@@ -46,7 +46,7 @@
 .dot {
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--base);
   letter-spacing: 0;
   color: var(--accent2);
   flex-shrink: 0;

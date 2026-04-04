@@ -2681,7 +2681,7 @@ section.about-sec-2-wrapper {
           margin-bottom: 0.6em;
 
           &::before {
-            content: "—";
+            content: "-";
             color: var(--text-faded);
             font-weight: 700;
             display: inline-block;
@@ -2829,7 +2829,7 @@ section.about-sec-4-wrapper {
       }
 
       .col-2 {
-        width: calc(50% - 24px); 
+        width: calc(50% - 24px);
 
         @media (max-width: 1024px) {
           width: calc(50% - 16px);
@@ -2837,9 +2837,10 @@ section.about-sec-4-wrapper {
 
         @media (max-width: 768px) {
           width: 100%;
+
           .btn-primary {
-             margin-top: 1.5em !important;
-            }
+            margin-top: 1.5em !important;
+          }
         }
 
         p {
@@ -2856,7 +2857,7 @@ section.about-sec-4-wrapper {
           .btn-primary {
             margin: unset;
             margin-top: 1em;
-            
+
           }
         }
       }
@@ -2955,7 +2956,7 @@ section.about-sec-5-wrapper {
         }
 
         .col-4.stat-wrapper {
-          width: calc(25% - 18px); 
+          width: calc(25% - 18px);
           margin-top: -72px;
           z-index: 2;
 

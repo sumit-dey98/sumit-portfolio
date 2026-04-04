@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { useRevealOnView } from '../hooks/useRevealOnView';
 import { useTypewriter } from '../hooks/useTypewriter';
 import styles from './Intro.module.css';
 
@@ -11,15 +11,11 @@ const LINES = [
 export default function Intro() {
   const typed = useTypewriter(LINES, { speed: 55, pause: 2000, loop: true });
 
+  const innerRef = useRevealOnView({ duration: 0.6 });
+
   return (
     <section id="intro" className={styles.Intro}>
-      <motion.div
-        className={styles.inner}
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
+      <div ref={innerRef} className={styles.inner}>
         <p className={styles.label}>
           <span className={styles.prompt}>&gt;</span> STATUS
         </p>
@@ -55,13 +51,13 @@ export default function Intro() {
             <span className={styles.metaKey}>coffee consumed</span>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       <div className={styles.lineDecor} aria-hidden="true">
         {Array.from({ length: 12 }).map((_, i) => (
           <span key={i} className={styles.line} style={{ '--i': i }} />
         ))}
       </div>
-    </section>
+    </section >
   );
 }

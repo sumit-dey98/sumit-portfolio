@@ -1,0 +1,248 @@
+@media (min-width: 1024px) {
+  .wrapper {
+    display: contents;
+  }
+
+  .nav,
+  .sheet {
+    display: none;
+  }
+
+  .body {
+    display: contents;
+  }
+
+  .paneTrack,
+  .pane {
+    display: contents;
+  }
+}
+
+@media (max-width: 1023px) {
+  body[style*="padding-right"] {
+    padding-right: 0 !important;
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .nav {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .navSlot {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .paneArea {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .paneTrack {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    will-change: transform;
+  }
+
+  .pane {
+    height: 100%;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+
+  .pane::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pane section,
+  .pane>* {
+    scroll-snap-align: none !important;
+    min-height: 100%;
+  }
+
+  /* -- Bottom sheet -- */
+  .sheet {
+    flex-shrink: 0;
+    height: var(--collapsed-h, 64px);
+    transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: height;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--accent);
+    margin: 6px;
+    box-shadow: 0 0 2px 2px var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+  }
+
+  .sheetExpanded {
+    height: var(--expanded-h, 96px);
+  }
+
+  .sheetDragging {
+    transition: none;
+  }
+
+  .handle {
+    flex-shrink: 0;
+    height: 4px;
+    padding-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .handle:active {
+    cursor: grabbing;
+  }
+
+  .handlePill {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: var(--radius-xs);
+    background: var(--border);
+    filter: contrast(0.5);
+    transition: width 0.22s, background 0.22s;
+  }
+
+  .sheetExpanded .handlePill {
+    width: 24px;
+    background: var(--dim);
+  }
+
+  .tabs {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding: 4px 4px 0;
+  }
+
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 6px 2px 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 0;
+    position: relative;
+    color: var(--muted);
+    transition: color 0.18s;
+  }
+
+  .tab:active {
+    opacity: 0.65;
+  }
+
+  .tabActive {
+    color: var(--accent);
+  }
+
+  .tabIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+  }
+
+  .tabActive .tabIcon {
+    transform: scale(1.1);
+  }
+
+  .tabLabel {
+    font-family: var(--mono);
+    font-size: var(--xxs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(5px);
+    pointer-events: none;
+    transition: opacity 0.2s 0s, transform 0.2s 0s;
+    will-change: transform, opacity;
+  }
+
+  .sheetExpanded .tab:nth-child(1) .tabLabel {
+    transition-delay: 0.06s;
+  }
+
+  .sheetExpanded .tab:nth-child(2) .tabLabel {
+    transition-delay: 0.09s;
+  }
+
+  .sheetExpanded .tab:nth-child(3) .tabLabel {
+    transition-delay: 0.12s;
+  }
+
+  .sheetExpanded .tab:nth-child(4) .tabLabel {
+    transition-delay: 0.15s;
+  }
+
+  .sheetExpanded .tab:nth-child(5) .tabLabel {
+    transition-delay: 0.18s;
+  }
+
+  .sheetExpanded .tab:nth-child(6) .tabLabel {
+    transition-delay: 0.21s;
+  }
+
+  .sheetExpanded .tabLabel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

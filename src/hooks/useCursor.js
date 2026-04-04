@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
-export function useCursor() {
+export function useCursor(enabled = true) {
   const cursorRef = useRef(null);
   const ringRef = useRef(null);
 
@@ -9,7 +9,24 @@ export function useCursor() {
     const ring = ringRef.current;
     if (!cursor || !ring) return;
 
-    let rx = 0, ry = 0;
+    if (!enabled) {
+      cursor.style.opacity = '0';
+      cursor.style.pointerEvents = 'none';
+      ring.style.opacity = '0';
+      ring.style.pointerEvents = 'none';
+      return;
+    }
+
+    cursor.style.opacity = '1';
+    ring.style.opacity = '0.6';
+    cursor.style.pointerEvents = 'none';
+    ring.style.pointerEvents = 'none';
+
+    let rx = 0, ry = 0, lx = 0, ly = 0, rafId;
+
+    const onSelect = () => {
+      window.getSelection()?.removeAllRanges();
+    };
 
     const onMove = (e) => {
       cursor.style.left = `${e.clientX}px`;
@@ -18,8 +35,6 @@ export function useCursor() {
       ry = e.clientY;
     };
 
-    let lx = 0, ly = 0;
-    let rafId;
     const lerp = () => {
       lx += (rx - lx) * 0.12;
       ly += (ry - ly) * 0.12;
@@ -29,20 +44,29 @@ export function useCursor() {
     };
     lerp();
 
-    const onEnter = () => {
-      cursor.style.width = '20px';
-      cursor.style.height = '20px';
-      ring.style.width = '56px';
-      ring.style.height = '56px';
-      ring.style.opacity = '1';
+    const setSize = (cw, ch, rw, rh, ro) => {
+      cursor.style.width = `${cw}px`;
+      cursor.style.height = `${ch}px`;
+      ring.style.width = `${rw}px`;
+      ring.style.height = `${rh}px`;
+      ring.style.opacity = `${ro}`;
     };
 
-    const onLeave = () => {
-      cursor.style.width = '10px';
-      cursor.style.height = '10px';
-      ring.style.width = '36px';
-      ring.style.height = '36px';
-      ring.style.opacity = '0.6';
+    const onNormal = () => setSize(10, 10, 36, 36, 0.6);
+    onNormal();
+    const onEnter = () => setSize(20, 20, 56, 56, 1);
+    const onLeave = () => onNormal();
+
+    const onClick = () => {
+      setSize(12, 12, 44, 44, 0.8);
+      setTimeout(onNormal, 150);
+    };
+
+    const onMouseOver = (e) => {
+      if (e.target.closest('a, button, [data-cursor]')) onEnter();
+    };
+    const onMouseOut = (e) => {
+      if (e.target.closest('a, button, [data-cursor]')) onLeave();
     };
 
     const onTouchMove = (e) => {
@@ -62,24 +86,26 @@ export function useCursor() {
     };
 
     window.addEventListener('mousemove', onMove);
-    document.querySelectorAll('a, button, [data-cursor]').forEach(el => {
-      el.addEventListener('mouseenter', onEnter);
-      el.addEventListener('mouseleave', onLeave);
-    });
-
+    window.addEventListener('click', onClick);
+    document.addEventListener('mouseover', onMouseOver);
+    document.addEventListener('mouseout', onMouseOut);
     window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('touchend', onTouchEnd);
     window.addEventListener('touchcancel', onTouchEnd);
+    document.addEventListener('selectstart', onSelect);
 
     return () => {
-      window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(rafId);
-
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('click', onClick);
+      document.removeEventListener('mouseover', onMouseOver);
+      document.removeEventListener('mouseout', onMouseOut);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('touchcancel', onTouchEnd);
+      document.removeEventListener('selectstart', onSelect);
     };
-  }, []);
+  }, [enabled]);
 
   return { cursorRef, ringRef };
 }

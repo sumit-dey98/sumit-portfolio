@@ -7,7 +7,7 @@
 }
 
 .inner {
-  max-width: 760px;
+  max-width: 1100px;
   width: 100%;
   position: relative;
   z-index: 2;
@@ -16,10 +16,10 @@
 .label {
   font-family: var(--mono);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--xs);
   letter-spacing: 4px;
   color: var(--accent);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .prompt {
@@ -59,7 +59,7 @@
 
 .statusText {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--xs);
   font-weight: 500;
   letter-spacing: 2px;
   color: var(--accent2);
@@ -99,8 +99,8 @@
 }
 
 .body {
-  font-size: 16px;
-  line-height: 1.8;
+  font-size: var(--base);
+  line-height: 1.6;
   color: var(--text-dim);
   margin-bottom: 56px;
   font-weight: 400;
@@ -121,14 +121,14 @@
 .metaVal {
   font-family: var(--display);
   font-weight: 400;
-  font-size: 40px;
+  font-size: var(--xxl);
   color: var(--text);
   line-height: 1;
 }
 
 .metaKey {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--xs);
   font-weight: 500;
   letter-spacing: 2px;
   color: var(--muted);
@@ -153,18 +153,51 @@
   position: absolute;
   right: 0;
   top: 0;
-  width: 1px;
+  width: 1.5px;
   height: 100%;
   background: linear-gradient(to bottom,
-      transparent,
       color-mix(in srgb, var(--accent) 20%, transparent),
-      transparent);
+      transparent 50%,
+      color-mix(in srgb, var(--accent2) 20%, transparent));
+  background-size: 100% 200%;
   transform: translateX(calc(var(--i) * -60px - 60px));
   opacity: calc(1 - var(--i) * 0.08);
+  animation: linePulse 12s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.15s);
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent,
+      black 20%,
+      black 80%,
+      transparent);
+  mask-image: linear-gradient(to bottom,
+      transparent,
+      black 20%,
+      black 80%,
+      transparent);
+}
+
+@keyframes linePulse {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 0% 100%;
+  }
+
+  100% {
+    background-position: 0% 0%;
+  }
 }
 
 @media (max-width: 479px) {
   .body {
-      margin-bottom: 32px;
+    margin-bottom: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .inner {
+    opacity: 0;
   }
 }

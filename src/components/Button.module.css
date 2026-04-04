@@ -5,11 +5,11 @@
   align-items: center;
   justify-content: center;
   font-family: var(--mono);
-  font-size: var(--text-sm, 13px);
+  font-size: var(--sm);
   font-weight: 600;
   letter-spacing: 3px;
   padding: 14px 36px;
-  border-radius: 2px;
+  border-radius: var(--radius);
   cursor: pointer;
   border: none;
   outline: none;
@@ -17,10 +17,9 @@
   text-decoration: none;
   -webkit-user-select: none;
   user-select: none;
-  will-change: transform, color;
 }
 
-.btnText, .btnText a {
+.btnText {
   position: relative;
   z-index: 2;
   pointer-events: none;
@@ -31,10 +30,23 @@
   opacity: 0.5;
 }
 
-@media(max-width: 767px) {
-  .btn {
-    padding: 12px 24px;
-  }
+/* Shared icon */
+.iconWrap {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  margin-right: 10px;
+  color: inherit;
+  transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.icon {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.7, 0, 0.2, 1);
+  z-index: 3;
 }
 
 /* VARIANT: fill */
@@ -42,7 +54,7 @@
   background: var(--accent);
   color: var(--bg);
   border: 1px solid transparent;
-  transition: color 0.35s ease;
+  transition: color 0.35s ease, border-color 0.35s ease;
 }
 
 .fillBg {
@@ -54,39 +66,25 @@
   z-index: 1;
 }
 
+.fill.iconLeft .fillBg {
+  transform: translateX(101%);
+}
+
 .fill:hover .fillBg {
   transform: translateX(calc(0% - var(--fill-strip, 40px)));
-}
-
-.fill:hover {
-  color: var(--accent);
-  border: 1px solid var(--accent);
-}
-
-.fill:active {
-  transform: scale(0.99);
-}
-
-.fill.iconLeft .fillBg {
-  transform: translateX(100%);
 }
 
 .fill.iconLeft:hover .fillBg {
   transform: translateX(calc(0% + var(--fill-strip, 40px)));
 }
 
-.iconWrap {
-  position: relative;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  margin-left: 10px;
-  margin-right: 10px;
-  transform: translateX(0);
-  color: inherit;
-  transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1),
-    color 0.3s cubic-bezier(0.7, 0, 0.2, 1);
-  will-change: transform, color;
+.fill:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.fill:active {
+  transform: scale(0.99);
 }
 
 .fill:hover .iconWrap {
@@ -99,130 +97,73 @@
   color: var(--bg);
 }
 
-.fill.iconLeft:active .iconWrap {
-  transform: translateX(calc(-1 * var(--icon-offset) - 8px));
+.fill:active .iconWrap {
+  transform: translateX(calc(var(--icon-offset) + 8px));
   transition-duration: 0.1s;
 }
 
-.icon {
-  display: block;
-  transition: transform 0.35s cubic-bezier(0.7, 0, 0.2, 1),
-    color 0.35s cubic-bezier(0.7, 0, 0.2, 1);
-  will-change: transform, color;
-  z-index: 3;
+.fill.iconLeft:active .iconWrap {
+  transform: translateX(calc(-1 * var(--icon-offset) - 8px));
+  transition-duration: 0.1s;
 }
 
 .fill:hover .icon {
   transform: scale(1.2);
 }
 
-.fill:active .iconWrap {
-  transform: translateX(calc(var(--icon-offset) + 8px));
-  transition-duration: 0.1s;
+/* VARIANT: nofill */
+.nofill {
+  background: var(--bg);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  transition: color 0.35s ease;
+  --icon-offset: 0px;
 }
 
-/* VARIANT: border */
-.border {
-  background: transparent;
-  color: var(--btn-color, var(--accent));
-  will-change: transform, color;
-  transition: color 0.3s ease 0.5s, transform 0.2s ease 0.5s;
-  --border-width: 1px;
-  --btn-color: var(--accent);
-  --btn-color-hover: var(--accent);
-  --btn-border-color: var(--accent);
-  --btn-border-hover: var(--accent2);
-  --btn-fill-color: transparent;
-  --btn-bg: transparent;
-  --btn-bg-hover: var(--accent2);
-}
-
-.border:hover {
-  color: var(--btn-border-hover);
-  transform: translateY(-2px);
-}
-
-.borderTop,
-.borderRight,
-.borderBottom,
-.borderLeft {
-  position: absolute;
-  background: var(--btn-border-color);
-  z-index: 1;
-  transition: none;
-}
-
-.borderTop {
-  top: 0;
-  left: 0;
-  height: var(--border-width);
-  width: 100%;
-  transition: background-color 0.15s ease 0s;
-}
-
-.borderRight {
-  top: 0;
-  right: 0;
-  width: calc(var(--border-width)*2);
-  height: 100%;
-  transition: background-color 0.15s ease 0.15s;
-}
-
-.borderBottom {
-  bottom: 0;
-  right: 0;
-  height: calc(var(--border-width)*2);
-  width: 100%;
-  transition: background-color 0.15s ease 0.3s;
-}
-
-.borderLeft {
-  bottom: 0;
-  left: 0;
-  width: var(--border-width);
-  height: 100%;
-  transition: background-color 0.15s ease 0.45s;
-}
-
-.border:hover .borderTop,
-.border:hover .borderRight,
-.border:hover .borderBottom,
-.border:hover .borderLeft {
-  background-color: var(--btn-border-hover);
-}
-
-.borderFill {
+.nofillBg {
   position: absolute;
   inset: 0;
-  background: var(--btn-fill-color);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.2s ease 0.55s;
+  background: var(--accent);
+  transform: translateX(calc(100% - var(--fill-strip, 40px)));
+  transition: transform 0.35s cubic-bezier(0.7, 0, 0.2, 1);
   z-index: 1;
 }
 
-.border:hover .borderFill {
-  transform: scaleX(1);
+.nofill.iconLeft .nofillBg {
+  transform: translateX(calc(-100% + var(--fill-strip, 40px)));
 }
 
- /* VARIANT: magnetic */
-.magneticWrap {
-  display: inline-block;
-  padding: 20px;
-  margin: -20px;
+.nofill:hover .nofillBg {
+  transform: translateX(0%);
 }
 
-.magnetic {
-  background: var(--accent);
+.nofill.iconLeft:hover .nofillBg {
+  transform: translateX(0%);
+}
+
+.nofill:hover {
   color: var(--bg);
-  border: 1px solid transparent;
-  will-change: transform;
 }
 
-.magnetic:hover {
-  background: var(--accent2);
+.nofill:active {
+  transform: scale(0.99);
 }
 
-.magnetic:active {
-  transform: scale(0.95) !important;
+.nofill .iconWrap {
+  transform: translateX(var(--icon-offset));
+  color: var(--bg);
+  transition: none;
+  will-change: auto;
+}
+
+.nofill.iconLeft .iconWrap {
+  transform: translateX(calc(-1 * var(--icon-offset)));
+  color: var(--bg);
+  transition: none;
+  will-change: auto;
+}
+
+.nofill .icon {
+  transform: none;
+  transition: none;
 }

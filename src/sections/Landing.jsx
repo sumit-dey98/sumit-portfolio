@@ -1,30 +1,85 @@
 import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import DotGrid from '../components/DotGrid';
-import AnimatedContent from '../components/AnimatedContent';
 import Button from '../components/Button';
 import SvgButton from '../components/SvgButton';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useDecryptedText } from '../hooks/useDecryptedText';
 import { useTypewriter } from '../hooks/useTypewriter';
-import { IoArrowForwardSharp, IoGlobeSharp } from 'react-icons/io5';
+import { IoArrowForwardSharp } from 'react-icons/io5';
 import styles from './Landing.module.css';
 
+const LINE = ['Front-end web developer'];
+const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1023;
 
-const LINE = ['Full-stack web developer'];
-
-export default function Landing({ onEnter, onSkip }) {
-
+export default function Landing({ ready = false, onEnter, onSkip }) {
   const { getCssVar } = useThemeContext();
+  const firedRef = useRef(false);
+  const tlRef = useRef(null);
 
-  const { display } = useDecryptedText('INITIALIZING PORTFOLIO...', {
+  const preRef = useRef(null);
+  const word0Ref = useRef(null);
+  const word1Ref = useRef(null);
+  const word2Ref = useRef(null);
+  const roleRef = useRef(null);
+  const buttonsRef = useRef(null);
+  const hintRef = useRef(null);
+
+  const { display, start: startDecrypt } = useDecryptedText('INITIALIZING PORTFOLIO...', {
     speed: 50,
     revealSpeed: 1,
-    delay: 300,
+    autoStart: false,
   });
 
-  const typed = useTypewriter(LINE, { speed: 55, pause: 2000 });
+  const startDecryptRef = useRef(startDecrypt);
+  useEffect(() => { startDecryptRef.current = startDecrypt; }, [startDecrypt]);
+
+  const typed = useTypewriter(LINE, {
+    speed: 55,
+    pause: 2000,
+    paused: !ready,
+  });
+
+  useEffect(() => {
+    if (!ready || firedRef.current) return;
+    firedRef.current = true;
+    startDecryptRef.current?.();
+
+    const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+    tlRef.current = tl;
+
+    tl.fromTo(preRef.current,
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.45 },
+      0.1
+    );
+
+    tl.fromTo([word0Ref.current, word1Ref.current, word2Ref.current],
+      { y: '100%' },
+      { y: '0%', duration: 0.65, stagger: 0.1 },
+      0.2  
+    );
+
+    tl.fromTo(roleRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.4 },
+      0.3
+    );
+
+    tl.fromTo(buttonsRef.current,
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.45 },
+      0.4
+    );
+
+    tl.fromTo(hintRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.4 },
+      0.5
+    );
+
+    return () => tl.kill();
+  }, [ready]);
 
   return (
     <section id="landing" className={styles.landing}>
@@ -42,37 +97,42 @@ export default function Landing({ onEnter, onSkip }) {
         />
       </div>
 
-      <motion.div
-        className={styles.content}
-        initial={{ opacity: 0.5, y: 0 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-      >
-        <p className={styles.pre}>
+      <div className={styles.content}>
+
+        <p ref={preRef} className={styles.pre} style={{ opacity: 0 }}>
           <span className={styles.prompt}>&gt;</span> {display}
         </p>
 
         <h1 className={styles.headline}>
-          <AnimatedContent direction='horizontal' reverse delay={0.2} ease='backIn'> SUMIT </AnimatedContent>
-          <AnimatedContent direction='horizontal' reverse delay={0.25} ease='backIn'> HILLOL </AnimatedContent>
-          <AnimatedContent direction='horizontal' reverse delay={0.3} ease='backIn'> DEY </AnimatedContent>
+          {['SUMIT', 'HILLOL', 'DEY'].map((word, i) => (
+            <span key={word} style={{ display: 'block', overflow: 'hidden' }}>
+              <span
+                ref={i === 0 ? word0Ref : i === 1 ? word1Ref : word2Ref}
+                style={{ display: 'inline-block', transform: 'translateY(100%)' }}
+              >
+                {word}
+              </span>
+            </span>
+          ))}
         </h1>
 
-        <p className={styles.role}>
-          <span className={styles.typed}>{typed}<span className={styles.cursor}>▌</span></span>
+        <p ref={roleRef} className={styles.role} style={{ opacity: 0 }}>
+          <span className={styles.typed}>
+            {typed}<span className={styles.cursor}>▌</span>
+          </span>
         </p>
 
-        <div className={styles.buttons}>
+        <div ref={buttonsRef} className={styles.buttons} style={{ opacity: 0 }}>
           <Button variant="fill" icon={IoArrowForwardSharp}>VIEW CV</Button>
           <SvgButton
             color={getCssVar('--accent')}
             colorHover={getCssVar('--accent2')}
-            width={180}
-            height={47}
-            radius = {2}
+            width={186}
+            height={48}
+            radius={6}
             duration={1500}
             fadeLength={0.75}
-            strokeWidth = {1.5}
+            strokeWidth={1.5}
             direction="ccw"
             gsap={gsap}
             maxGap={0.5}
@@ -82,11 +142,13 @@ export default function Landing({ onEnter, onSkip }) {
             SKIP INTRO
           </SvgButton>
         </div>
-        <div className={styles.scrollHint}>
-          <span>SCROLL</span>
+
+        <div ref={hintRef} className={styles.scrollHint} style={{ opacity: 0 }}>
+          <span>{isMobile ? 'SWIPE' : 'SCROLL'}</span>
           <div className={styles.scrollLine} />
         </div>
-      </motion.div>
+
+      </div>
     </section>
   );
 }

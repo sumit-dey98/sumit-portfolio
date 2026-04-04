@@ -1,0 +1,20 @@
+{
+  "name": "Sumit Portfolio",
+  "short_name": "Portfolio",
+  "display": "standalone",
+  "background_color": "#080810",
+  "theme_color": "#080810",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/Icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/Icon.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}

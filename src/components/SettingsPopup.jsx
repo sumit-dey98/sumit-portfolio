@@ -1,22 +1,84 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import gsap from 'gsap';
 import { useUserPrefs } from '../hooks/useUserPrefs';
 import Button from './Button';
 import styles from './SettingsPopup.module.css';
 
-const ease = [0.16, 1, 0.3, 1];
+function ToggleThumb({ on }) {
+  const ref = useRef(null);
+  const prevOn = useRef(on);
 
-/**
- * variant="popup"  - floating popup, desktop nav (default)
- * variant="inline" - fills sidebar settings panel, no overlay
- */
-export default function SettingsPopup({ onClose, variant = 'popup' }) {
+  useEffect(() => {
+    if (!ref.current || prevOn.current === on) return;
+    prevOn.current = on;
+    gsap.to(ref.current, {
+      x: on ? 18 : 0,
+      duration: 0.4,
+      ease: 'elastic.out(1, 0.5)',
+    });
+  }, [on]);
+
+  return (
+    <span
+      ref={ref}
+      className={styles.toggleThumb}
+      style={{ transform: `translateX(${on ? 18 : 0}px)` }}
+    />
+  );
+}
+
+function CursorSetting({ localCursor, setLocalCursor }) {
+  return (
+    <div className={styles.settingRow}>
+      <span className={styles.settingLabel}>Ring Cursor</span>
+      <button
+        className={`${styles.toggle} ${localCursor === 'yes' ? styles.toggleOn : ''}`}
+        onClick={() => setLocalCursor(localCursor === 'yes' ? 'no' : 'yes')}
+        role="switch"
+        aria-checked={localCursor === 'yes'}
+      >
+        <span className={styles.toggleTrack}>
+          <ToggleThumb on={localCursor === 'yes'} />
+        </span>
+      </button>
+    </div>
+  );
+}
+
+function GenieSetting({ localGenie, setLocalGenie }) {
+  return (
+    <div className={styles.settingRow}>
+      <span className={styles.settingLabel}>Preloader Animation</span>
+      <button
+        className={`${styles.toggle} ${localGenie === 'yes' ? styles.toggleOn : ''}`}
+        onClick={() => setLocalGenie(localGenie === 'yes' ? 'no' : 'yes')}
+        role="switch"
+        aria-checked={localGenie === 'yes'}
+      >
+        <span className={styles.toggleTrack}>
+          <ToggleThumb on={localGenie === 'yes'} />
+        </span>
+      </button>
+    </div>
+  );
+}
+
+export default function SettingsPopup({ onClose, variant = 'popup', onCursorChange }) {
   const { prefs, savePrefs } = useUserPrefs();
   const [name, setName] = useState(prefs?.name || '');
   const [mode, setMode] = useState(prefs?.mode || null);
+  const [localCursor, setLocalCursor] = useState(
+    () => localStorage.getItem('ring-cursor') ?? 'yes'
+  );
+  const [localGenie, setLocalGenie] = useState(
+    () => localStorage.getItem('genie-enabled') ?? 'yes'
+  );
 
   const handleSave = () => {
     savePrefs({ name: name.trim(), mode });
+    localStorage.setItem('ring-cursor', localCursor);
+    localStorage.setItem('genie-enabled', localGenie);
+    onCursorChange?.(localCursor === 'yes');
     onClose?.();
   };
 
@@ -32,7 +94,6 @@ export default function SettingsPopup({ onClose, variant = 'popup' }) {
       </div>
 
       <div className={styles.body}>
-        {/* Name */}
         <div className={styles.field}>
           <label className={styles.label}>NAME</label>
           <div className={styles.inputRow}>
@@ -51,41 +112,16 @@ export default function SettingsPopup({ onClose, variant = 'popup' }) {
           </div>
         </div>
 
-        {/* Mode */}
-        <div className={styles.field}>
-          <label className={styles.label}>EXPERIENCE MODE</label>
-          <div className={styles.modeRow}>
-            {[
-              { id: 'lite', tag: 'LITE', desc: 'Reduced motion' },
-              { id: 'full', tag: 'FULL', desc: 'Full animations' },
-            ].map(m => (
-              <button
-                key={m.id}
-                className={`${styles.modeBtn} ${mode === m.id ? styles.modeBtnOn : ''}`}
-                onClick={() => setMode(m.id)}
-              >
-                <span className={styles.modeTag}>{m.tag}</span>
-                <span className={styles.modeDesc}>{m.desc}</span>
-                {mode === m.id && (
-                  <motion.span
-                    className={styles.modeCheck}
-                    initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  ></motion.span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+        <CursorSetting localCursor={localCursor} setLocalCursor={setLocalCursor} />
+        <GenieSetting localGenie={localGenie} setLocalGenie={setLocalGenie} />
       </div>
 
       <div className={styles.footer}>
         <Button className={styles.saveBtn} onClick={handleSave}>
-          <span className={styles.saveBg} />
-          <span >SAVE CHANGES</span>
+          SAVE CHANGES
         </Button>
         {variant === 'popup' && (
-          <button className={styles.cancelBtn} onClick={onClose}>cancel</button>
+          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
         )}
       </div>
     </div>
@@ -94,23 +130,8 @@ export default function SettingsPopup({ onClose, variant = 'popup' }) {
   if (variant === 'inline') return inner;
 
   return (
-    <motion.div
-      className={styles.overlay}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
-      onClick={e => e.target === e.currentTarget && onClose?.()}
-    >
-      <motion.div
-        className={styles.popup}
-        initial={{ opacity: 0, y: -10, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -10, scale: 0.97 }}
-        transition={{ duration: 0.22, ease }}
-      >
-        {inner}
-      </motion.div>
-    </motion.div>
+    <div className={styles.popup}>
+      {inner}
+    </div>
   );
 }
