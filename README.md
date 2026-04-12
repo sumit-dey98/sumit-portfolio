@@ -2,14 +2,25 @@
 Portfolio website designed & developed by Sumit Hillol Dey, a front-end web developer. 
 
 ## Screenshots
+
 <table width="100%">
   <tr>
-    <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216220/sumit-portfolio/assets/portfolio-screen-loader-1.png" width="100%" /></td>
-    <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216215/sumit-portfolio/assets/portfolio-screen-landing.png" width="100%" /></td>
-    <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216231/sumit-portfolio/assets/portfolio-screen-projects-1.png" width="100%" /></td>
-    <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216238/sumit-portfolio/assets/portfolio-screen-skills-1.png" width="100%" /></td>
-    <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216216/sumit-portfolio/assets/portfolio-screen-light-1.png" width="100%" /></td>
-    <td><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216219/sumit-portfolio/assets/portfolio-screen-light-3.png" width="100%" /></td>
+    <td colspan="3"><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216220/sumit-portfolio/assets/portfolio-screen-loader-1.png" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="3"><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216215/sumit-portfolio/assets/portfolio-screen-landing.png" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="3"><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216231/sumit-portfolio/assets/portfolio-screen-projects-1.png" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="3"><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216238/sumit-portfolio/assets/portfolio-screen-skills-1.png" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="3"><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216216/sumit-portfolio/assets/portfolio-screen-light-1.png" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="3"><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216219/sumit-portfolio/assets/portfolio-screen-light-3.png" width="100%" /></td>
   </tr>
   <tr>
     <td width="33%"><img src="https://res.cloudinary.com/sumitdey/image/upload/f_auto,q_auto,fl_immutable_cache/v1775216221/sumit-portfolio/assets/portfolio-screen-mobile-1.png" width="100%" /></td>
