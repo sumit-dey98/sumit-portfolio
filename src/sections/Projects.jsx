@@ -126,7 +126,14 @@ function CardDesc({ text }) {
         onPointerDown={onTextPointerDown}
         style={{ cursor: 'grab' }}
       >
-        {text}
+        {Array.isArray(text)
+          ? text.map((para, i) => (
+            <span key={i} style={{ display: "block", marginBottom: i < text.length - 1 ? "0.75rem" : 0 }}>
+              {para}
+            </span>
+          ))
+          : text
+        }
       </p>
       {showScroll && (
         <div

@@ -19,6 +19,12 @@ export const PROJECT_ROUTES = {
     bgColor: '#fff',
     url: 'interior-design-studio',
   },
+  greenfield: {
+    logoSrc: '/projects/greenfield/greenfield-logo.svg',
+    src: 'https://greenfield-academy-project.vercel.app/',
+    bgColor: 'var(--surface)',
+    url: 'greenfield',
+  },
 };
 
 export const SECTIONS = ['landing', 'intro', 'about', 'projects', 'skills', 'services', 'contact'];
@@ -59,14 +65,27 @@ export const PROJECTS = [
   },
   {
     id: '04',
-    name: 'Motion Design System',
-    tags: ['Framer Motion', 'Storybook', 'React'],
-    link: null,
-    desc: 'A comprehensive animation library with 60+ primitives, used across 3 production products.',
-    screens: [CLD_ASSETS.project_connect4_thumb, CLD_ASSETS.project_rubiks_thumb, CLD_ASSETS.project_interior_thumb],
-    preview: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
-    mobileSrc: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=80',
-    videoSrc: null,
+    name: 'School Management Demo',
+    tags: ['React', 'Next.JS', 'Tailwind', 'Supabase'],
+    link: '/project/greenfield',
+    desc: [
+      "A full-stack school website and management system built with Next.js, Tailwind CSS, and Supabase. Includes a public-facing website and three role-based portals for students, teachers, and administrators, each with their own dashboard and data access.",
+      "Students can view their results, attendance records, class schedule, and personal profile. Teachers have access to their assigned class, student list with subject-specific performance, weekly timetable, and attendance management. Admins get a complete overview with CRUD operations across students, teachers, classes, schedules, results, notices, and announcements. ",
+       "Features a superadmin layer backed by real Supabase Auth for write operations and a custom component library. The UI supports light and dark mode with system preference detection and is fully responsive.",
+    ],
+    screens: [CLD_ASSETS.greenfield_screen_home,
+    CLD_ASSETS.greenfield_screen_adminDash,
+    CLD_ASSETS.greenfield_screen_login,
+    CLD_ASSETS.greenfield_screen_studentDash,
+    CLD_ASSETS.greenfield_screen_teacherDash,
+    CLD_ASSETS.greenfield_screen_homeDark,
+    CLD_ASSETS.greenfield_screen_studentDashDark,
+    CLD_ASSETS.greenfield_screen_teacherDashDark,
+    CLD_ASSETS.greenfield_screen_adminDashDark,
+    ],
+    preview: CLD_ASSETS.greenfield_screen_home,
+    mobileSrc: CLD_ASSETS.greenfield_screen_home,
+    videoSrc: CLD_ASSETS.project_greenfield_preview,
   },
 ];
 

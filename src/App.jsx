@@ -291,6 +291,7 @@ function AppInner() {
         <Route path="/project/connect4" element={<SingleProject {...PROJECT_ROUTES.connect4} />} />
         <Route path="/project/rubiks-cube" element={<SingleProject {...PROJECT_ROUTES.rubiks} />} />
         <Route path="/project/interior" element={<SingleProject {...PROJECT_ROUTES.interior} />} />
+        <Route path="/project/greenfield" element={<SingleProject {...PROJECT_ROUTES.greenfield} />} />
       </Routes>
       <Analytics />
       <SpeedInsights />
