@@ -89,7 +89,8 @@ export default function About() {
             <div ref={imageRef} className={styles.imageWrap}>
               <div className={styles.imageFrame}>
                 <img
-                  src="https://i.pravatar.cc/480?img=11"
+                  // src="https://i.pravatar.cc/480?img=11"
+                  src=""
                   alt="Sumit Hillol Dey"
                   className={styles.image}
                 />
