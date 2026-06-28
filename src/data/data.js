@@ -87,6 +87,31 @@ export const PROJECTS = [
     mobileSrc: CLD_ASSETS.greenfield_screen_home,
     videoSrc: CLD_ASSETS.project_greenfield_preview,
   },
+  {
+    id: '05',
+    name: 'FIFA WC 2026 Companion',
+    tags: ['React', 'Vite', 'Tailwind'],
+    link: '/project/fwc2026',
+    desc: [
+      "A real-time FIFA World Cup 2026 schedule and live score tracker built with React, Vite, and Tailwind CSS. Pulls live fixtures, scores, and standings from a public sports API, with squad rosters and player photos.",
+      "Includes a date-grouped match schedule with group filters and a favorite-team filter, live-updating scores, group standings computed client-side with full FIFA tie-break rules (head-to-head, goal difference, goals scored), a stadium browser with photos and per-venue schedules, and team profiles.",
+      "Features an interactive bracket predictor covering the full 32-team knockout format — group rank picks, an auto-pick option that fills predictions from real-time standings, a best-third-place wildcard selector, and a predicted bracket that resolves round-by-round as picks are made, exportable as a shareable PNG. Installable as a PWA with offline app-shell support, lightweight custom URL routing with no router dependency, and a tiered caching strategy.",
+    ],
+    screens: [
+      CLD_ASSETS.fwc2026_desk_1,
+      CLD_ASSETS.fwc2026_desk_2,
+      CLD_ASSETS.fwc2026_desk_3,
+      CLD_ASSETS.fwc2026_desk_4,
+      CLD_ASSETS.fwc2026_desk_5,
+      CLD_ASSETS.fwc2026_desk_6,
+      CLD_ASSETS.fwc2026_mobile_1,
+      CLD_ASSETS.fwc2026_mobile_2,
+      CLD_ASSETS.fwc2026_mobile_3,
+    ],
+    preview: CLD_ASSETS.fwc2026_desk_1,
+    mobileSrc: CLD_ASSETS.fwc2026_desk_1,
+    videoSrc: CLD_ASSETS.project_fwc26_preview,
+  },
 ];
 
 export const STACKS = [

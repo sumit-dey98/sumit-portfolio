@@ -17,12 +17,14 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-const FOLDER = 'sumit-portfolio/assets/greenfield/screens/'
+// const FOLDER = 'sumit-portfolio/assets/fwc2026/screens/'
+const FOLDER = 'sumit-portfolio/assets/'
 const IMAGES_DIRS = [
   // './public/',
-  // './public/previews/',
+  './public/previews/',
   // './public/screens/',
-  './public/screens/greenfield-screens/',
+  // './public/screens/greenfield-screens/',
+  // './public/screens/fwc2026-screens/',
   // './public/projects/',
   // './public/projects/interior/images/',
 ]
