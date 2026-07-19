@@ -142,7 +142,12 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
     });
   };
 
-  const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    window.dispatchEvent(new CustomEvent('nav:navigate', { detail: { id } }));
+    requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth' }));
+  };
 
   return (
     <>

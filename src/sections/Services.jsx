@@ -244,29 +244,40 @@ function DesktopServices() {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
+  const disableSnap = useCallback(() => {
+    document.documentElement.style.setProperty('scroll-snap-type', 'none', 'important');
+  }, []);
+
+  const enableSnap = useCallback(() => {
+    document.documentElement.style.removeProperty('scroll-snap-type');
+  }, []);
+
+  const releaseHijack = useCallback(() => {
+    if (!hijackingRef.current) return;
+    hijackingRef.current = false;
+    clearTimeout(releaseTimerRef.current);
+    enableSnap();
+  }, [enableSnap]);
+
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !introRunningRef.current && !introDoneRef.current) {
-          introRunningRef.current = true;
-          introStartRef.current = null;
+        if (entry.isIntersecting) {
+          if (!introRunningRef.current && !introDoneRef.current) {
+            introRunningRef.current = true;
+            introStartRef.current = null;
+          }
+        } else {
+          releaseHijack();
         }
       },
       { threshold: 0.5 }
     );
     observer.observe(section);
     return () => observer.disconnect();
-  }, []);
-
-  const disableSnap = useCallback(() => {
-    document.documentElement.style.scrollSnapType = 'none';
-  }, []);
-
-  const enableSnap = useCallback(() => {
-    document.documentElement.style.scrollSnapType = '';
-  }, []);
+  }, [releaseHijack]);
 
   const snapOut = useCallback(direction => {
     hijackingRef.current = false;
@@ -313,13 +324,17 @@ function DesktopServices() {
       }, 600);
     };
 
+    const onNavigate = () => releaseHijack();
+
     window.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    window.addEventListener('nav:navigate', onNavigate);
     return () => {
       clearTimeout(releaseTimerRef.current);
       window.removeEventListener('wheel', onWheel, { capture: true });
-      enableSnap();
+      window.removeEventListener('nav:navigate', onNavigate);
+      if (hijackingRef.current) enableSnap();
     };
-  }, [disableSnap, enableSnap, snapOut]);
+  }, [disableSnap, enableSnap, snapOut, releaseHijack]);
 
   const card01P = () => (!introRunningRef.current && !introDoneRef.current) ? 0 : introP;
   const scrollCardP = i => {
