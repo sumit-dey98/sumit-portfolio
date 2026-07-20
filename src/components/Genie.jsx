@@ -3,10 +3,19 @@ import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 
 const DURATION = 2000;
-const isMobile = window.innerWidth <= 1;
-const EASE_RISE = gsap.parseEase(isMobile ? 'power1.in' : 'power2.out');
+const isMobile = window.innerWidth <= 1023;
+
+// Swap this to try each mobile rise: 'snappy' | 'elastic' | 'glide'
+const MOBILE_RISE = 'glide';
+const MOBILE_RISE_EASES = {
+  snappy: 'expo.out',
+  elastic: 'back.out(1.4)',
+  glide: 'sine.out',
+};
+
+const EASE_RISE = gsap.parseEase(isMobile ? MOBILE_RISE_EASES[MOBILE_RISE] : 'power2.out');
 const EASE_TOP_W = gsap.parseEase('power1.inOut');
-const EASE_BOT_W = gsap.parseEase(isMobile ? 'expo.in' : 'power1.in');
+const EASE_BOT_W = gsap.parseEase(isMobile ? 'power1.in' : 'power1.in');
 const SLICES = 20;
 const CONCAVE_DEPTH = isMobile ? -0.6 : 0.6;
 const CORNER_RADIUS_PX = isMobile ? 0 : 6;
@@ -70,7 +79,7 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
       return 1 + 0.3 * squeeze;
     };
 
-    const fontSize = Math.round(W * 0.075);
+    const fontSize = Math.round(W * (isMobile ? 0.14 : 0.075));
     const textCanvas = document.createElement('canvas');
     const textCtx = textCanvas.getContext('2d');
     textCtx.font = `400 ${fontSize}px ${fontFamily}`;
