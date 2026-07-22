@@ -202,11 +202,9 @@ export default function SvgButton({
     svgW, svgH, radius, strokeWidth, color, colorHover, fadeLength, startOffset,
   ]);
 
-  // hold the hover-lit border when forced active (e.g. selected dock item)
   useEffect(() => {
     if (svgW === 0 || svgH === 0) return;
     animateTo(forceActive ? 1 : 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceActive, svgW, svgH]);
 
   const shared = {

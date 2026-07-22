@@ -264,9 +264,6 @@ function ProjectStrip({ activeIndex, onSelect }) {
   const stripRef = useRef(null);
   const itemRefs = useRef([]);
 
-  // center the active chip within the strip ONLY — scroll the strip element
-  // directly rather than scrollIntoView, which would also scroll ancestors
-  // (e.g. the pane track) and shift the whole layout sideways.
   useEffect(() => {
     const strip = stripRef.current;
     const el = itemRefs.current[activeIndex];
@@ -299,7 +296,6 @@ function VerticalProjects() {
   const lenisRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Lenis smooth scrolling on the inner .scroller, plus active-row tracking
   useEffect(() => {
     const scroller = scrollRef.current;
     if (!scroller) return;
@@ -327,9 +323,6 @@ function VerticalProjects() {
     lenisRef.current = lenis;
     lenis.on('scroll', pickActive);
 
-    // Stop wheel events from bubbling to the outer .pane (also overflow:auto).
-    // Without this, delta leaks to the pane at scroll boundaries / direction
-    // changes, so the pane consumes rotations before the inner list moves.
     const blockBubble = (e) => e.stopPropagation();
     scroller.addEventListener('wheel', blockBubble, { passive: true });
 
@@ -350,16 +343,12 @@ function VerticalProjects() {
     };
   }, []);
 
-  // mark only the active row as focused (drives the dim/pop styling)
   useEffect(() => {
     rowRefs.current.forEach((el, idx) => {
       if (el) el.dataset.focused = idx === activeIndex ? 'true' : 'false';
     });
   }, [activeIndex]);
 
-  // smooth-scroll the .scroller to center the chosen row (via Lenis).
-  // Compute the target from live rects (offsetParent-independent) so the
-  // header / section offsets don't skew the centering.
   const scrollToIndex = useCallback((idx) => {
     const scroller = scrollRef.current;
     const row = rowRefs.current[idx];
@@ -368,7 +357,6 @@ function VerticalProjects() {
     const scrollerRect = scroller.getBoundingClientRect();
     const rowRect = row.getBoundingClientRect();
     const current = lenis ? lenis.scroll : scroller.scrollTop;
-    // where the row's center currently is, relative to the scroller's center
     const delta =
       (rowRect.top + rowRect.height / 2) -
       (scrollerRect.top + scrollerRect.height / 2);

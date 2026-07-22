@@ -283,7 +283,6 @@ export default function ThemeSwitcher({ variant = 'dropdown', magnifyRef }) {
   const wrapperRef = useRef(null);
   const grouped = groupThemes();
 
-  // keep the dock theme card mounted through its exit animation
   const [dockMounted, setDockMounted] = useState(false);
   const [dockClosing, setDockClosing] = useState(false);
   const dockTimer = useRef(null);
@@ -367,8 +366,6 @@ export default function ThemeSwitcher({ variant = 'dropdown', magnifyRef }) {
     );
   }
 
-  // Dock variant: same dropdown menu, but the trigger is a dock icon and the
-  // panel opens upward (the dock lives at the bottom of the screen).
   const isDock = variant === 'dockIcon';
 
   return (

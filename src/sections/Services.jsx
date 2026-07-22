@@ -296,10 +296,6 @@ function DesktopServices() {
     if (!section) return;
 
     const onWheel = e => {
-      // In the dock layout every section is mounted at once; inactive panes are
-      // marked `inert`. Never hijack wheel while this Services pane is inactive —
-      // otherwise it swallows wheel events meant for the visible tab (e.g.
-      // Projects), and the user scrolls Services invisibly.
       if (section.closest('[inert]')) return;
 
       const rect = section.getBoundingClientRect();

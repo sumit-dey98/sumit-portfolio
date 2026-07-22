@@ -1,4 +1,4 @@
-/* Desktop dock layout — active at >= 1024px only. */
+/* Desktop dock layout at >= 1024px only. */
 
 .shell {
   position: relative;
@@ -6,7 +6,6 @@
   height: 100dvh;
   overflow: hidden;
   background: var(--bg);
-  /* space the dock occupies at the bottom (icon 44 + padding 20 + gap 22) */
   --dock-clearance: 96px;
 }
 
@@ -48,7 +47,7 @@
   z-index: 400;
 }
 
-/* fullscreen toggle — mirrors the logo, top-right corner */
+/* fullscreen toggle */
 .fullscreenToggle {
   position: fixed;
   top: 24px;
@@ -74,7 +73,7 @@
   background: color-mix(in srgb, var(--surface) 90%, transparent);
 }
 
-/* ---- Tab-change wipe: full-screen panel sweeps across with the section name ---- */
+/* ---- Tab-change wipe ---- */
 .wipe {
   position: fixed;
   inset: 0;
@@ -85,8 +84,6 @@
   pointer-events: none;
 }
 
-/* the sweeping colored panel (scaled) — separate from the label so the
-   label keeps its own size while the panel wipes */
 .wipe::before {
   content: '';
   position: absolute;
@@ -152,8 +149,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
-  /* reserve the dock's footprint so centered section content stays
-     centered in the visible area above the floating dock */
   padding-bottom: var(--dock-clearance);
 }
 
@@ -161,15 +156,11 @@
   display: none;
 }
 
-/* Panes whose section owns its own inner scroll (e.g. Projects/Lenis):
-   the pane must NOT scroll, or wheel delta is split between the two and the
-   section feels unresponsive. No dock padding either — the section reserves it. */
 .paneNoScroll {
   overflow: hidden;
   padding-bottom: 0;
 }
 
-/* neutralize the stacked-section scroll-snap / full-viewport rules */
 .pane section,
 .pane > * {
   scroll-snap-align: none !important;
@@ -208,16 +199,14 @@
 
 .dockItem {
   position: relative;
-  z-index: 600; /* keep item + its tooltip above the popover cards (z-500) */
+  z-index: 600; 
   height: 44px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   transform-origin: bottom center;
-  /* transform (fisheye scale) is driven imperatively — no transition on it */
 }
 
-/* SvgButton content wrapper — border comes from SvgButton, no fill */
 .dockBtn {
   display: grid;
   place-items: center;
@@ -231,8 +220,6 @@
   color: var(--text);
 }
 
-/* active/open state: SvgButton's forceActive holds the lit border;
-   here we only carry the icon color. */
 .dockBtnActive {
   color: var(--accent2);
 }
@@ -278,7 +265,6 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* divider between sections and utilities */
 .dockSep {
   width: 1px;
   height: 34px;
@@ -295,12 +281,11 @@
   height: 44px;
 }
 
-/* on-state: color only, border handled by SvgButton */
 .dockBtnOn {
   color: var(--accent2) !important;
 }
 
-/* settings popover — matches the dock width, opens upward from the dock */
+/* settings popover */
 .settingsPop {
   pointer-events: auto;
   position: fixed;
@@ -332,7 +317,6 @@
   }
 }
 
-/* exit animation — reverse of dockCardIn, held on the final frame */
 .cardOut {
   animation: dockCardOut 0.22s cubic-bezier(0.4, 0, 1, 1) both;
 }
@@ -357,7 +341,6 @@
   }
 }
 
-/* This layout is desktop-only; hide entirely below the breakpoint. */
 @media (max-width: 1023px) {
   .shell {
     display: none;

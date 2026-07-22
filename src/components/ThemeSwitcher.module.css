@@ -254,7 +254,7 @@
 
 .dockTrigger {
   position: relative;
-  z-index: 600; /* keep the trigger + its tooltip above the theme card (z-500) */
+  z-index: 600; 
   height: 44px;
   display: flex;
   align-items: flex-end;
@@ -306,14 +306,12 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* dock dropdown opens upward from the trigger */
 .menuUp {
   top: auto;
   bottom: calc(100% + 12px);
   right: 0;
 }
 
-/* dock theme card: matches the dock width, centered over it, flat groups */
 .menuDock {
   position: fixed;
   left: 50%;
@@ -341,7 +339,7 @@
   }
 }
 
-/* exit animation — reverse of dockThemeIn */
+/* exit animation */
 .menuDockOut {
   animation: dockThemeOut 0.22s cubic-bezier(0.4, 0, 1, 1) both;
 }

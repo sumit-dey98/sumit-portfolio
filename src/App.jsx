@@ -136,9 +136,6 @@ function PortfolioInner() {
     setPhase('spinner');
   }, []);
 
-  // Full site reset — wipe every persisted preference so the next load behaves
-  // exactly like a first-ever visit from a fresh browser, then hard-reload so
-  // all hooks/components re-initialize from a clean slate.
   const replayIntro = useCallback(() => {
     try {
       ['portfolio-prefs', 'portfolio-theme', 'ring-cursor', 'genie-enabled', 'wipe-enabled']

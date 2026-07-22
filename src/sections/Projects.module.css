@@ -199,7 +199,7 @@
   box-shadow: 0 0 2px 1px var(--accent), 0 24px 60px -34px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-/* ---- Preview panel (right) — keeps the media's aspect ratio, centered ---- */
+/* ---- Preview panel (right) ---- */
 .preview {
   position: relative;
   align-self: stretch;

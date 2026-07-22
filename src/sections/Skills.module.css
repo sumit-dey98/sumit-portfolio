@@ -7,7 +7,7 @@
 .inner {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* center the label + cards block vertically in the pane */
+  justify-content: center; 
   align-items: flex-start;
   height: 100%;
   width: min(80vw, 1600px);
