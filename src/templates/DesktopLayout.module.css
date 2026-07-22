@@ -1,0 +1,365 @@
+/* Desktop dock layout — active at >= 1024px only. */
+
+.shell {
+  position: relative;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  /* space the dock occupies at the bottom (icon 44 + padding 20 + gap 22) */
+  --dock-clearance: 96px;
+}
+
+/* ---- Entrance: elements rest off-position, ease in once .shellEntered lands ---- */
+.brand,
+.fullscreenToggle,
+.dockWrap,
+.stage {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand { transform: translate(-24px, -16px); opacity: 0; }
+.fullscreenToggle { transform: translate(24px, -16px); opacity: 0; }
+.dockWrap { transform: translateZ(0) translateY(120px); opacity: 0; }
+.stage { opacity: 0; }
+
+.shellEntered .brand,
+.shellEntered .fullscreenToggle { transform: translate(0, 0); opacity: 1; }
+.shellEntered .dockWrap { transform: translateZ(0) translateY(0); opacity: 1; }
+.shellEntered .stage { opacity: 1; }
+
+/* dock arrives last, after the section has faded in */
+.dockWrap { transition-delay: 0.18s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .brand, .fullscreenToggle, .dockWrap, .stage {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* floating corner logo, no topbar */
+.brand {
+  position: fixed;
+  top: 24px;
+  left: 48px;
+  z-index: 400;
+}
+
+/* fullscreen toggle — mirrors the logo, top-right corner */
+.fullscreenToggle {
+  position: fixed;
+  top: 24px;
+  right: 48px;
+  z-index: 400;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.fullscreenToggle:hover {
+  color: var(--accent2);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+}
+
+/* ---- Tab-change wipe: full-screen panel sweeps across with the section name ---- */
+.wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* the sweeping colored panel (scaled) — separate from the label so the
+   label keeps its own size while the panel wipes */
+.wipe::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, var(--accent), var(--accent2));
+  transform-origin: left center;
+  will-change: transform;
+  animation: wipeSweep 1.4s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+.wipeLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: clamp(48px, 9vw, 140px);
+  line-height: 1;
+  color: var(--bg);
+  opacity: 0;
+  animation: wipeLabel 1.6s ease forwards;
+}
+
+@keyframes wipeSweep {
+  0%   { transform: scaleX(0); transform-origin: left center; }
+  33%  { transform: scaleX(1); transform-origin: left center; }
+  67%  { transform: scaleX(1); transform-origin: right center; }
+  100% { transform: scaleX(0); transform-origin: right center; }
+}
+
+@keyframes wipeLabel {
+  0%   { opacity: 0; transform: translateY(28px); }
+  20%  { opacity: 0; transform: translateY(28px); }   /* wait until panel fully covers */
+  33%  { opacity: 1; transform: translateY(0); }      /* rise in */
+  62%  { opacity: 1; transform: translateY(0); }       /* long hold, readable */
+  67%  { opacity: 0; transform: translateY(-22px); }  /* leave before panel sweeps out */
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wipe { animation-duration: 0.4s; }
+  .wipeLabel { animation: none; opacity: 1; }
+}
+
+/* ---- Stage (pane track) ---- */
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.track {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  will-change: transform;
+}
+
+.pane {
+  height: 100%;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  /* reserve the dock's footprint so centered section content stays
+     centered in the visible area above the floating dock */
+  padding-bottom: var(--dock-clearance);
+}
+
+.pane::-webkit-scrollbar {
+  display: none;
+}
+
+/* Panes whose section owns its own inner scroll (e.g. Projects/Lenis):
+   the pane must NOT scroll, or wheel delta is split between the two and the
+   section feels unresponsive. No dock padding either — the section reserves it. */
+.paneNoScroll {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* neutralize the stacked-section scroll-snap / full-viewport rules */
+.pane section,
+.pane > * {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+  height: auto !important;
+  min-height: 100%;
+}
+
+/* ---- Dock ---- */
+.dockWrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  display: flex;
+  justify-content: center;
+  z-index: 500;
+  pointer-events: none;
+  /* NOTE: the containing-block translateZ(0) for the fixed popover cards is
+     applied via the entrance rules above (kept in both rest & entered states). */
+}
+
+.dock {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 0 2px 2px var(--border), 0 18px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.dockItem {
+  position: relative;
+  z-index: 600; /* keep item + its tooltip above the popover cards (z-500) */
+  height: 44px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: bottom center;
+  /* transform (fisheye scale) is driven imperatively — no transition on it */
+}
+
+/* SvgButton content wrapper — border comes from SvgButton, no fill */
+.dockBtn {
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--dim);
+  transition: color 0.22s;
+}
+
+.dockBtn:hover {
+  color: var(--text);
+}
+
+/* active/open state: SvgButton's forceActive holds the lit border;
+   here we only carry the icon color. */
+.dockBtnActive {
+  color: var(--accent2);
+}
+
+/* .dockActive::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+} */
+
+/* tooltip */
+.dockLabel {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 600;
+  font-family: var(--mono);
+  font-size: var(--xxs);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.dockItem:hover .dockLabel {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* divider between sections and utilities */
+.dockSep {
+  width: 1px;
+  height: 34px;
+  align-self: center;
+  background: var(--text);
+  /* margin: 0 6px; */
+}
+
+/* utility cluster */
+.dockUtil {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 44px;
+}
+
+/* on-state: color only, border handled by SvgButton */
+.dockBtnOn {
+  color: var(--accent2) !important;
+}
+
+/* settings popover — matches the dock width, opens upward from the dock */
+.settingsPop {
+  pointer-events: auto;
+  position: fixed;
+  bottom: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  width: var(--dock-w, 560px);
+  max-width: calc(100vw - 32px);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 0 2px 2px var(--border), 0 18px 50px -12px rgba(0, 0, 0, 0.5);
+  transform-origin: bottom center;
+  animation: dockCardIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+  overflow: hidden;
+}
+
+@keyframes dockCardIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* exit animation — reverse of dockCardIn, held on the final frame */
+.cardOut {
+  animation: dockCardOut 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes dockCardOut {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dockLabel {
+    transition: none;
+  }
+  .settingsPop {
+    animation: none;
+  }
+}
+
+/* This layout is desktop-only; hide entirely below the breakpoint. */
+@media (max-width: 1023px) {
+  .shell {
+    display: none;
+  }
+}

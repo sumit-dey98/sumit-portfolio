@@ -223,6 +223,31 @@
   color: var(--text-dim);
 }
 
+.replayBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: var(--xs);
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.replayBtn:hover {
+  color: var(--accent2);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
 .toggle {
   position: relative;
   width: 40px;

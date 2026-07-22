@@ -3,46 +3,16 @@ import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 
 const DURATION = 2000;
-const isMobile = window.innerWidth <= 1023;
-
-// Swap this to try each mobile rise: 'snappy' | 'elastic' | 'glide'
-const MOBILE_RISE = 'glide';
-const MOBILE_RISE_EASES = {
-  snappy: 'expo.out',
-  elastic: 'back.out(1.4)',
-  glide: 'sine.out',
-};
-
-const EASE_RISE = gsap.parseEase(isMobile ? MOBILE_RISE_EASES[MOBILE_RISE] : 'power2.out');
+const isMobile = window.innerWidth <= 1;
+const EASE_RISE = gsap.parseEase(isMobile ? 'power1.in' : 'power2.out');
 const EASE_TOP_W = gsap.parseEase('power1.inOut');
-const EASE_BOT_W = gsap.parseEase(isMobile ? 'power1.in' : 'power1.in');
+const EASE_BOT_W = gsap.parseEase(isMobile ? 'expo.in' : 'power1.in');
 const SLICES = 20;
 const CONCAVE_DEPTH = isMobile ? -0.6 : 0.6;
 const CORNER_RADIUS_PX = isMobile ? 0 : 6;
 const LAG_FRACTION = 0.1;
 const LAYER2_SPREAD = 1.1;
 const STRIP_H = 2;
-
-// Effect 1 - Liquid & light: gradient fill, moving specular band, neon glow edge.
-const LIQUID_LIGHT = false;
-// Rippling top edge so the leading surface reads as liquid, not a flat bar.
-const WAVE_EDGE = false;
-const WAVE_SEGMENTS = 24;
-const WAVE_COUNT = 2.5;        // ripples across the width
-const WAVE_AMP_FRAC = 0.05;    // amplitude as a fraction of shape height
-
-// Effect 2 - Livelier motion: trailing droplets behind the neck + elastic settle.
-const LIVELIER_MOTION = false;
-const DROPLET_COUNT = 3;
-
-// Effect 3 - Fancier text: RGB-split glitch on the label near the end.
-const TEXT_GLITCH = false;
-
-// Effect 4 - Particle finish: the filled screen shatters into particles that
-// scatter as the content is handed off.
-const PARTICLE_FINISH = false;
-const PARTICLE_DURATION = 650;                 // ms, runs after the main fill
-const PARTICLE_COUNT = isMobile ? 90 : 180;
 
 export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GET", label2 = "STARTED" }) {
   const canvasRef = useRef(null);
@@ -79,6 +49,21 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
     const textColor = CSS_BG;
     const fontFamily = CSS_DISPLAY;
 
+    // 115deg accent → accent2 gradient, matching the tab-change wipe.
+    // 115deg ≈ from lower-left toward upper-right.
+    const makeGradient = () => {
+      const angle = (115 * Math.PI) / 180;
+      const cx = W / 2, cy = H / 2;
+      const len = Math.abs(W * Math.cos(angle)) + Math.abs(H * Math.sin(angle));
+      const dx = Math.cos(angle) * len / 2;
+      const dy = Math.sin(angle) * len / 2;
+      const g = ctx.createLinearGradient(cx - dx, cy + dy, cx + dx, cy - dy);
+      g.addColorStop(0, fillColor);
+      g.addColorStop(1, fillColor2 || fillColor);
+      return g;
+    };
+    const fillGradient = makeGradient();
+
     let originX = W / 2;
     let originY = H;
 
@@ -89,18 +74,18 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
     }
 
     const warpFn = (v, t) => {
-      // A pinched "waist" (Gaussian dip) that travels up the shape as it rises,
-      // strongest early and fading as the shape fills. Returns a width
-      // multiplier < 1 at the waist so the sides deform inward like liquid.
-      const WAIST_DEPTH = 0.55;   // how hard the sides pinch (0..1)
-      const WAIST_WIDTH = 2.2;    // higher = tighter/narrower waist band
-      const waistCenter = 1 - t * 1.4;               // travels from base -> top
-      const fade = Math.max(0, 1 - t * 1.3);         // relaxes as it fills
-      const gaussian = Math.exp(-Math.pow((v - waistCenter) * WAIST_WIDTH, 2));
-      return 1 - WAIST_DEPTH * fade * gaussian;
+      const WARP_STRENGTH = 0.25;
+      const WARP_WIDTH = 1.5;
+      const waistCenter = 1 - t * 1.5;
+      const warpFade = Math.max(0, 1 - t * 1.4);
+      const squeeze = WARP_STRENGTH * warpFade
+        * v < waistCenter
+        ? Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2))
+        : Math.exp(-Math.pow((v - waistCenter) * WARP_WIDTH * 2, 2));
+      return 1 + 0.3 * squeeze;
     };
 
-    const fontSize = Math.round(W * (isMobile ? 0.14 : 0.075));
+    const fontSize = Math.round(W * 0.075);
     const textCanvas = document.createElement('canvas');
     const textCtx = textCanvas.getContext('2d');
     textCtx.font = `400 ${fontSize}px ${fontFamily}`;
@@ -127,26 +112,6 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
     } else {
       textCtx.fillText(label1, textW / 2, textH / 2);
     }
-
-    // Pre-tinted copies of the text bitmap for the RGB-split glitch (Effect 3).
-    // source-in recolors the glyph pixels while preserving their alpha mask.
-    const makeTinted = (tint) => {
-      const c = document.createElement('canvas');
-      c.width = textW;
-      c.height = textH;
-      const cx = c.getContext('2d');
-      cx.drawImage(textCanvas, 0, 0);
-      cx.globalCompositeOperation = 'source-in';
-      cx.fillStyle = tint;
-      cx.fillRect(0, 0, textW, textH);
-      return c;
-    };
-    const textCanvasMag = TEXT_GLITCH ? makeTinted('#ff0040') : null;
-    const textCanvasCyan = TEXT_GLITCH ? makeTinted('#00e5ff') : null;
-
-    // Set by draw() before each buildPath call to ripple the top edge.
-    let waveAmp = 0;
-    let wavePhase = 0;
 
     const buildPath = (leftPts, rightPts, cornerPx, concavePx) => {
       const TL = leftPts[0];
@@ -209,26 +174,7 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
 
       ctx.moveTo(arcTL_start.x, arcTL_start.y);
       ctx.quadraticCurveTo(TL.x, TL.y, arcTL_end.x, arcTL_end.y);
-
-      if (waveAmp > 0.5) {
-        // Rippling top edge: sine wave between the two top corners, with a
-        // baseline concave dip preserved via the midpoint offset.
-        const ax = arcTL_end.x, ay = arcTL_end.y;
-        const bx = arcTR_start.x, by = arcTR_start.y;
-        for (let s = 1; s <= WAVE_SEGMENTS; s++) {
-          const f = s / WAVE_SEGMENTS;
-          const x = ax + (bx - ax) * f;
-          const baseY = ay + (by - ay) * f;
-          // envelope: 0 at both corners, 1 in the middle (keeps ends anchored)
-          const env = Math.sin(f * Math.PI);
-          const ripple = Math.sin(f * Math.PI * 2 * WAVE_COUNT + wavePhase) * waveAmp * env;
-          const dip = concavePx * env; // fold the old concave dip into the edge
-          ctx.lineTo(x, baseY + ripple + dip);
-        }
-      } else {
-        ctx.quadraticCurveTo(topMidX, topMidY, arcTR_start.x, arcTR_start.y);
-      }
-
+      ctx.quadraticCurveTo(topMidX, topMidY, arcTR_start.x, arcTR_start.y);
       ctx.quadraticCurveTo(TR.x, TR.y, arcTR_end.x, arcTR_end.y);
 
       for (let i = 0; i < rightPts.length - 3; i++) {
@@ -252,62 +198,16 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
       ctx.closePath();
     };
 
-    // Resolve any CSS color string to [r,g,b] via the canvas, then scale toward
-    // white (amount > 0) or black (amount < 0).
-    const _rgbCache = {};
-    const toRGB = (col) => {
-      if (_rgbCache[col]) return _rgbCache[col];
-      ctx.save();
-      ctx.fillStyle = '#000';
-      ctx.fillStyle = col;
-      const resolved = ctx.fillStyle; // normalized to #rrggbb or rgba(...)
-      ctx.restore();
-      let rgb = [39, 107, 255];
-      if (resolved[0] === '#') {
-        const h = resolved.slice(1);
-        const n = h.length === 3
-          ? h.split('').map((c) => parseInt(c + c, 16))
-          : [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
-        rgb = n;
-      } else {
-        const m = resolved.match(/[\d.]+/g);
-        if (m) rgb = [Number(m[0]), Number(m[1]), Number(m[2])];
-      }
-      _rgbCache[col] = rgb;
-      return rgb;
-    };
-    const mix = (col, amount) => {
-      const [r, g, b] = toRGB(col);
-      const target = amount >= 0 ? 255 : 0;
-      const a = Math.abs(amount);
-      const c = (x) => Math.round(x + (target - x) * a);
-      return `rgb(${c(r)}, ${c(g)}, ${c(b)})`;
-    };
-    const lightenColor = (col, amount) => mix(col, amount);
-    const darkenColor = (col, amount) => mix(col, -amount);
-
     const draw = (elapsed) => {
       ctx.clearRect(0, 0, W, H);
       const t = Math.min(elapsed / DURATION, 1);
 
-      // Elastic settle: a damped-sine width wobble that ramps in over the last
-      // ~25% of the animation, so the shape "lands" instead of stopping dead.
-      let settle = 1;
-      if (LIVELIER_MOTION && t > 0.75) {
-        const s = (t - 0.75) / 0.25;          // 0..1 across the settle window
-        settle = 1 + Math.sin(s * Math.PI * 3) * 0.06 * (1 - s);
-      }
-
       const topY = originY - (originY + H * 0.03) * EASE_RISE(t);
-      const topHW = (W / 2) * EASE_TOP_W(t) * settle;
+      const topHW = (W / 2) * EASE_TOP_W(t);
       const botY = originY + (H - originY) * EASE_RISE(Math.pow(t, 2.5));
-      const botHW = (W / 2) * EASE_BOT_W(t) * settle;
+      const botHW = (W / 2) * EASE_BOT_W(t);
       const shapeH = botY - topY;
       if (shapeH <= 0) return;
-
-      // Rippling top edge, strongest mid-rise and relaxing to flat as it fills.
-      waveAmp = WAVE_EDGE ? shapeH * WAVE_AMP_FRAC * Math.max(0, 1 - t * 1.2) : 0;
-      wavePhase = elapsed * 0.006;
 
       const leftPts = [];
       const rightPts = [];
@@ -323,26 +223,6 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
       const minHalfEdge = Math.min(topHW, botHW, shapeH / 2);
       const cornerPx = Math.min(CORNER_RADIUS_PX * (1 - t), minHalfEdge * 0.45);
       const concavePx = topHW * CONCAVE_DEPTH * (1 - t);
-
-      // Trailing droplets: small blobs that lag above the neck while rising,
-      // fading out as the shape approaches full. Drawn first so the neck covers
-      // their base.
-      if (LIVELIER_MOTION && t > 0.05 && t < 0.9) {
-        const dropletFade = Math.min(1, t / 0.2) * Math.max(0, 1 - (t - 0.6) / 0.3);
-        ctx.save();
-        ctx.fillStyle = fillColor;
-        for (let d = 1; d <= DROPLET_COUNT; d++) {
-          const lag = LAG_FRACTION * d;
-          const dy = topY - shapeH * lag;               // above the neck
-          if (dy < -40) continue;
-          const r = Math.max(2, topHW * (0.5 / d) * (1 - t));
-          ctx.globalAlpha = dropletFade * (1 - d / (DROPLET_COUNT + 1));
-          ctx.beginPath();
-          ctx.arc(originX, dy, r, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.restore();
-      }
 
       if (true) {
         const topHW2 = (W / 2) * EASE_TOP_W(t) * LAYER2_SPREAD;
@@ -374,44 +254,12 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
 
       ctx.save();
       buildPath(leftPts, rightPts, cornerPx, concavePx);
-
-      if (LIQUID_LIGHT) {
-        // Neon glow edge (fades out as it fills the screen).
-        ctx.save();
-        ctx.shadowColor = fillColor;
-        ctx.shadowBlur = 24 * (1 - t);
-        ctx.fillStyle = fillColor;
-        ctx.fill();
-        ctx.restore();
-
-        // Vertical gradient body: brighter near the neck, base color at the base.
-        const grad = ctx.createLinearGradient(0, topY, 0, botY);
-        grad.addColorStop(0, lightenColor(fillColor, 0.18));
-        grad.addColorStop(0.5, fillColor);
-        grad.addColorStop(1, darkenColor(fillColor, 0.12));
-        ctx.fillStyle = grad;
-        ctx.fill();
-
-        // Moving specular band, clipped to the shape, sweeping top->bottom.
-        ctx.save();
-        ctx.clip();
-        const sweep = topY + shapeH * (t * 1.3 - 0.15);
-        const bandH = Math.max(40, shapeH * 0.18);
-        const gloss = ctx.createLinearGradient(0, sweep - bandH, 0, sweep + bandH);
-        gloss.addColorStop(0, 'rgba(255,255,255,0)');
-        gloss.addColorStop(0.5, `rgba(255,255,255,${0.35 * (1 - t)})`);
-        gloss.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = gloss;
-        ctx.fillRect(originX - W / 2, sweep - bandH, W, bandH * 2);
-        ctx.restore();
-      } else {
-        ctx.fillStyle = fillColor;
-        ctx.fill();
-      }
+      ctx.fillStyle = fillGradient;
+      ctx.fill();
 
       if (t >= 1) {
         ctx.restore();
-        ctx.fillStyle = fillColor;
+        ctx.fillStyle = fillGradient;
         ctx.fillRect(0, 0, W, H);
         return;
       }
@@ -437,11 +285,6 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
         const visibleCenterY = (visibleTop + visibleBot) / 2;
         const destY = visibleCenterY - textH / 2;
 
-        // Glitch ramps in over the last 30% before the text starts fading out.
-        const glitchAmt = TEXT_GLITCH
-          ? Math.max(0, (tText - 0.7) / 0.3)
-          : 0;
-
         for (let row = 0; row < textH; row += STRIP_H) {
           const screenY = destY + row;
           if (screenY < 0 || screenY > H) continue;
@@ -452,29 +295,10 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
           const warpedTextW = textW * rowWarp;
           if (warpedTextW < 1) continue;
 
-          const dx = originX - warpedTextW / 2;
-
-          if (glitchAmt > 0) {
-            // Per-row horizontal jitter, scaled by how far the glitch has ramped.
-            const jitter = (Math.sin(row * 12.9898 + t * 60) * 0.5 + 0.5);
-            const shift = (4 + jitter * 10) * glitchAmt;
-            const prevComp = ctx.globalCompositeOperation;
-            ctx.globalCompositeOperation = 'lighter';
-
-            ctx.globalAlpha = textOpacity * 0.7 * glitchAmt;
-            ctx.drawImage(textCanvasMag, 0, row, textW, STRIP_H,
-              dx - shift, screenY, warpedTextW, STRIP_H); // magenta ghost
-            ctx.drawImage(textCanvasCyan, 0, row, textW, STRIP_H,
-              dx + shift, screenY, warpedTextW, STRIP_H); // cyan ghost
-
-            ctx.globalCompositeOperation = prevComp;
-            ctx.globalAlpha = textOpacity;
-          }
-
           ctx.drawImage(
             textCanvas,
             0, row, textW, STRIP_H,
-            dx, screenY, warpedTextW, STRIP_H,
+            originX - warpedTextW / 2, screenY, warpedTextW, STRIP_H,
           );
         }
       }
@@ -482,91 +306,14 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
       ctx.restore();
     };
 
-    // Build a grid of particles covering the screen, each with an outward
-    // velocity (biased away from the origin) so the fill "shatters" apart.
-    let particles = null;
-    const buildParticles = () => {
-      const arr = [];
-      const cols = Math.ceil(Math.sqrt(PARTICLE_COUNT * (W / H)));
-      const rows = Math.ceil(PARTICLE_COUNT / cols);
-      const cw = W / cols;
-      const ch = H / rows;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const px = (c + 0.5) * cw;
-          const py = (r + 0.5) * ch;
-          const ang = Math.atan2(py - originY, px - originX) + (Math.random() - 0.5) * 0.8;
-          const spd = (0.6 + Math.random() * 0.9) * Math.max(W, H) * 0.0016;
-          arr.push({
-            x: px, y: py,
-            vx: Math.cos(ang) * spd * (0.5 + Math.random()),
-            vy: Math.sin(ang) * spd * (0.5 + Math.random()) - 0.4,
-            size: Math.min(cw, ch) * (0.7 + Math.random() * 0.5),
-            rot: Math.random() * Math.PI,
-            vrot: (Math.random() - 0.5) * 0.3,
-          });
-        }
-      }
-      return arr;
-    };
-
-    const drawParticles = (pElapsed) => {
-      const pt = Math.min(pElapsed / PARTICLE_DURATION, 1);
-      ctx.clearRect(0, 0, W, H);
-      if (!particles) return;
-      const ease = 1 - Math.pow(1 - pt, 2);
-      ctx.save();
-      ctx.fillStyle = fillColor;
-      for (const p of particles) {
-        const dist = ease * 260;
-        const x = p.x + p.vx * dist;
-        const y = p.y + p.vy * dist + ease * ease * 120; // slight gravity
-        const s = p.size * (1 - pt * 0.9);
-        if (s <= 0.5) continue;
-        ctx.globalAlpha = 1 - ease;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(p.rot + p.vrot * pElapsed * 0.05);
-        ctx.fillRect(-s / 2, -s / 2, s, s);
-        ctx.restore();
-      }
-      ctx.restore();
-    };
-
-    let completed = false;
-    let particleStart = null;
-
     const tick = (ts) => {
       if (!startTime) startTime = ts;
       const elapsed = ts - startTime;
-
+      draw(elapsed);
       if (elapsed < DURATION) {
-        draw(elapsed);
-        rafId = requestAnimationFrame(tick);
-        return;
-      }
-
-      if (!PARTICLE_FINISH) {
-        onComplete?.();
-        return;
-      }
-
-      // Fill is complete. Hand off to content immediately, raise the canvas
-      // above it, and shatter on top.
-      if (!completed) {
-        completed = true;
-        particleStart = ts;
-        particles = buildParticles();
-        if (canvasRef.current) canvasRef.current.style.zIndex = '9000';
-        onComplete?.();
-      }
-
-      const pElapsed = ts - particleStart;
-      drawParticles(pElapsed);
-      if (pElapsed < PARTICLE_DURATION) {
         rafId = requestAnimationFrame(tick);
       } else {
-        ctx.clearRect(0, 0, W, H);
+        onComplete?.();
       }
     };
 

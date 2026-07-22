@@ -11,7 +11,7 @@ import styles from './Nav.module.css';
 
 const ease = 'power4.out';
 
-export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVisible = false }) {
+export default function Nav({ children, cursorEnabled, onCursorChange, onReplayIntro, alwaysVisible = false }) {
   const [active, setActive] = useState('landing');
   const [visible, setVisible] = useState(alwaysVisible);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -166,6 +166,7 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
           onClose={() => setSettingsOpen(false)}
           cursorEnabled={cursorEnabled}
           onCursorChange={onCursorChange}
+          onReplayIntro={onReplayIntro}
         />
       </div>
 
@@ -268,6 +269,7 @@ export default function Nav({ children, cursorEnabled, onCursorChange, alwaysVis
                       onClose={() => switchDrawerView('menu')}
                       cursorEnabled={cursorEnabled}
                       onCursorChange={onCursorChange}
+                      onReplayIntro={onReplayIntro}
                     />
                   </>
                 )}
