@@ -143,10 +143,10 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
           </SvgButton>
         </div>
 
-        <div ref={hintRef} className={styles.scrollHint} style={{ opacity: 0 }}>
+        {/* <div ref={hintRef} className={styles.scrollHint} style={{ opacity: 0 }}>
           <span>{isMobile ? 'SWIPE' : 'SCROLL'}</span>
           <div className={styles.scrollLine} />
-        </div>
+        </div> */}
 
       </div>
     </section>

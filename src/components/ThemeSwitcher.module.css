@@ -244,6 +244,163 @@
   color: var(--muted);
 }
 
+/* ---- Dock icon variant (desktop dock) ---- */
+.dockWrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 56px;
+}
+
+.dockTrigger {
+  position: relative;
+  z-index: 600; /* keep the trigger + its tooltip above the theme card (z-500) */
+  height: 44px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: bottom center;
+}
+
+.dockTriggerBtn {
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--dim);
+  transition: color 0.22s;
+}
+
+.dockTrigger:hover .dockTriggerBtn {
+  color: var(--text);
+}
+
+.dockTriggerOn {
+  color: var(--accent2) !important;
+}
+
+.dockTriggerLabel {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 600;
+  font-family: var(--mono);
+  font-size: var(--xxs);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.dockTrigger:hover .dockTriggerLabel {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* dock dropdown opens upward from the trigger */
+.menuUp {
+  top: auto;
+  bottom: calc(100% + 12px);
+  right: 0;
+}
+
+/* dock theme card: matches the dock width, centered over it, flat groups */
+.menuDock {
+  position: fixed;
+  left: 50%;
+  right: auto;
+  bottom: 74px;
+  z-index: 500;
+  width: var(--dock-w, 560px);
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 0 2px 2px var(--border), 0 18px 50px -12px rgba(0, 0, 0, 0.5);
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  padding: 12px;
+  gap: 6px;
+  animation: dockThemeIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dockThemeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* exit animation — reverse of dockThemeIn */
+.menuDockOut {
+  animation: dockThemeOut 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes dockThemeOut {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px) scale(0.97);
+  }
+}
+
+.dockGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dockGroup + .dockGroup {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+
+.dockGroupLabel {
+  font-family: var(--mono);
+  font-size: var(--xxs);
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--muted);
+  padding: 2px 4px;
+}
+
+.dockGroupGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.dockGroupGrid > li {
+  min-width: 0;
+}
+
+.dockGroupGrid > li > * {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menuDock {
+    animation: none;
+  }
+}
+
 @media (max-width: 1023px) {
   .list {
     gap: 0;

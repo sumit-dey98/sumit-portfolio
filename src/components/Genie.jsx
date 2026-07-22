@@ -49,6 +49,21 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
     const textColor = CSS_BG;
     const fontFamily = CSS_DISPLAY;
 
+    // 115deg accent → accent2 gradient, matching the tab-change wipe.
+    // 115deg ≈ from lower-left toward upper-right.
+    const makeGradient = () => {
+      const angle = (115 * Math.PI) / 180;
+      const cx = W / 2, cy = H / 2;
+      const len = Math.abs(W * Math.cos(angle)) + Math.abs(H * Math.sin(angle));
+      const dx = Math.cos(angle) * len / 2;
+      const dy = Math.sin(angle) * len / 2;
+      const g = ctx.createLinearGradient(cx - dx, cy + dy, cx + dx, cy - dy);
+      g.addColorStop(0, fillColor);
+      g.addColorStop(1, fillColor2 || fillColor);
+      return g;
+    };
+    const fillGradient = makeGradient();
+
     let originX = W / 2;
     let originY = H;
 
@@ -239,12 +254,12 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
 
       ctx.save();
       buildPath(leftPts, rightPts, cornerPx, concavePx);
-      ctx.fillStyle = fillColor;
+      ctx.fillStyle = fillGradient;
       ctx.fill();
 
       if (t >= 1) {
         ctx.restore();
-        ctx.fillStyle = fillColor;
+        ctx.fillStyle = fillGradient;
         ctx.fillRect(0, 0, W, H);
         return;
       }

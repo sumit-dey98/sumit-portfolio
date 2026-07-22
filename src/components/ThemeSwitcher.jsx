@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback,  } from 'react';
 import { useThemeContext } from '../theme/ThemeContext';
-import { IoChevronDownSharp, IoChevronForwardSharp } from 'react-icons/io5';
+import { IoChevronDownSharp, IoChevronForwardSharp, IoColorPaletteOutline } from 'react-icons/io5';
 import SvgButton from './SvgButton';
 import { THEMES } from '../theme/themes';
 import styles from './ThemeSwitcher.module.css';
@@ -276,12 +276,31 @@ function HoverSlideButton({ className, activeClassName, isActive, onClick, child
   );
 }
 
-export default function ThemeSwitcher({ variant = 'dropdown' }) {
+export default function ThemeSwitcher({ variant = 'dropdown', magnifyRef }) {
   const { themeKey, setTheme, theme } = useThemeContext();
   const [open, setOpen] = useState(false);
   const [hoveredGroup, setHoveredGroup] = useState(null);
   const wrapperRef = useRef(null);
   const grouped = groupThemes();
+
+  // keep the dock theme card mounted through its exit animation
+  const [dockMounted, setDockMounted] = useState(false);
+  const [dockClosing, setDockClosing] = useState(false);
+  const dockTimer = useRef(null);
+  useEffect(() => {
+    clearTimeout(dockTimer.current);
+    if (open) {
+      setDockMounted(true);
+      setDockClosing(false);
+    } else if (dockMounted) {
+      setDockClosing(true);
+      dockTimer.current = setTimeout(() => {
+        setDockMounted(false);
+        setDockClosing(false);
+      }, 220);
+    }
+    return () => clearTimeout(dockTimer.current);
+  }, [open, dockMounted]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -348,77 +367,134 @@ export default function ThemeSwitcher({ variant = 'dropdown' }) {
     );
   }
 
+  // Dock variant: same dropdown menu, but the trigger is a dock icon and the
+  // panel opens upward (the dock lives at the bottom of the screen).
+  const isDock = variant === 'dockIcon';
+
   return (
-    <div ref={wrapperRef} className={styles.wrapper}>
-      <SvgButton
-        height={36}
-        radius={4}
-        strokeWidth={1.5}
-        duration={1000}
-        maxGap={0.4}
-        fadeLength={0.5}
-        background='var(--bg)'
-        color='var(--accent)'
-        colorHover='var(--accent2)'
-        className={styles.trigger}
-        onClick={() => setOpen(o => !o)}
-        title="Switch theme"
-      >
-        <span className={styles.icon}>
-          <ThemeIcon icon={theme.icon} color={theme.vars['--accent']} />
-        </span>
-        <span className={styles.label}>{theme.label}</span>
-        <AnimatedChevron open={open} className={styles.arrow} />
-      </SvgButton>
-
-      <DropdownPanel open={open} className={styles.menu}>
-        <ul className={styles.menuMain}>
-          {Object.entries(grouped).map(([group, entries]) => {
-            if (group === '__top__') {
-              return entries.map(([key]) => (
-                <li key={key}>
-                  <ThemeOption
-                    themeKey={key}
-                    activeKey={themeKey}
-                    onSelect={handleSelect}
-                  />
-                </li>
-              ));
-            }
-            const hasActive = entries.some(([k]) => k === themeKey);
-            return (
-              <li
-                key={group}
-                className={styles.submenuItem}
-                onClick={() => setHoveredGroup(group)}
-              >
-                <button className={`${styles.option} ${hasActive ? styles.active : ''}`}>
-                  <span className={styles.optionLabel}>{group}</span>
-                  <SubmenuChevron
-                    active={hoveredGroup === group}
-                    className={styles.submenuArrow}
-                  />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-
-        <SubmenuPanel
-          open={!!hoveredGroup && !!grouped[hoveredGroup]}
-          className={styles.submenu}
+    <div ref={wrapperRef} className={isDock ? styles.dockWrapper : styles.wrapper}>
+      {isDock ? (
+        <div
+          ref={magnifyRef}
+          className={`${styles.dockTrigger} ${open ? styles.dockTriggerActive : ''}`}
         >
-          {hoveredGroup && grouped[hoveredGroup]?.map(([key]) => (
-            <li key={key}>
-              <ThemeOption
-                themeKey={key}
-                activeKey={themeKey}
-                onSelect={handleSelect}
-              />
-            </li>
-          ))}
-        </SubmenuPanel>
-      </DropdownPanel>
+          <span className={styles.dockTriggerLabel}>Theme</span>
+          <SvgButton
+            width={44}
+            height={44}
+            radius={6}
+            strokeWidth={1.5}
+            duration={1000}
+            maxGap={0.5}
+            fadeLength={0.5}
+            color="var(--accent)"
+            colorHover="var(--accent2)"
+            textColor={open ? 'var(--accent2)' : 'var(--dim)'}
+            forceActive={open}
+            className={`${styles.dockTriggerBtn} ${open ? styles.dockTriggerOn : ''}`}
+            onClick={() => setOpen(o => !o)}
+            title="Switch theme"
+            aria-label="Switch theme"
+          >
+            <IoColorPaletteOutline size={20} />
+          </SvgButton>
+        </div>
+      ) : (
+        <SvgButton
+          height={36}
+          radius={4}
+          strokeWidth={1.5}
+          duration={1000}
+          maxGap={0.4}
+          fadeLength={0.5}
+          background='var(--bg)'
+          color='var(--accent)'
+          colorHover='var(--accent2)'
+          className={styles.trigger}
+          onClick={() => setOpen(o => !o)}
+          title="Switch theme"
+        >
+          <span className={styles.icon}>
+            <ThemeIcon icon={theme.icon} color={theme.vars['--accent']} />
+          </span>
+          <span className={styles.label}>{theme.label}</span>
+          <AnimatedChevron open={open} className={styles.arrow} />
+        </SvgButton>
+      )}
+
+      {isDock ? (
+        dockMounted && (
+          <div className={`${styles.menu} ${styles.menuUp} ${styles.menuDock} ${dockClosing ? styles.menuDockOut : ''}`}>
+            {Object.entries(grouped).map(([group, entries]) => (
+              <div key={group} className={styles.dockGroup}>
+                {group !== '__top__' && (
+                  <p className={styles.dockGroupLabel}>{group}</p>
+                )}
+                <ul className={styles.dockGroupGrid}>
+                  {entries.map(([key]) => (
+                    <li key={key}>
+                      <ThemeOption
+                        themeKey={key}
+                        activeKey={themeKey}
+                        onSelect={handleSelect}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        <DropdownPanel open={open} className={styles.menu}>
+          <ul className={styles.menuMain}>
+            {Object.entries(grouped).map(([group, entries]) => {
+              if (group === '__top__') {
+                return entries.map(([key]) => (
+                  <li key={key}>
+                    <ThemeOption
+                      themeKey={key}
+                      activeKey={themeKey}
+                      onSelect={handleSelect}
+                    />
+                  </li>
+                ));
+              }
+              const hasActive = entries.some(([k]) => k === themeKey);
+              return (
+                <li
+                  key={group}
+                  className={styles.submenuItem}
+                  onClick={() => setHoveredGroup(group)}
+                >
+                  <button className={`${styles.option} ${hasActive ? styles.active : ''}`}>
+                    <span className={styles.optionLabel}>{group}</span>
+                    <SubmenuChevron
+                      active={hoveredGroup === group}
+                      className={styles.submenuArrow}
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <SubmenuPanel
+            open={!!hoveredGroup && !!grouped[hoveredGroup]}
+            className={styles.submenu}
+          >
+            {hoveredGroup && grouped[hoveredGroup]?.map(([key]) => (
+              <li key={key}>
+                <ThemeOption
+                  themeKey={key}
+                  activeKey={themeKey}
+                  onSelect={handleSelect}
+                />
+              </li>
+            ))}
+          </SubmenuPanel>
+        </DropdownPanel>
+      )}
     </div>
   );
 }

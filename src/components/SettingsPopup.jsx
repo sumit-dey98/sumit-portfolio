@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import gsap from 'gsap';
+import { IoRefreshOutline } from 'react-icons/io5';
 import { useUserPrefs } from '../hooks/useUserPrefs';
 import Button from './Button';
 import styles from './SettingsPopup.module.css';
@@ -63,7 +64,25 @@ function GenieSetting({ localGenie, setLocalGenie }) {
   );
 }
 
-export default function SettingsPopup({ onClose, variant = 'popup', onCursorChange }) {
+function WipeSetting({ localWipe, setLocalWipe }) {
+  return (
+    <div className={styles.settingRow}>
+      <span className={styles.settingLabel}>Section Transition</span>
+      <button
+        className={`${styles.toggle} ${localWipe === 'yes' ? styles.toggleOn : ''}`}
+        onClick={() => setLocalWipe(localWipe === 'yes' ? 'no' : 'yes')}
+        role="switch"
+        aria-checked={localWipe === 'yes'}
+      >
+        <span className={styles.toggleTrack}>
+          <ToggleThumb on={localWipe === 'yes'} />
+        </span>
+      </button>
+    </div>
+  );
+}
+
+export default function SettingsPopup({ onClose, variant = 'popup', onCursorChange, onReplayIntro }) {
   const { prefs, savePrefs } = useUserPrefs();
   const [name, setName] = useState(prefs?.name || '');
   const [mode, setMode] = useState(prefs?.mode || null);
@@ -73,11 +92,16 @@ export default function SettingsPopup({ onClose, variant = 'popup', onCursorChan
   const [localGenie, setLocalGenie] = useState(
     () => localStorage.getItem('genie-enabled') ?? 'yes'
   );
+  const [localWipe, setLocalWipe] = useState(
+    () => localStorage.getItem('wipe-enabled') ?? 'yes'
+  );
 
   const handleSave = () => {
     savePrefs({ name: name.trim(), mode });
     localStorage.setItem('ring-cursor', localCursor);
     localStorage.setItem('genie-enabled', localGenie);
+    localStorage.setItem('wipe-enabled', localWipe);
+    window.dispatchEvent(new CustomEvent('wipe-pref-change', { detail: localWipe === 'yes' }));
     onCursorChange?.(localCursor === 'yes');
     onClose?.();
   };
@@ -114,6 +138,18 @@ export default function SettingsPopup({ onClose, variant = 'popup', onCursorChan
 
         <CursorSetting localCursor={localCursor} setLocalCursor={setLocalCursor} />
         <GenieSetting localGenie={localGenie} setLocalGenie={setLocalGenie} />
+        <WipeSetting localWipe={localWipe} setLocalWipe={setLocalWipe} />
+
+        {onReplayIntro && (
+          <button
+            className={styles.replayBtn}
+            onClick={onReplayIntro}
+            title="Clear saved preferences and restart as a first-time visit"
+          >
+            <IoRefreshOutline size={14} />
+            <span>RESET &amp; REPLAY INTRO</span>
+          </button>
+        )}
       </div>
 
       <div className={styles.footer}>

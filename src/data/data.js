@@ -29,6 +29,9 @@ export const PROJECT_ROUTES = {
 
 export const SECTIONS = ['landing', 'intro', 'about', 'projects', 'skills', 'services', 'contact'];
 
+// Section tabs shared by the mobile bottom-sheet and desktop dock layouts.
+export const TAB_IDS = ['intro', 'about', 'projects', 'skills', 'services', 'contact'];
+
 export const PROJECTS = [
   {
     id: '01',

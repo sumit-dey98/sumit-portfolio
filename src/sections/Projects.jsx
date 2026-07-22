@@ -1,15 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import gsap from 'gsap';
-import { FiArrowUpRight, FiChevronDown, FiPlay, FiPause, FiMaximize } from 'react-icons/fi';
+import { FiArrowUpRight, FiPlay, FiPause, FiMaximize } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import Lenis from 'lenis';
 import ScreenSlides from './../components/ScreenSlides';
 import styles from './Projects.module.css';
 import { PROJECTS } from '../data/data';
 
 const TOTAL = PROJECTS.length;
-const GAP = 32;
-const CARD_W = () => Math.min(window.innerWidth * 0.8, 1600);
-const MAX_X = () => (TOTAL - 1) * (CARD_W() + GAP);
 
 function requestFullscreen(el) {
   if (el.requestFullscreen) return el.requestFullscreen();
@@ -17,6 +14,7 @@ function requestFullscreen(el) {
   if (el.webkitEnterFullscreen) return el.webkitEnterFullscreen();
 }
 
+/* ---- Scrollable, drag-inertia description (unchanged behavior) ---- */
 function CardDesc({ text }) {
   const ref = useRef(null);
   const thumbRef = useRef(null);
@@ -128,12 +126,11 @@ function CardDesc({ text }) {
       >
         {Array.isArray(text)
           ? text.map((para, i) => (
-            <span key={i} style={{ display: "block", marginBottom: i < text.length - 1 ? "0.75rem" : 0 }}>
+            <span key={i} style={{ display: 'block', marginBottom: i < text.length - 1 ? '0.75rem' : 0 }}>
               {para}
             </span>
           ))
-          : text
-        }
+          : text}
       </p>
       {showScroll && (
         <div
@@ -153,7 +150,8 @@ function CardDesc({ text }) {
   );
 }
 
-function ProjectCard({ project, cardRef }) {
+/* ---- Video preview panel (shared by desktop rows and mobile cards) ---- */
+function Preview({ project, src }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -174,61 +172,33 @@ function ProjectCard({ project, cardRef }) {
     const vid = videoRef.current;
     if (!vid) return;
     if (!isPlaying) {
-      vid.play().catch(() => { });
+      vid.play().catch(() => {});
       setIsPlaying(true);
     }
     requestFullscreen(vid);
   };
 
   return (
-    <div ref={cardRef} className={styles.card} style={{ opacity: 0.25, scale: 0.92 }}>
-      <div className={styles.cardInfo}>
-        <div className={styles.cardTop}>
-          <div className={styles.cardTopLeft}>
-            <span className={styles.cardNum}>{project.id}</span>
-            <span className={styles.cardSlash}>/</span>
-            <span className={styles.cardTotal}>{String(PROJECTS.length).padStart(2, '0')}</span>
-          </div>
-          {project.link ? (
-            <Link to={project.link} target="_blank" className={styles.cardDemoBtn} onClick={e => e.stopPropagation()}>
-              <span className={styles.cardDemoBtnLabel}>DEMO</span>
-              <FiArrowUpRight className={styles.cardDemoBtnArrow} />
-            </Link>
-          ) : (
-            <span className={styles.cardDemoBtnDisabled}><span>SOON</span></span>
-          )}
-        </div>
-
-        <div className={styles.cardMid}>
-          <h2 className={styles.cardName}>{project.name}</h2>
-          <CardDesc text={project.desc} />
-          <ScreenSlides screens={project.screens} />
-        </div>
-
-        <div className={styles.cardBottom}>
-          {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
-        </div>
-      </div>
-
-      <div className={styles.cardPreview} onClick={togglePlay}>
-        <img
-          src={project.preview}
-          alt={project.name}
-          className={`${styles.cardImg} ${isPlaying ? styles.cardImgHidden : ''}`}
-        />
-        {project.videoSrc && (
-          <>
-            <video
-              ref={videoRef}
-              className={`${styles.cardVideo} ${isPlaying ? styles.cardVideoVisible : ''}`}
-              src={project.videoSrc}
-              muted
-              loop
-              playsInline
-              preload="metadata"
-            />
+    <div className={styles.preview} onClick={togglePlay}>
+      <img
+        src={src}
+        alt={project.name}
+        className={`${styles.cardImg} ${isPlaying ? styles.cardImgHidden : ''}`}
+      />
+      {project.videoSrc && (
+        <>
+          <video
+            ref={videoRef}
+            className={`${styles.cardVideo} ${isPlaying ? styles.cardVideoVisible : ''}`}
+            src={project.videoSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+          <div className={styles.videoControls}>
             <button
-              className={isPlaying ? styles.stopBtn : styles.playBtn}
+              className={styles.playBtn}
               onClick={e => { e.stopPropagation(); togglePlay(); }}
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
@@ -241,288 +211,213 @@ function ProjectCard({ project, cardRef }) {
             >
               <FiMaximize />
             </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ViewAllDropdown({ onSelect, activeIndex }) {
-  const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const dropdownRef = useRef(null);
-  const tweenRef = useRef(null);
-  const wrapperRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (open) {
-      setMounted(true);
-    } else {
-      if (!dropdownRef.current) return;
-      tweenRef.current?.kill();
-      tweenRef.current = gsap.to(dropdownRef.current, {
-        opacity: 0,
-        x: 24,
-        duration: 0.22,
-        ease: 'power2.in',
-        onComplete: () => setMounted(false),
-      });
-    }
-  }, [open]);
-
-  const dropdownAnimRef = useCallback((node) => {
-    dropdownRef.current = node;
-    if (!node) return;
-    tweenRef.current?.kill();
-    tweenRef.current = gsap.fromTo(node,
-      { opacity: 0, x: 24 },
-      { opacity: 1, x: 0, duration: 0.22, ease: 'power2.out' }
-    );
-  }, []);
-
-  return (
-    <div ref={wrapperRef} className={styles.viewAll}>
-      <button className={styles.viewAllBtn} onClick={() => setOpen(v => !v)}>
-        <span>ALL PROJECTS</span>
-        <span className={styles.viewAllCount}>{TOTAL}</span>
-        <FiChevronDown className={`${styles.viewAllChevron} ${open ? styles.viewAllChevronOpen : ''}`} />
-      </button>
-
-      {mounted && (
-        <div ref={dropdownAnimRef} className={styles.dropdown}>
-          {PROJECTS.map((p, i) => (
-            <button
-              key={p.id}
-              className={`${styles.dropdownItem} ${activeIndex === i ? styles.dropdownItemActive : ''}`}
-              onClick={() => { onSelect(i); setOpen(false); }}
-            >
-              <span className={styles.dropdownNum}>{p.id}</span>
-              <span className={styles.dropdownName}>{p.name}</span>
-              <FiArrowUpRight className={styles.dropdownArrow} />
-            </button>
-          ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-function MobileCard({ project }) {
-  const videoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const togglePlay = () => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    if (isPlaying) {
-      vid.pause();
-      setIsPlaying(false);
-    } else {
-      vid.play().catch(() => setIsPlaying(false));
-      setIsPlaying(true);
-    }
-  };
-
-  const handleFullscreen = (e) => {
-    e.stopPropagation();
-    const vid = videoRef.current;
-    if (!vid) return;
-    if (!isPlaying) {
-      vid.play().catch(() => { });
-      setIsPlaying(true);
-    }
-    requestFullscreen(vid);
-  };
-
+/* ---- One project row (desktop) / card (mobile) ---- */
+function ProjectRow({ project, index, rowRef, mobile }) {
   return (
-    <div className={styles.mobileCard}>
-      <div className={styles.mobilePreview}>
-        <img
-          src={project.mobileSrc}
-          alt={project.name}
-          className={`${styles.cardImg} ${isPlaying ? styles.cardImgHidden : ''}`}
-        />
-        {project.videoSrc && (
-          <video
-            ref={videoRef}
-            className={`${styles.cardVideo} ${isPlaying ? styles.cardVideoVisible : ''}`}
-            src={project.videoSrc}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-          />
-        )}
-
-        {project.link && (
-          <Link to={project.link} target="_blank" className={styles.mobileDemoBtn} onClick={e => e.stopPropagation()}>
-            <span>DEMO</span>
-            <FiArrowUpRight size={13} />
-          </Link>
-        )}
-
-        {project.videoSrc && (
-          <div className={styles.mobileVideoControls}>
-            <button
-              className={styles.mobilePlayBtn}
-              onClick={togglePlay}
-              aria-label={isPlaying ? 'Pause' : 'Play'}
-            >
-              {isPlaying ? <FiPause size={13} /> : <FiPlay size={13} />}
-            </button>
-            <button
-              className={styles.mobileFullscreenBtn}
-              onClick={handleFullscreen}
-              aria-label="Fullscreen"
-            >
-              <FiMaximize size={13} />
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className={styles.mobileInfo}>
-        <div className={styles.mobileTopRow}>
-          <span className={styles.cardNum}>{project.id}</span>
-          <span className={styles.cardSlash}>/</span>
-          <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
+    <article
+      ref={rowRef}
+      data-index={index}
+      className={`${styles.row} ${mobile ? styles.rowMobile : ''}`}
+    >
+      <div className={styles.info}>
+        <div className={styles.infoTop}>
+          <span className={styles.num}>
+            <span className={styles.cardNum}>{project.id}</span>
+            <span className={styles.cardSlash}>/</span>
+            <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
+          </span>
+          {project.link ? (
+            <Link to={project.link} target="_blank" className={styles.demoBtn} onClick={e => e.stopPropagation()}>
+              <span className={styles.demoBtnLabel}>DEMO</span>
+              <FiArrowUpRight className={styles.demoBtnArrow} />
+            </Link>
+          ) : (
+            <span className={styles.demoBtnDisabled}><span>SOON</span></span>
+          )}
         </div>
-        <h2 className={styles.mobileName}>{project.name}</h2>
+
+        <h2 className={styles.name}>{project.name}</h2>
         <CardDesc text={project.desc} />
-        <ScreenSlides screens={project.screens} />
-        <div className={styles.cardBottom}>
+        <div className={styles.slides}>
+          <ScreenSlides screens={project.screens} />
+        </div>
+
+        <div className={styles.tags}>
           {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
         </div>
       </div>
+
+      <Preview project={project} src={mobile ? project.mobileSrc : project.preview} />
+    </article>
+  );
+}
+
+/* ---- Top navigation strip: expandable, snaps to active project ---- */
+function ProjectStrip({ activeIndex, onSelect }) {
+  const stripRef = useRef(null);
+  const itemRefs = useRef([]);
+
+  // center the active chip within the strip ONLY — scroll the strip element
+  // directly rather than scrollIntoView, which would also scroll ancestors
+  // (e.g. the pane track) and shift the whole layout sideways.
+  useEffect(() => {
+    const strip = stripRef.current;
+    const el = itemRefs.current[activeIndex];
+    if (!strip || !el) return;
+    const target = el.offsetLeft - strip.clientWidth / 2 + el.offsetWidth / 2;
+    strip.scrollTo({ left: target, behavior: 'smooth' });
+  }, [activeIndex]);
+
+  return (
+    <div ref={stripRef} className={styles.strip}>
+      {PROJECTS.map((p, i) => (
+        <button
+          key={p.id}
+          ref={el => (itemRefs.current[i] = el)}
+          className={`${styles.stripItem} ${activeIndex === i ? styles.stripItemActive : ''}`}
+          onClick={() => onSelect(i)}
+        >
+          <span className={styles.stripNum}>{p.id}</span>
+          <span className={styles.stripName}>{p.name}</span>
+        </button>
+      ))}
     </div>
   );
 }
 
-function DesktopScroller() {
-  const sectionRef = useRef(null);
-  const viewportRef = useRef(null);
-  const trackRef = useRef(null);
-  const cardRefs = useRef([]);
+/* ---- Desktop: vertical smooth-scroll list with active tracking ---- */
+function VerticalProjects() {
+  const scrollRef = useRef(null);
+  const rowRefs = useRef([]);
+  const lenisRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const xRef = useRef(0);
-  const targetXRef = useRef(0);
 
-  const updateVisuals = useCallback((x) => {
-    if (trackRef.current) {
-      trackRef.current.style.transform = `translateX(${-x}px)`;
-    }
-    const cw = CARD_W();
-    const paddingLeft = window.innerWidth / 2 - cw / 2;
-
-    PROJECTS.forEach((_, i) => {
-      const card = cardRefs.current[i];
-      if (!card) return;
-      const cardCenter = paddingLeft + i * (cw + GAP) + cw / 2;
-      const viewCenter = x + window.innerWidth / 2;
-      const dist = Math.abs(cardCenter - viewCenter);
-      const p = Math.max(0, 1 - dist / (cw + GAP));
-
-      const opacity = p < 0.5
-        ? 0.25 + (p / 0.5) * 0.35
-        : 0.6 + ((p - 0.5) / 0.5) * 0.4;
-      const scale = p < 0.5
-        ? 0.92 + (p / 0.5) * 0.04
-        : 0.96 + ((p - 0.5) / 0.5) * 0.04;
-
-      gsap.set(card, { opacity, scale });
-    });
-
-    setActiveIndex(Math.max(0, Math.min(TOTAL - 1, Math.round(x / (CARD_W() + GAP)))));
-  }, []);
-
-  const snapToIndex = useCallback(idx => {
-    targetXRef.current = Math.max(0, Math.min(MAX_X(), idx * (CARD_W() + GAP)));
-  }, []);
-
+  // Lenis smooth scrolling on the inner .scroller, plus active-row tracking
   useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+
+    const pickActive = () => {
+      const pr = scroller.getBoundingClientRect();
+      const center = pr.top + pr.height / 2;
+      let best = { idx: 0, dist: Infinity };
+      rowRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const dist = Math.abs((r.top + r.height / 2) - center);
+        if (dist < best.dist) best = { idx, dist };
+      });
+      setActiveIndex(best.idx);
+    };
+
+    const lenis = new Lenis({
+      wrapper: scroller,
+      content: scroller.firstElementChild || scroller,
+      smoothWheel: true,
+      wheelMultiplier: 0.6,
+      lerp: 0.1,
+    });
+    lenisRef.current = lenis;
+    lenis.on('scroll', pickActive);
+
+    // Stop wheel events from bubbling to the outer .pane (also overflow:auto).
+    // Without this, delta leaks to the pane at scroll boundaries / direction
+    // changes, so the pane consumes rotations before the inner list moves.
+    const blockBubble = (e) => e.stopPropagation();
+    scroller.addEventListener('wheel', blockBubble, { passive: true });
 
     let rafId;
-    const tick = () => {
-      const dx = targetXRef.current - xRef.current;
-      if (Math.abs(dx) > 0.1) {
-        xRef.current += dx * 0.1;
-        updateVisuals(xRef.current);
-      }
-      const step = CARD_W() + GAP;
-      const nearest = Math.round(targetXRef.current / step) * step;
-      targetXRef.current += (nearest - targetXRef.current) * 0.02;
-      rafId = requestAnimationFrame(tick);
+    const raf = time => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
     };
-    rafId = requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(raf);
 
-    const onWheel = e => {
-      const maxX = MAX_X();
-      const atStart = xRef.current <= 1 && e.deltaY < 0;
-      const atEnd = xRef.current >= maxX - 1 && e.deltaY > 0;
-      if (atStart || atEnd) return;
-      e.preventDefault();
-      e.stopPropagation();
-      targetXRef.current = Math.max(0, Math.min(maxX, targetXRef.current + e.deltaY * 1.1));
-    };
-
-    const onPointerDown = e => {
-      if (e.target.closest('a, button')) return;
-      e.preventDefault();
-    };
-
-    viewport.addEventListener('wheel', onWheel, { passive: false });
-    viewport.addEventListener('pointerdown', onPointerDown, { passive: false });
-    updateVisuals(0);
+    pickActive();
 
     return () => {
       cancelAnimationFrame(rafId);
-      viewport.removeEventListener('wheel', onWheel);
-      viewport.removeEventListener('pointerdown', onPointerDown);
+      scroller.removeEventListener('wheel', blockBubble);
+      lenis.destroy();
+      lenisRef.current = null;
     };
-  }, [updateVisuals]);
+  }, []);
+
+  // mark only the active row as focused (drives the dim/pop styling)
+  useEffect(() => {
+    rowRefs.current.forEach((el, idx) => {
+      if (el) el.dataset.focused = idx === activeIndex ? 'true' : 'false';
+    });
+  }, [activeIndex]);
+
+  // smooth-scroll the .scroller to center the chosen row (via Lenis).
+  // Compute the target from live rects (offsetParent-independent) so the
+  // header / section offsets don't skew the centering.
+  const scrollToIndex = useCallback((idx) => {
+    const scroller = scrollRef.current;
+    const row = rowRefs.current[idx];
+    const lenis = lenisRef.current;
+    if (!scroller || !row) return;
+    const scrollerRect = scroller.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
+    const current = lenis ? lenis.scroll : scroller.scrollTop;
+    // where the row's center currently is, relative to the scroller's center
+    const delta =
+      (rowRect.top + rowRect.height / 2) -
+      (scrollerRect.top + scrollerRect.height / 2);
+    const target = current + delta;
+    if (lenis) lenis.scrollTo(target, { duration: 0.9 });
+    else scroller.scrollTo({ top: target, behavior: 'smooth' });
+  }, []);
 
   return (
-    <section ref={sectionRef} id="projects" className={styles.desktopSection}>
+    <section id="projects" className={styles.desktopSection}>
       <div className={styles.header}>
         <p className={styles.label}>
           <span className={styles.prompt}>&gt;</span> PROJECTS
         </p>
-        <ViewAllDropdown onSelect={snapToIndex} activeIndex={activeIndex} />
+        <ProjectStrip activeIndex={activeIndex} onSelect={scrollToIndex} />
       </div>
 
-      <div ref={viewportRef} className={styles.scrollViewport}>
-        <div ref={trackRef} className={styles.scrollTrack}>
+      <div ref={scrollRef} className={styles.scroller}>
+        <div className={styles.scrollContent}>
           {PROJECTS.map((p, i) => (
-            <ProjectCard
+            <ProjectRow
               key={p.id}
               project={p}
-              cardRef={el => cardRefs.current[i] = el}
+              index={i}
+              rowRef={el => (rowRefs.current[i] = el)}
             />
           ))}
         </div>
       </div>
 
-      <div className={styles.dots}>
-        {PROJECTS.map((_, i) => (
-          <span
-            key={i}
-            className={`${styles.dot} ${activeIndex === i ? styles.dotActive : ''}`}
-            onClick={() => snapToIndex(i)}
-            style={{ cursor: 'pointer' }}
-          />
+      <div className={styles.fadeTop} aria-hidden="true" />
+      <div className={styles.fadeBottom} aria-hidden="true" />
+    </section>
+  );
+}
+
+/* ---- Mobile: single-column stacked list ---- */
+function MobileProjects() {
+  return (
+    <section id="projects" className={styles.projects}>
+      <div className={styles.mobileHeader}>
+        <p className={styles.label}>
+          <span className={styles.prompt}>&gt;</span> PROJECTS
+        </p>
+        <span className={styles.count}>{TOTAL} works</span>
+      </div>
+      <div className={styles.mobileList}>
+        {PROJECTS.map((p, i) => (
+          <ProjectRow key={p.id} project={p} index={i} mobile />
         ))}
       </div>
     </section>
@@ -534,7 +429,6 @@ export default function Projects() {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   );
-  const touchStartX = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1023px)');
@@ -543,19 +437,5 @@ export default function Projects() {
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  if (!isMobile) return <DesktopScroller />;
-
-  return (
-    <section id="projects" className={styles.projects}>
-      <div className={styles.mobileHeader}>
-        <p className={styles.label}>
-          <span className={styles.prompt}>&gt;</span> PROJECTS
-        </p>
-        <span className={styles.count}>{TOTAL} works</span>
-      </div>
-      <div className={styles.mobileList}>
-        {PROJECTS.map(p => <MobileCard key={p.id} project={p} />)}
-      </div>
-    </section>
-  );
+  return isMobile ? <MobileProjects /> : <VerticalProjects />;
 }

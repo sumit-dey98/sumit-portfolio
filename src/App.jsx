@@ -19,6 +19,7 @@ import Services from './sections/Services';
 import About from './sections/About';
 import Contact from './sections/Contact';
 import MobileLayout from './templates/MobileLayout';
+import DesktopLayout from './templates/DesktopLayout';
 import {PROJECT_ROUTES} from './data/data';
 import './index.css';
 
@@ -83,6 +84,23 @@ function HorizontalMobileShell({ landingPanel, tabsPanel }) {
   );
 }
 
+function HorizontalDesktopShell({ landingPanel, shellPanel }) {
+  const [panel, setPanel] = useState(0);
+  const slideTo = useCallback((index) => setPanel(index), []);
+  const offset = panel === 0 ? '0vw' : '-100vw';
+
+  return (
+    <div style={{ position: 'relative', width: '100vw', height: '100dvh', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100dvh', transform: `translateX(${offset})`, transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)', willChange: 'transform' }}>
+        {landingPanel(slideTo)}
+      </div>
+      <div style={{ position: 'absolute', top: 0, left: '100vw', width: '100vw', height: '100dvh', transform: `translateX(${offset})`, transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)', willChange: 'transform' }}>
+        {shellPanel(slideTo, panel === 1)}
+      </div>
+    </div>
+  );
+}
+
 function PortfolioInner() {
   const [phase, setPhase] = useState('loader');
   const [userPrefs, setUserPrefs] = useState(null);
@@ -95,7 +113,6 @@ function PortfolioInner() {
 
   const anchorRef = useRef(null);
   const bodyRef = useRef(null);
-  const navRef = useRef(null);
 
   const handleSpinnerReady = useCallback(() => {
     const genieEnabled = localStorage.getItem('genie-enabled') !== 'no';
@@ -103,19 +120,13 @@ function PortfolioInner() {
       setPhase('genie');
     } else {
       window.scrollTo(0, 0);
-      if (!isMobile) {
-        document.documentElement.style.setProperty('scroll-snap-type', 'none', 'important');
-      }
       document.body.style.overflow = 'hidden';
       setPhase('sliding');
     }
-  }, [isMobile]);
+  }, []);
 
   const handleGenieComplete = () => {
     window.scrollTo(0, 0);
-    if (!isMobile) {
-      document.documentElement.style.setProperty('scroll-snap-type', 'none', 'important');
-    }
     document.body.style.overflow = 'hidden';
     setPhase('sliding');
   };
@@ -123,6 +134,18 @@ function PortfolioInner() {
   const handleLoaderComplete = useCallback((prefs) => {
     setUserPrefs(prefs);
     setPhase('spinner');
+  }, []);
+
+  // Full site reset — wipe every persisted preference so the next load behaves
+  // exactly like a first-ever visit from a fresh browser, then hard-reload so
+  // all hooks/components re-initialize from a clean slate.
+  const replayIntro = useCallback(() => {
+    try {
+      ['portfolio-prefs', 'portfolio-theme', 'ring-cursor', 'genie-enabled', 'wipe-enabled']
+        .forEach((k) => localStorage.removeItem(k));
+    } catch { /* ignore */ }
+    document.body.style.overflow = '';
+    window.location.reload();
   }, []);
 
   useEffect(() => {
@@ -148,19 +171,8 @@ function PortfolioInner() {
             bodyRef.current.style.webkitTransform = '';
           }
           document.body.style.overflow = '';
-          if (!isMobile) {
-            document.documentElement.style.removeProperty('scroll-snap-type');
-          }
           window.scrollTo(0, 0);
           setPhase('landing');
-
-          if (navRef.current && !isMobile) {
-            gsap.fromTo(
-              navRef.current,
-              { opacity: 0, y: -12 },
-              { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
-            );
-          }
         },
       });
     }, genieEnabled ? 350 : 0);
@@ -168,14 +180,8 @@ function PortfolioInner() {
     return () => {
       clearTimeout(t);
       document.body.style.overflow = '';
-      if (!isMobile) {
-        document.documentElement.style.removeProperty('scroll-snap-type');
-      }
     };
   }, [phase, isMobile]);
-
-  const scrollTo = (id) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
   const genieEnabled = localStorage.getItem('genie-enabled') !== 'no';
   const showGenie = genieEnabled && (phase === 'genie' || phase === 'sliding');
@@ -214,17 +220,6 @@ function PortfolioInner() {
       {phase === 'loader' && <Loader onComplete={handleLoaderComplete} />}
       {phase === 'spinner' && <SpinnerScreen onReady={handleSpinnerReady} />}
 
-      {showBody && !isMobile && (
-        <div
-          ref={navRef}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 8000, opacity: 0 }}
-        >
-          <Nav cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
-            <ThemeSwitcher variant="dropdown" />
-          </Nav>
-        </div>
-      )}
-
       {showBody && (
         <div
           ref={bodyRef}
@@ -234,13 +229,14 @@ function PortfolioInner() {
             background: 'var(--bg)',
             transform: genieEnabled ? 'translateY(100vh)' : 'none',
             opacity: genieEnabled ? 1 : 0,
-            ...(isMobile ? { height: '100dvh', overflow: 'hidden' } : {}),
+            height: '100dvh',
+            overflow: 'hidden',
           }}
         >
           {isMobile ? (
             <div style={{ position: 'relative', width: '100vw', height: '100dvh', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 200 }}>
-                <Nav alwaysVisible cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled}>
+                <Nav alwaysVisible cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled} onReplayIntro={replayIntro}>
                   <ThemeSwitcher variant="dropdown" />
                 </Nav>
               </div>
@@ -263,19 +259,25 @@ function PortfolioInner() {
               />
             </div>
           ) : (
-            <>
-              <Landing
-                ready={phase === 'landing'}
-                onEnter={() => scrollTo('intro')}
-                onSkip={() => scrollTo('projects')}
-              />
-              <Intro userPrefs={userPrefs} />
-              <About />
-              <Projects />
-              <Skills />
-              <Services />
-              <Contact />
-            </>
+            <HorizontalDesktopShell
+              landingPanel={(slideTo) => (
+                <Landing
+                  ready={phase === 'landing'}
+                  onEnter={() => slideTo(1)}
+                  onSkip={() => slideTo(1)}
+                />
+              )}
+              shellPanel={(slideTo, revealed) => (
+                <DesktopLayout
+                  sections={mobileSections}
+                  revealed={revealed}
+                  onBackToLanding={() => slideTo(0)}
+                  onReplayIntro={replayIntro}
+                  cursorEnabled={cursorEnabled}
+                  onCursorChange={setCursorEnabled}
+                />
+              )}
+            />
           )}
         </div>
       )}
