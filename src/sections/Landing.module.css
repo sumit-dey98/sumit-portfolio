@@ -77,6 +77,59 @@
   margin-top: 16px;
 }
 
+.lastLine {
+  align-items: center;
+}
+
+.enterArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-right: 0.35em;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  will-change: background, color, transform;
+}
+
+.enterArrow:hover {
+  background: var(--accent);
+  color: var(--bg);
+  transform: scale(1.08);
+}
+
+.enterArrowIcon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  animation: enterBob 1.3s ease-in-out infinite;
+}
+
+.enterArrow:hover .enterArrowIcon {
+  animation-play-state: paused;
+  transform: translateX(6px);
+  transition: transform 0.25s ease;
+}
+
+@keyframes enterBob {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(10px);
+  }
+}
+
 .scrollHint {
   position: absolute;
   bottom: 40%;
@@ -115,7 +168,7 @@
 
 @media (max-width: 1023px) {
   .content {
-    align-items: center;
+    align-items: left;
     text-align: center;
     padding: 0 var(--section-pad-x);
   }
@@ -130,6 +183,11 @@
   .buttons {
     flex-direction: column;
     align-items: center;
+  }
+
+  .enterArrow {
+    width: 48px;
+    height: 48px;
   }
 
   .scrollHint {
@@ -151,4 +209,16 @@
     translate: 0 0;
     rotate: 90deg;
   }
+}
+
+@media (max-width: 767px) {
+  .enterArrow {
+      width: 40px;
+      height: 40px;
+    }
+
+    .enterArrowIcon {
+      width: 18px;
+      height: 18px;
+    }
 }

@@ -59,6 +59,7 @@ function useExitTransition(open, exitMs = CARD_EXIT_MS) {
 export default function DesktopLayout({
   sections = {},
   revealed = true,
+  initialTab = null,
   onBackToLanding,
   onReplayIntro,
   cursorEnabled,
@@ -68,7 +69,7 @@ export default function DesktopLayout({
   useEffect(() => {
     if (revealed && !entered) setEntered(true);
   }, [revealed, entered]);
-  const [activeTab, setActiveTab] = useState('intro');
+  const [activeTab, setActiveTab] = useState(initialTab || 'intro');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsAnim = useExitTransition(settingsOpen);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -110,6 +111,13 @@ export default function DesktopLayout({
     gsap.set(trackRef.current, { xPercent: -(index * PANE_PCT) });
   }, [PANE_PCT]);
 
+  useEffect(() => {
+    if (!initialTab) return;
+    setActiveTab(initialTab);
+    const index = TABS.findIndex((t) => t.id === initialTab);
+    if (index >= 0) snapTo(index);
+  }, [initialTab, snapTo]);
+
   const switchTab = useCallback((id) => {
     if (id === activeTab || wipe) return;
     const tab = TABS.find((t) => t.id === id);
@@ -129,7 +137,9 @@ export default function DesktopLayout({
       return;
     }
 
-    setWipe({ label: tab.label });
+    const currentIndex = TABS.findIndex((t) => t.id === activeTab);
+    const reverse = index < currentIndex;
+    setWipe({ label: tab.label, reverse });
 
     wipeTimers.current.forEach(clearTimeout);
     const t1 = setTimeout(() => snapTo(index), 680);
@@ -221,7 +231,10 @@ export default function DesktopLayout({
   return (
     <div className={`${styles.shell} ${entered ? styles.shellEntered : ''}`}>
       {wipe && (
-        <div className={styles.wipe} aria-hidden="true">
+        <div
+          className={`${styles.wipe} ${wipe.reverse ? styles.wipeReverse : ''}`}
+          aria-hidden="true"
+        >
           <span className={styles.wipeLabel}>{wipe.label}</span>
         </div>
       )}

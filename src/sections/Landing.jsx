@@ -12,7 +12,7 @@ import styles from './Landing.module.css';
 const LINE = ['Front-end web developer'];
 const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1023;
 
-export default function Landing({ ready = false, onEnter, onSkip }) {
+export default function Landing({ ready = false, onEnter, onViewProjects }) {
   const { getCssVar } = useThemeContext();
   const firedRef = useRef(false);
   const tlRef = useRef(null);
@@ -72,11 +72,13 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
       0.4
     );
 
-    tl.fromTo(hintRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.4 },
-      0.5
-    );
+    if (hintRef.current) {
+      tl.fromTo(hintRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.4 },
+        0.5
+      );
+    }
 
     return () => tl.kill();
   }, [ready]);
@@ -105,13 +107,27 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
 
         <h1 className={styles.headline}>
           {['SUMIT', 'HILLOL', 'DEY'].map((word, i) => (
-            <span key={word} style={{ display: 'block', overflow: 'hidden' }}>
-              <span
-                ref={i === 0 ? word0Ref : i === 1 ? word1Ref : word2Ref}
-                style={{ display: 'inline-block', transform: 'translateY(100%)' }}
-              >
-                {word}
+            <span key={word} className={i === 2 ? styles.lastLine : undefined} style={{ display: i === 2 ? 'flex' : 'block' }}>
+              <span style={{ display: 'block', overflow: 'hidden' }}>
+                <span
+                  ref={i === 0 ? word0Ref : i === 1 ? word1Ref : word2Ref}
+                  style={{ display: 'inline-block', transform: 'translateY(100%)' }}
+                >
+                  {word}
+                </span>
               </span>
+              {i === 2 && !isMobile && (
+                <button
+                  ref={hintRef}
+                  type="button"
+                  className={styles.enterArrow}
+                  style={{ opacity: 0 }}
+                  onClick={onEnter}
+                  aria-label="Enter portfolio"
+                >
+                  <IoArrowForwardSharp className={styles.enterArrowIcon} />
+                </button>
+              )}
             </span>
           ))}
         </h1>
@@ -137,16 +153,11 @@ export default function Landing({ ready = false, onEnter, onSkip }) {
             gsap={gsap}
             maxGap={0.5}
             ease="expo.inOut"
-            onClick={onSkip}
+            onClick={onViewProjects}
           >
-            SKIP INTRO
+            VIEW PROJECTS
           </SvgButton>
         </div>
-
-        {/* <div ref={hintRef} className={styles.scrollHint} style={{ opacity: 0 }}>
-          <span>{isMobile ? 'SWIPE' : 'SCROLL'}</span>
-          <div className={styles.scrollLine} />
-        </div> */}
 
       </div>
     </section>

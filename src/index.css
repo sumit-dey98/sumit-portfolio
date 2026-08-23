@@ -42,6 +42,11 @@
   --text: #e0e0f0;
   --text-dim: #8888aa;
 
+  --wipe-mix: 80%;
+  --wipe-bg: linear-gradient(115deg,
+    color-mix(in srgb, var(--accent) var(--wipe-mix), var(--bg)),
+    color-mix(in srgb, var(--accent2) var(--wipe-mix), var(--bg)));
+
   --mono: 'Roboto Mono', monospace;
   --display: 'Impact', sans-serif;
   --body: 'DM Sans', sans-serif;

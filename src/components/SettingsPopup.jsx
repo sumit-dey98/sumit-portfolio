@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
-import { IoRefreshOutline } from 'react-icons/io5';
+import { IoRefresh } from 'react-icons/io5';
 import { useUserPrefs } from '../hooks/useUserPrefs';
 import Button from './Button';
 import styles from './SettingsPopup.module.css';
@@ -15,7 +15,7 @@ function ToggleThumb({ on }) {
     gsap.to(ref.current, {
       x: on ? 18 : 0,
       duration: 0.4,
-      ease: 'elastic.out(1, 0.5)',
+      ease: 'power3.out',
     });
   }, [on]);
 
@@ -82,6 +82,33 @@ function WipeSetting({ localWipe, setLocalWipe }) {
   );
 }
 
+function ModeSetting({ mode, setMode }) {
+  const active = mode === 'lite' ? 'lite' : 'full';
+  return (
+    <div className={styles.settingRow}>
+      <span className={styles.settingLabel}>Experience Mode</span>
+      <div className={styles.segmented} role="radiogroup" aria-label="Experience mode">
+        <button
+          className={`${styles.segment} ${active === 'full' ? styles.segmentOn : ''}`}
+          onClick={() => setMode('full')}
+          role="radio"
+          aria-checked={active === 'full'}
+        >
+          Immersive
+        </button>
+        <button
+          className={`${styles.segment} ${active === 'lite' ? styles.segmentOn : ''}`}
+          onClick={() => setMode('lite')}
+          role="radio"
+          aria-checked={active === 'lite'}
+        >
+          Essential
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPopup({ onClose, variant = 'popup', onCursorChange, onReplayIntro }) {
   const { prefs, savePrefs } = useUserPrefs();
   const [name, setName] = useState(prefs?.name || '');
@@ -97,12 +124,17 @@ export default function SettingsPopup({ onClose, variant = 'popup', onCursorChan
   );
 
   const handleSave = () => {
+    const modeChanged = mode !== (prefs?.mode || null) && mode != null;
     savePrefs({ name: name.trim(), mode });
     localStorage.setItem('ring-cursor', localCursor);
     localStorage.setItem('genie-enabled', localGenie);
     localStorage.setItem('wipe-enabled', localWipe);
     window.dispatchEvent(new CustomEvent('wipe-pref-change', { detail: localWipe === 'yes' }));
     onCursorChange?.(localCursor === 'yes');
+    if (modeChanged) {
+      window.location.reload();
+      return;
+    }
     onClose?.();
   };
 
@@ -136,6 +168,7 @@ export default function SettingsPopup({ onClose, variant = 'popup', onCursorChan
           </div>
         </div>
 
+        <ModeSetting mode={mode} setMode={setMode} />
         <CursorSetting localCursor={localCursor} setLocalCursor={setLocalCursor} />
         <GenieSetting localGenie={localGenie} setLocalGenie={setLocalGenie} />
         <WipeSetting localWipe={localWipe} setLocalWipe={setLocalWipe} />
@@ -146,8 +179,8 @@ export default function SettingsPopup({ onClose, variant = 'popup', onCursorChan
             onClick={onReplayIntro}
             title="Clear saved preferences and restart as a first-time visit"
           >
-            <IoRefreshOutline size={14} />
-            <span>RESET &amp; REPLAY INTRO</span>
+            <IoRefresh size={14} />
+            <span>RESET WEBSITE</span>
           </button>
         )}
       </div>

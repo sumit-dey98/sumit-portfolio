@@ -23,9 +23,9 @@ const MenuTrigger = ({ isOpen, onClick, fixed = true }) => {
   useEffect(() => {
     if (!linesRef.current[0]) return;
     if (isOpen) {
-      gsap.to(linesRef.current[0], { y: 6.5, rotation: 45, duration: 0.3, ease: 'power2.inOut' });
+      gsap.to(linesRef.current[0], { y: 6, rotation: 45, duration: 0.3, ease: 'power2.inOut' });
       gsap.to(linesRef.current[1], { opacity: 0, duration: 0.2 });
-      gsap.to(linesRef.current[2], { y: -6.5, rotation: -45, duration: 0.3, ease: 'power2.inOut' });
+      gsap.to(linesRef.current[2], { y: -6, rotation: -45, duration: 0.3, ease: 'power2.inOut' });
     } else {
       gsap.to(linesRef.current[0], { y: 0, rotation: 0, duration: 0.3, ease: 'power2.inOut' });
       gsap.to(linesRef.current[1], { opacity: 1, duration: 0.2 });

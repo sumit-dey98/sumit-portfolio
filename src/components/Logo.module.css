@@ -1,6 +1,6 @@
 .logo {
   display: inline-flex;
-  min-width: 240px;
+  /* min-width: 240px; */
   align-items: center;
   gap: 0;
   cursor: pointer;

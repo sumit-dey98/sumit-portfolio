@@ -73,8 +73,10 @@
 /* Email button */
 .emailBtn {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
+  width: 100%;
+  max-width: 420px;
   background: none;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -89,14 +91,23 @@
 }
 
 .emailText {
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: var(--mono);
   font-size: clamp(13px, 2vw, 18px);
   color: var(--text);
   padding: 16px 24px;
   letter-spacing: 1px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 
 .emailAction {
+  flex-shrink: 0;
   font-family: var(--mono);
   font-size: 12px;
   font-weight: 500;
@@ -104,13 +115,11 @@
   color: var(--bg);
   background: var(--accent2);
   padding: 0 20px;
-  height: 100%;
   display: flex;
   align-items: center;
-  align-self: stretch;
+  justify-content: center;
   transition: background 0.2s;
   min-width: 80px;
-  justify-content: center;
 }
 
 .emailBtn:hover .emailAction {
