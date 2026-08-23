@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
+import { isDebug } from '../utils/debug';
 
 const DURATION = 2000;
 const isMobile = window.innerWidth <= 1;
@@ -16,12 +17,18 @@ const STRIP_H = 2;
 
 export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GET", label2 = "STARTED" }) {
   const canvasRef = useRef(null);
+  const debug = isDebug();
+
+  const drawFrameRef = useRef(null);
+  const [debugMs, setDebugMs] = useState(DURATION / 2);
+  const [debugPlaying, setDebugPlaying] = useState(false);
 
   useEffect(() => {
     const _cs = getComputedStyle(document.documentElement);
     const CSS_ACCENT = _cs.getPropertyValue('--accent').trim();
     const CSS_ACCENT2 = _cs.getPropertyValue('--accent2').trim();
     const CSS_BG = _cs.getPropertyValue('--bg').trim() || '#080810';
+    const CSS_TEXT = _cs.getPropertyValue('--text').trim() || '#e0e0f0';
     const CSS_DISPLAY = _cs.getPropertyValue('--display').trim() || 'Impact';
     
     let startTime = null;
@@ -85,14 +92,15 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
       return 1 + 0.3 * squeeze;
     };
 
-    const fontSize = Math.round(W * 0.075);
+    const fontFrac = W < 600 ? 0.13 : W < 1024 ? 0.1 : 0.075;
+    const fontSize = Math.round(W * fontFrac);
     const textCanvas = document.createElement('canvas');
     const textCtx = textCanvas.getContext('2d');
     textCtx.font = `400 ${fontSize}px ${fontFamily}`;
 
     const measured = textCtx.measureText(label1).width;
     const textW = Math.ceil(measured * 1.5) + 128;
-    const textH = Math.ceil(fontSize * 1.6 * 2);
+    const textH = Math.ceil(fontSize * 2.0 * 2);
 
     textCanvas.width = textW;
     textCanvas.height = textH;
@@ -103,6 +111,11 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
     textCtx.textAlign = 'center';
     textCtx.textBaseline = 'middle';
 
+    textCtx.shadowColor = CSS_TEXT;
+    textCtx.shadowBlur = Math.round(fontSize * 0.03);
+    textCtx.shadowOffsetX = Math.round(-1 * fontSize * 0.02);
+    textCtx.shadowOffsetY = Math.round(fontSize * 0.02);
+
     if (label2?.trim()) {
       const lineHeight = fontSize * 1.2;
       const totalTextH = lineHeight * 2;
@@ -112,6 +125,10 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
     } else {
       textCtx.fillText(label1, textW / 2, textH / 2);
     }
+
+    textCtx.shadowColor = 'transparent';
+    textCtx.shadowBlur = 0;
+    textCtx.shadowOffsetY = 0;
 
     const buildPath = (leftPts, rightPts, cornerPx, concavePx) => {
       const TL = leftPts[0];
@@ -306,6 +323,45 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
       ctx.restore();
     };
 
+    const drawTextBounds = (ms) => {
+      const boxX = originX - textW / 2;
+      const boxY = H / 2 - textH / 2;
+
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.setLineDash([6, 4]);
+      ctx.lineWidth = 1;
+
+      ctx.strokeStyle = 'rgba(0, 255, 204, 0.9)';
+      ctx.strokeRect(boxX, boxY, textW, textH);
+
+      ctx.setLineDash([]);
+      ctx.strokeStyle = 'rgba(255, 0, 120, 0.8)';
+      ctx.beginPath();
+      ctx.moveTo(originX, boxY);
+      ctx.lineTo(originX, boxY + textH);
+      ctx.moveTo(boxX, H / 2);
+      ctx.lineTo(boxX + textW, H / 2);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(0, 255, 204, 0.95)';
+      ctx.font = '12px monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`textW=${textW} textH=${textH} fontSize=${fontSize} t=${Math.round(ms)}ms / ${DURATION}ms`, boxX + 4, boxY + 4);
+      ctx.restore();
+    };
+
+    if (debug) {
+      drawFrameRef.current = (ms) => {
+        draw(ms);
+        drawTextBounds(ms);
+      };
+      drawFrameRef.current(DURATION / 2);
+      return;
+    }
+
     const tick = (ts) => {
       if (!startTime) startTime = ts;
       const elapsed = ts - startTime;
@@ -322,11 +378,106 @@ export default function Genie({ anchorRef, color, onComplete, label1 = "LET'S GE
     return () => cancelAnimationFrame(rafId);
   }, []);
 
+  // Debug: redraw whenever the scrub value (ms) changes.
+  useEffect(() => {
+    if (debug) drawFrameRef.current?.(debugMs);
+  }, [debug, debugMs]);
+
+  // Debug: play — advance elapsed 0 -> DURATION in real time, then stop.
+  useEffect(() => {
+    if (!debug || !debugPlaying) return;
+    let raf;
+    let start = null;
+    const step = (ts) => {
+      if (start === null) start = ts;
+      const ms = Math.min(ts - start, DURATION);
+      setDebugMs(ms);
+      if (ms < DURATION) {
+        raf = requestAnimationFrame(step);
+      } else {
+        setDebugPlaying(false);
+      }
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [debug, debugPlaying]);
+
   const canvas = (
-    <canvas
-      ref={canvasRef}
-      style={{ position: 'fixed', zIndex: 6000, pointerEvents: 'none' }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'fixed', zIndex: 6000, pointerEvents: 'none' }}
+      />
+
+      {debug && (
+        <div
+          style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: 24,
+            transform: 'translateX(-50%)',
+            zIndex: 6001,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '10px 14px',
+            background: 'rgba(8,8,16,0.85)',
+            border: '1px solid rgba(0,255,204,0.5)',
+            borderRadius: 8,
+            backdropFilter: 'blur(6px)',
+            fontFamily: 'monospace',
+            fontSize: 12,
+            color: '#00ffcc',
+            pointerEvents: 'auto',
+          }}
+        >
+          <button
+            onClick={() => {
+              if (debugMs >= DURATION) setDebugMs(0);
+              setDebugPlaying((p) => !p);
+            }}
+            style={{
+              cursor: 'pointer',
+              background: 'none',
+              border: '1px solid rgba(0,255,204,0.6)',
+              borderRadius: 4,
+              color: '#00ffcc',
+              padding: '4px 10px',
+              fontFamily: 'monospace',
+            }}
+          >
+            {debugPlaying ? '❚❚ pause' : '▶ play'}
+          </button>
+
+          <input
+            type="range"
+            min={0}
+            max={DURATION}
+            step={1}
+            value={debugMs}
+            onChange={(e) => { setDebugPlaying(false); setDebugMs(parseFloat(e.target.value)); }}
+            style={{ width: 320, accentColor: '#00ffcc' }}
+          />
+
+          <span style={{ minWidth: 74, textAlign: 'right' }}>{Math.round(debugMs)} / {DURATION}ms</span>
+
+          <button
+            onClick={() => { setDebugPlaying(false); setDebugMs(0); }}
+            style={{
+              cursor: 'pointer',
+              background: 'none',
+              border: '1px solid rgba(0,255,204,0.6)',
+              borderRadius: 4,
+              color: '#00ffcc',
+              padding: '4px 10px',
+              fontFamily: 'monospace',
+            }}
+          >
+            ⟲ reset
+          </button>
+        </div>
+      )}
+    </>
   );
 
   return createPortal(canvas, document.body);

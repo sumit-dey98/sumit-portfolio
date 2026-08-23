@@ -24,8 +24,8 @@ const EXPANDED_H = 64;
 const DRAG_THRESHOLD = 28;
 const SWIPE_THRESHOLD = 128;
 
-export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
-  const [activeTab, setActiveTab] = useState('intro');
+export default function MobileLayout({ sections = {}, nav, initialTab = null, onBackToLanding }) {
+  const [activeTab, setActiveTab] = useState(initialTab || 'intro');
   const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
 
@@ -55,7 +55,10 @@ export default function MobileLayout({ sections = {}, nav, onBackToLanding }) {
 
   useEffect(() => {
     if (!trackRef.current) return;
-    gsap.set(trackRef.current, { x: 0 });
+    // position the track at the initial tab (e.g. projects from "VIEW PROJECTS")
+    const index = TABS.findIndex(t => t.id === activeTab);
+    const paneWidth = trackRef.current.parentElement.offsetWidth;
+    gsap.set(trackRef.current, { x: -(Math.max(0, index) * paneWidth) });
   }, []);
 
   useEffect(() => {

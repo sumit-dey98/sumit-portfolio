@@ -88,7 +88,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, var(--accent), var(--accent2));
+  background: var(--wipe-bg);
   transform-origin: left center;
   will-change: transform;
   animation: wipeSweep 1.4s cubic-bezier(0.76, 0, 0.24, 1) forwards;
@@ -104,6 +104,7 @@
   font-size: clamp(48px, 9vw, 140px);
   line-height: 1;
   color: var(--bg);
+  text-shadow: -0.02em 0.02em 0.03em var(--text);
   opacity: 0;
   animation: wipeLabel 1.6s ease forwards;
 }
@@ -113,6 +114,19 @@
   33%  { transform: scaleX(1); transform-origin: left center; }
   67%  { transform: scaleX(1); transform-origin: right center; }
   100% { transform: scaleX(0); transform-origin: right center; }
+}
+
+/* reverse direction: sweep in from the right, out to the left
+   (used when navigating to a section on the left / lower index) */
+.wipeReverse::before {
+  animation-name: wipeSweepReverse;
+}
+
+@keyframes wipeSweepReverse {
+  0%   { transform: scaleX(0); transform-origin: right center; }
+  33%  { transform: scaleX(1); transform-origin: right center; }
+  67%  { transform: scaleX(1); transform-origin: left center; }
+  100% { transform: scaleX(0); transform-origin: left center; }
 }
 
 @keyframes wipeLabel {

@@ -1,0 +1,117 @@
+.wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  padding: clamp(56px, 8vh, 88px) 0 0;
+}
+
+/* static, subtle grid backdrop (no animation) */
+.grid {
+  position: absolute;
+  inset: -40px -80px;
+  z-index: 0;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--border) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--border) 60%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 30% 50%, black, transparent 80%);
+  mask-image: radial-gradient(ellipse 70% 70% at 30% 50%, black, transparent 80%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 22px;
+}
+
+.pre {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: var(--xs);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.prompt {
+  color: var(--accent2);
+  margin-right: 6px;
+}
+
+.headline {
+  font-family: var(--name);
+  font-size: clamp(56px, 11vw, 150px);
+  line-height: 0.92;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+.word {
+  display: block;
+}
+
+.role {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: var(--sm);
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.index {
+  position: absolute;
+  right: 0;
+  bottom: 12px;
+  z-index: 1;
+  font-family: var(--display);
+  font-size: clamp(120px, 22vw, 300px);
+  line-height: 0.8;
+  color: var(--text);
+  opacity: 0.04;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 1023px) {
+  .wrap {
+    padding-top: 28px;
+  }
+
+  .grid {
+    -webkit-mask-image: radial-gradient(ellipse 90% 60% at 40% 40%, black, transparent 80%);
+    mask-image: radial-gradient(ellipse 90% 60% at 40% 40%, black, transparent 80%);
+  }
+
+  .headline {
+    font-size: clamp(80px, 18vw, 120px);
+  }
+
+  .buttons {
+    width: 100%;
+  }
+}

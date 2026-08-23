@@ -13,7 +13,7 @@
 
 .popup {
   background: var(--surface);
-  width: 300px;
+  width: min(420px, calc(100vw - 48px));
   overflow: hidden;
   border: 1px solid var(--accent);
   border-radius: var(--radius);
@@ -212,6 +212,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
+  gap: 8px;
   /* border-bottom: 1px solid var(--border); */
 }
 
@@ -234,9 +235,9 @@
   font-size: var(--xs);
   font-weight: 600;
   letter-spacing: 2px;
-  color: var(--text-dim);
+  color: var(--accent);
   background: none;
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s, background 0.2s;
@@ -345,18 +346,51 @@
   background-color: var(--dim);
 }
 
+/* ---- Segmented mode control ---- */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--accent);
+  border-radius: 99px;
+  padding: 2px;
+  box-shadow: 0 0 1px 1px var(--accent);
+}
+
+.segment {
+  font-family: var(--mono);
+  font-size: var(--xxs);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.segment:hover {
+  color: var(--text);
+}
+
+.segmentOn, .segmentOn:hover {
+  color: var(--bg);
+  background: var(--accent);
+}
+
 @media (max-width: 1023px) {
-  .header {
+  .innerInline .header {
     border-bottom: none;
     padding: 20px 0 !important;
   }
 
-  .body{
+  .innerInline .body {
     border: 1px solid var(--accent);
     border-radius: var(--radius);
   }
 
-  .footer {
+  .innerInline .footer {
     border-top: none;
     padding: 20px 0 !important;
   }

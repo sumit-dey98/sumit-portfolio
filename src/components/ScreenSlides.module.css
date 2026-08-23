@@ -35,6 +35,7 @@
   min-height: 0;
   width: 100%;
   aspect-ratio: 16/9;
+  max-height: 100%;
   overflow: hidden;
   border-radius: var(--radius);
   outline: none;

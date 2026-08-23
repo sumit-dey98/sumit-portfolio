@@ -400,6 +400,20 @@
 }
 
 @media (max-width: 1023px) {
+  .menu {
+    max-width: calc(100vw - 24px);
+  }
+
+  .menuMain {
+    flex-wrap: wrap;
+    min-width: 130px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .submenu {
+    flex-wrap: wrap;
+  }
+
   .list {
     gap: 0;
   }

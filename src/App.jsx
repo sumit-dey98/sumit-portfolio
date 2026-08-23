@@ -20,7 +20,17 @@ import About from './sections/About';
 import Contact from './sections/Contact';
 import MobileLayout from './templates/MobileLayout';
 import DesktopLayout from './templates/DesktopLayout';
+import LiteLayout from './templates/LiteLayout';
+import LiteLanding from './sections/lite/LiteLanding';
+import LiteIntro from './sections/lite/LiteIntro';
+import LiteAbout from './sections/lite/LiteAbout';
+import LiteProjects from './sections/lite/LiteProjects';
+import LiteSkills from './sections/lite/LiteSkills';
+import LiteServices from './sections/lite/LiteServices';
+import LiteContact from './sections/lite/LiteContact';
+import { ModeProvider } from './mode/ModeContext';
 import {PROJECT_ROUTES} from './data/data';
+import { isDebug } from './utils/debug';
 import './index.css';
 
 function useIsMobile() {
@@ -104,6 +114,7 @@ function HorizontalDesktopShell({ landingPanel, shellPanel }) {
 function PortfolioInner() {
   const [phase, setPhase] = useState('loader');
   const [userPrefs, setUserPrefs] = useState(null);
+  const [pendingTab, setPendingTab] = useState(null);
   const isMobile = useIsMobile();
 
   const [cursorEnabled, setCursorEnabled] = useState(
@@ -115,7 +126,9 @@ function PortfolioInner() {
   const bodyRef = useRef(null);
 
   const handleSpinnerReady = useCallback(() => {
-    const genieEnabled = localStorage.getItem('genie-enabled') !== 'no';
+    const lite = (userPrefs?.mode ?? 'full') === 'lite';
+    const geniePref = localStorage.getItem('genie-enabled');
+    const genieEnabled = lite ? geniePref === 'yes' : geniePref !== 'no';
     if (genieEnabled) {
       setPhase('genie');
     } else {
@@ -123,7 +136,7 @@ function PortfolioInner() {
       document.body.style.overflow = 'hidden';
       setPhase('sliding');
     }
-  }, []);
+  }, [userPrefs]);
 
   const handleGenieComplete = () => {
     window.scrollTo(0, 0);
@@ -180,8 +193,11 @@ function PortfolioInner() {
     };
   }, [phase, isMobile]);
 
-  const genieEnabled = localStorage.getItem('genie-enabled') !== 'no';
-  const showGenie = genieEnabled && (phase === 'genie' || phase === 'sliding');
+  const isLite = (userPrefs?.mode ?? 'full') === 'lite';
+  const geniePref = localStorage.getItem('genie-enabled');
+  const genieEnabled = isLite ? geniePref === 'yes' : geniePref !== 'no';
+  const genieDebug = isDebug();
+  const showGenie = genieDebug || (genieEnabled && (phase === 'genie' || phase === 'sliding'));
   const showBody = phase === 'sliding' || phase === 'landing';
 
   const mobileSections = {
@@ -191,6 +207,16 @@ function PortfolioInner() {
     skills: <Skills />,
     services: <Services />,
     contact: <Contact />,
+  };
+
+  const liteSections = {
+    landing: <LiteLanding />,
+    intro: <LiteIntro />,
+    about: <LiteAbout />,
+    projects: <LiteProjects />,
+    skills: <LiteSkills />,
+    services: <LiteServices />,
+    contact: <LiteContact />,
   };
 
   return (
@@ -230,7 +256,16 @@ function PortfolioInner() {
             overflow: 'hidden',
           }}
         >
-          {isMobile ? (
+          {isLite ? (
+            <ModeProvider mode="lite">
+              <LiteLayout
+                sections={liteSections}
+                onReplayIntro={replayIntro}
+                cursorEnabled={cursorEnabled}
+                onCursorChange={setCursorEnabled}
+              />
+            </ModeProvider>
+          ) : isMobile ? (
             <div style={{ position: 'relative', width: '100vw', height: '100dvh', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 200 }}>
                 <Nav alwaysVisible cursorEnabled={cursorEnabled} onCursorChange={setCursorEnabled} onReplayIntro={replayIntro}>
@@ -243,13 +278,13 @@ function PortfolioInner() {
                   <Landing
                     ready={phase === 'landing'}
                     onEnter={() => slideTo(1)}
-                    onSkip={() => slideTo(1)}
+                    onViewProjects={() => { setPendingTab('projects'); slideTo(1); }}
                   />
                 )}
                 tabsPanel={(slideTo) => (
                   <MobileLayout
                     sections={mobileSections}
-                    // nav={mobileNav}
+                    initialTab={pendingTab}
                     onBackToLanding={() => slideTo(0)}
                   />
                 )}
@@ -261,13 +296,14 @@ function PortfolioInner() {
                 <Landing
                   ready={phase === 'landing'}
                   onEnter={() => slideTo(1)}
-                  onSkip={() => slideTo(1)}
+                  onViewProjects={() => { setPendingTab('projects'); slideTo(1); }}
                 />
               )}
               shellPanel={(slideTo, revealed) => (
                 <DesktopLayout
                   sections={mobileSections}
                   revealed={revealed}
+                  initialTab={pendingTab}
                   onBackToLanding={() => slideTo(0)}
                   onReplayIntro={replayIntro}
                   cursorEnabled={cursorEnabled}

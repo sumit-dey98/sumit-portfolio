@@ -61,34 +61,23 @@
 .stripItem {
   scroll-snap-align: center;
   flex-shrink: 0;
-  display: grid;
-  grid-template-columns: auto 0fr;
+  display: flex;
   align-items: center;
-  column-gap: 0;
   padding: 7px 12px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 100px;
   cursor: pointer;
-  transition:
-    grid-template-columns 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    column-gap 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.3s ease,
-    background 0.3s ease;
-  will-change: grid-template-columns;
+  transition: border-color 0.3s ease, background 0.3s ease;
 }
 
 .stripItem:hover {
   border-color: var(--accent);
-  grid-template-columns: auto 1fr;
-  column-gap: 8px;
 }
 
 .stripItemActive {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 12%, var(--surface));
-  grid-template-columns: auto 1fr;
-  column-gap: 8px;
 }
 
 .stripNum {
@@ -112,14 +101,9 @@
   color: var(--text-dim);
   white-space: nowrap;
   overflow: hidden;
-  min-width: 0;
+  width: 0;
   opacity: 0;
-  transition: opacity 0.35s ease, color 0.3s ease;
-}
-
-.stripItem:hover .stripName,
-.stripItemActive .stripName {
-  opacity: 1;
+  transition: color 0.3s ease;
 }
 
 .stripItemActive .stripName {
@@ -289,6 +273,7 @@
 
 /* ---- Info panel (left) ---- */
 .info {
+  position: relative;
   padding: clamp(22px, 2.2vw, 34px);
   display: flex;
   flex-direction: column;
@@ -393,20 +378,80 @@
 }
 
 .slides {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-top: calc(1em * 1.7 * 4 + 18px + 16px);
 }
 
-/* ---- Description (scrollable box, drag + inertia) ---- */
+.infoBody {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .cardDescWrapper {
   display: flex;
-  position: relative;
-  height: calc(1em * 1.7 * 4);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: calc(1em * 1.7 * 4 + 18px);
   font-size: var(--base);
   line-height: 1.7;
-  flex-shrink: 0;
-  margin-bottom: 16px;
+  /* padding-bottom: 18px;  */
+  background: var(--surface);
+  transition: height 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.42s ease;
+}
+
+.cardDescExpanded {
+  height: 101%;
+  /* box-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.55); */
+}
+
+/* ---- Pull-tab ---- */
+.descTab {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 28px; 
+  padding: 0 0 2px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--surface) 70%, transparent) 45%,
+    var(--surface) 100%
+  );
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  z-index: 6;
+  transition: color 0.2s ease;
+}
+
+.descTab:hover {
+  color: var(--accent2);
+}
+
+.descTabIcon {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.descTabIconOpen {
+  transform: rotate(180deg);
 }
 
 .cardDesc {
@@ -448,6 +493,7 @@
 /* ---- Tags ---- */
 .tags {
   display: flex;
+  padding-left: 1px;
   gap: 8px;
   flex-wrap: wrap;
   flex-shrink: 0;
@@ -469,15 +515,186 @@
 
 /* ============ Mobile: single-column stacked list ============ */
 .projects {
-  padding: 0;
+  padding: 100px 0 0;
   overflow: visible;
+  position: relative;
 }
 
 .mobileHeader {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 14px 0;
+}
+
+.mobileHeader .label {
+  flex-shrink: 0;
+}
+
+.mDropRail {
+  position: sticky;
+  top: 64px;
+  z-index: 30;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -66px;
   margin-bottom: 20px;
+  pointer-events: none;
+}
+
+/* ---- Mobile jump dropdown ---- */
+.mDrop {
+  position: relative;
+  z-index: 30;
+  flex-shrink: 0;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.mDropTrigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 60vw;
+  padding: 7px 12px;
+  background: var(--accent);
+  border: 1px solid var(--accent2);
+  border-radius: 100px;
+  cursor: pointer;
+  color: var(--bg);
+}
+
+.mDropNum {
+  font-family: var(--mono);
+  font-size: var(--sm);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--accent2);
+  flex-shrink: 0;
+}
+
+.mDropName {
+  font-family: var(--body);
+  font-size: var(--sm);
+  font-weight: 500;
+  color: var(--bg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.mDropChevron {
+  flex-shrink: 0;
+  font-size: var(--sm);
+  color: var(--bg);
+  transition: transform 0.25s ease;
+}
+
+.mDropChevronOpen {
+  transform: rotate(180deg);
+}
+
+.mDropMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 240px;
+  max-width: 80vw;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 41;
+}
+
+.mDropScrim {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background: color-mix(in srgb, var(--bg) 74%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: mScrimIn 0.2s ease;
+}
+
+.mDropScrimOut {
+  animation: mScrimOut 0.2s ease forwards;
+}
+
+@keyframes mScrimIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mScrimOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes mPillIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.mDropItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 18px;
+  text-align: left;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--accent) 96%, transparent);
+  border: 1px solid var(--accent2);
+  border-radius: 100px;
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+  opacity: 0;
+  animation: mPillIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mDropItem:hover {
+  border-color: var(--accent);
+  backdrop-filter: brightness(0.8);
+  -webkit-backdrop-filter: brightness(0.8);
+}
+
+.mDropItem:nth-child(1) { animation-delay: 0.02s; }
+.mDropItem:nth-child(2) { animation-delay: 0.06s; }
+.mDropItem:nth-child(3) { animation-delay: 0.10s; }
+.mDropItem:nth-child(4) { animation-delay: 0.14s; }
+.mDropItem:nth-child(5) { animation-delay: 0.18s; }
+.mDropItem:nth-child(6) { animation-delay: 0.22s; }
+
+.mDropItem:active {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.mDropItemActive {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent2) 88%, var(--surface));
+}
+
+.mDropItemName {
+  font-family: var(--body);
+  line-height: 1.15;
+  font-size: var(--sm);
+  color: var(--bg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mDropItemActive .mDropNum {
+  color: var(--bg);
+}
+
+.mDropItemActive .mDropItemName {
+  color: var(--bg);
 }
 
 .count {
@@ -491,24 +708,27 @@
 .mobileList {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 32px;
 }
 
 /* mobile card = single column, preview on top, info below */
 .rowMobile {
   display: flex;
   flex-direction: column;
-  height: auto;
+  height: calc(100dvh - 160px);
+  min-height: 600px;
   width: 100%;
   margin-inline: 0;
   opacity: 1;
   filter: none;
   border-color: var(--accent);
   box-shadow: 0 0 2px 2px var(--border);
+  scroll-margin-top: 100px;
 }
 
 .rowMobile .preview {
   order: 0;
+  flex-shrink: 0;
   aspect-ratio: 16 / 9;
   border-left: 0;
   border-bottom: 1px solid var(--border);
@@ -516,16 +736,84 @@
 
 .rowMobile .info {
   order: 1;
-  overflow: visible;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
   padding: 16px;
 }
 
-.rowMobile .slides {
-  flex: none;
+.rowMobile .infoTop {
+  flex-shrink: 0;
 }
 
 .rowMobile .name {
   font-size: var(--lg);
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.rowMobile .infoBody {
+  position: static;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rowMobile .cardDescWrapper {
+  position: static;
+  flex: 1 1 0;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  margin-bottom: 14px;
+  background: transparent;
+  transition: none;
+}
+
+.rowMobile .cardDesc {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+.rowMobile .cardDesc::-webkit-scrollbar {
+  width: 4px;
+}
+
+.rowMobile .cardDesc::-webkit-scrollbar-track {
+  background: var(--border);
+  border-radius: var(--radius-xs);
+}
+
+.rowMobile .cardDesc::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: var(--radius-xs);
+  box-shadow: 0 0 4px var(--accent);
+}
+
+.rowMobile .descScrollTrack,
+.rowMobile .descTab {
+  display: none !important;
+}
+
+.rowMobile .slides {
+  position: static;
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: visible;
+  margin-bottom: 14px;
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+.rowMobile .tags {
+  flex-shrink: 0;
+  padding-top: 0;
 }
 
 @media (max-width: 1023px) {
@@ -542,6 +830,12 @@
 @media (max-width: 767px) {
   .mobileHeader {
     padding: 0;
+    min-height: 48px;
+  }
+
+  .mDropRail {
+    margin-top: -60px;
+    align-items: center;
   }
 
   .mobileList {

@@ -29,7 +29,7 @@ export default function SpinnerScreen({ onReady }) {
     if (!arcRef.current) return;
     spinTweenRef.current = gsap.to(arcRef.current, {
       rotation: 360,
-      transformOrigin: '50% 50%',
+      svgOrigin: `${cx} ${cy}`,
       duration: 1 / SPEED,
       ease: 'none',
       repeat: -1,
@@ -95,19 +95,20 @@ export default function SpinnerScreen({ onReady }) {
           strokeWidth={STROKE - 1}
           opacity={0.6}
         />
-        <circle
-          ref={arcRef}
-          cx={cx}
-          cy={cy}
-          r={radius}
-          fill="none"
-          stroke="var(--accent)"
-          strokeWidth={STROKE}
-          strokeLinecap="round"
-          strokeDasharray={`${arcLength} ${circumference - arcLength}`}
-          strokeDashoffset={0}
-          transform={`rotate(-90 ${cx} ${cy})`}
-        />
+        <g transform={`rotate(-90 ${cx} ${cy})`}>
+          <circle
+            ref={arcRef}
+            cx={cx}
+            cy={cy}
+            r={radius}
+            fill="none"
+            stroke="var(--accent)"
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+            strokeDasharray={`${arcLength} ${circumference - arcLength}`}
+            strokeDashoffset={0}
+          />
+        </g>
       </svg>
 
       <p

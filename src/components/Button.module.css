@@ -39,8 +39,20 @@
   margin-left: 10px;
   margin-right: 10px;
   color: inherit;
-  transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1),
-    color 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+  transition: transform 0.35s cubic-bezier(0.7, 0, 0.2, 1),
+    color 0.35s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.fill .iconWrap::before {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: calc(var(--fill-strip, 40px));
+  height: 200%;
+  transform: translate(-50%, -50%);
+  background: var(--accent);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .icon {

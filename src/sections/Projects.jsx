@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FiArrowUpRight, FiPlay, FiPause, FiMaximize } from 'react-icons/fi';
+import gsap from 'gsap';
+import { FiArrowUpRight, FiPlay, FiPause, FiMaximize, FiChevronDown } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Lenis from 'lenis';
 import ScreenSlides from './../components/ScreenSlides';
@@ -114,8 +115,12 @@ function CardDesc({ text }) {
     window.addEventListener('pointerup', onUp);
   };
 
+  const [expanded, setExpanded] = useState(false);
+
+  const canExpand = showScroll || expanded;
+
   return (
-    <div className={styles.cardDescWrapper}>
+    <div className={`${styles.cardDescWrapper} ${expanded ? styles.cardDescExpanded : ''}`}>
       <p
         ref={ref}
         className={styles.cardDesc}
@@ -145,6 +150,20 @@ function CardDesc({ text }) {
             onPointerDown={onThumbPointerDown}
           />
         </div>
+      )}
+
+      {canExpand && (
+        <button
+          className={styles.descTab}
+          onClick={() => setExpanded(v => !v)}
+          onPointerDown={e => e.stopPropagation()}
+          aria-expanded={expanded}
+          aria-label={expanded ? 'Collapse description' : 'Expand description'}
+        >
+          <FiChevronDown
+            className={`${styles.descTabIcon} ${expanded ? styles.descTabIconOpen : ''}`}
+          />
+        </button>
       )}
     </div>
   );
@@ -244,13 +263,15 @@ function ProjectRow({ project, index, rowRef, mobile }) {
         </div>
 
         <h2 className={styles.name}>{project.name}</h2>
-        <CardDesc text={project.desc} />
-        <div className={styles.slides}>
-          <ScreenSlides screens={project.screens} />
-        </div>
+        <div className={styles.infoBody}>
+          <CardDesc text={project.desc} />
+          <div className={styles.slides}>
+            <ScreenSlides screens={project.screens} />
+          </div>
 
-        <div className={styles.tags}>
-          {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+          <div className={styles.tags}>
+            {project.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+          </div>
         </div>
       </div>
 
@@ -260,10 +281,30 @@ function ProjectRow({ project, index, rowRef, mobile }) {
 }
 
 /* ---- Top navigation strip: expandable, snaps to active project ---- */
+const STRIP_EASE = 'power3.out';
+const STRIP_DUR = 0.5;
+
 function ProjectStrip({ activeIndex, onSelect }) {
   const stripRef = useRef(null);
   const itemRefs = useRef([]);
+  const nameRefs = useRef([]);
 
+  useEffect(() => {
+    nameRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const open = i === activeIndex;
+      gsap.to(el, {
+        width: open ? el.scrollWidth : 0,
+        opacity: open ? 1 : 0,
+        marginLeft: open ? 8 : 0,
+        duration: STRIP_DUR,
+        ease: STRIP_EASE,
+        overwrite: 'auto',
+      });
+    });
+  }, [activeIndex]);
+
+  // Center the active pill in view.
   useEffect(() => {
     const strip = stripRef.current;
     const el = itemRefs.current[activeIndex];
@@ -282,7 +323,12 @@ function ProjectStrip({ activeIndex, onSelect }) {
           onClick={() => onSelect(i)}
         >
           <span className={styles.stripNum}>{p.id}</span>
-          <span className={styles.stripName}>{p.name}</span>
+          <span
+            ref={el => (nameRefs.current[i] = el)}
+            className={styles.stripName}
+          >
+            {p.name}
+          </span>
         </button>
       ))}
     </div>
@@ -393,19 +439,136 @@ function VerticalProjects() {
   );
 }
 
-/* ---- Mobile: single-column stacked list ---- */
+/* ---- Mobile: dropdown jump-nav to any project ---- */
+function MobileProjectDropdown({ activeIndex, onSelect, open, setOpen }) {
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [open, setOpen]);
+
+  const active = PROJECTS[activeIndex];
+
+  return (
+    <div ref={wrapRef} className={styles.mDrop}>
+      <button
+        className={styles.mDropTrigger}
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+      >
+        <span className={styles.mDropNum}>{active.id}</span>
+        <span className={styles.mDropName}>{active.name}</span>
+        <FiChevronDown className={`${styles.mDropChevron} ${open ? styles.mDropChevronOpen : ''}`} />
+      </button>
+
+      {open && (
+        <div className={styles.mDropMenu}>
+          {PROJECTS.map((p, i) => (
+            <button
+              key={p.id}
+              className={`${styles.mDropItem} ${i === activeIndex ? styles.mDropItemActive : ''}`}
+              onClick={() => { onSelect(i); setOpen(false); }}
+            >
+              <span className={styles.mDropNum}>{p.id}</span>
+              <span className={styles.mDropItemName}>{p.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MobileProjects() {
+  const rowRefs = useRef([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const [scrimMounted, setScrimMounted] = useState(false);
+  const [scrimClosing, setScrimClosing] = useState(false);
+  const scrimTimer = useRef(null);
+  useEffect(() => {
+    clearTimeout(scrimTimer.current);
+    if (dropdownOpen) {
+      setScrimMounted(true);
+      setScrimClosing(false);
+    } else if (scrimMounted) {
+      setScrimClosing(true);
+      scrimTimer.current = setTimeout(() => {
+        setScrimMounted(false);
+        setScrimClosing(false);
+      }, 200);
+    }
+    return () => clearTimeout(scrimTimer.current);
+  }, [dropdownOpen, scrimMounted]);
+
+  useEffect(() => {
+    let raf = null;
+    const pick = () => {
+      raf = null;
+      const centre = window.innerHeight / 2;
+      let best = { idx: 0, dist: Infinity };
+      rowRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const dist = Math.abs((r.top + r.height / 2) - centre);
+        if (dist < best.dist) best = { idx, dist };
+      });
+      setActiveIndex(best.idx);
+    };
+    const onScroll = () => { if (raf == null) raf = requestAnimationFrame(pick); };
+    const scroller = rowRefs.current[0]?.closest('[class*="pane"]') || window;
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    pick();
+    return () => {
+      scroller.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll, { capture: true });
+      if (raf != null) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  const scrollToIndex = useCallback((idx) => {
+    rowRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
   return (
     <section id="projects" className={styles.projects}>
+      {scrimMounted && (
+        <div
+          className={`${styles.mDropScrim} ${scrimClosing ? styles.mDropScrimOut : ''}`}
+          aria-hidden="true"
+        />
+      )}
+
       <div className={styles.mobileHeader}>
         <p className={styles.label}>
           <span className={styles.prompt}>&gt;</span> PROJECTS
         </p>
-        <span className={styles.count}>{TOTAL} works</span>
+      </div>
+
+      <div className={styles.mDropRail}>
+        <MobileProjectDropdown
+          activeIndex={activeIndex}
+          onSelect={scrollToIndex}
+          open={dropdownOpen}
+          setOpen={setDropdownOpen}
+        />
       </div>
       <div className={styles.mobileList}>
         {PROJECTS.map((p, i) => (
-          <ProjectRow key={p.id} project={p} index={i} mobile />
+          <ProjectRow
+            key={p.id}
+            project={p}
+            index={i}
+            rowRef={el => (rowRefs.current[i] = el)}
+            mobile
+          />
         ))}
       </div>
     </section>
