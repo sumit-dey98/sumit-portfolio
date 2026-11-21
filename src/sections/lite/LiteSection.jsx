@@ -3,7 +3,7 @@ import styles from './LiteSection.module.css';
 
 export default function LiteSection({
   index,
-  total = 6,
+  total,
   label,
   title,
   headerRight = null,
@@ -41,11 +41,13 @@ export default function LiteSection({
         </p>
         <div className={styles.headRight}>
           {headerRight}
-          <span className={styles.count}>
-            <span className={styles.countNum}>{String(index).padStart(2, '0')}</span>
-            <span className={styles.countSlash}>/</span>
-            <span className={styles.countTotal}>{String(total).padStart(2, '0')}</span>
-          </span>
+          {index != null && total != null && (
+            <span className={styles.count}>
+              <span className={styles.countNum}>{String(index).padStart(2, '0')}</span>
+              <span className={styles.countSlash}>/</span>
+              <span className={styles.countTotal}>{String(total).padStart(2, '0')}</span>
+            </span>
+          )}
         </div>
       </div>
 

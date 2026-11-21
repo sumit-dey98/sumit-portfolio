@@ -1,20 +1,22 @@
 import LiteSection from './LiteSection';
-import { STACKS } from '../../data/data';
 import styles from './LiteSkills.module.css';
 
-export default function LiteSkills() {
+/** Lite variant: 'terminal'. Data shape matches src/data/sections/skills.js. */
+export default function LiteSkills({ data = {}, label, index, total }) {
+  const { groups = [] } = data;
+
   return (
-    <LiteSection index={4} label="SKILLS" className={styles.section}>
+    <LiteSection index={index} total={total} label={label} className={styles.section}>
       <div className={styles.grid}>
-        {STACKS.map((stack) => (
-          <div key={stack.id} className={styles.group}>
+        {groups.map((stack, i) => (
+          <div key={stack.id ?? stack.group ?? i} className={styles.group}>
             <div className={styles.groupHead}>
-              <span className={styles.groupNum}>{stack.id}</span>
+              <span className={styles.groupNum}>{stack.id ?? String(i + 1).padStart(2, '0')}</span>
               <span className={styles.groupName}>{stack.group}</span>
             </div>
 
             <ul className={styles.items}>
-              {Object.entries(stack.items).map(([name, level]) => (
+              {Object.entries(stack.items || {}).map(([name, level]) => (
                 <li key={name} className={styles.item}>
                   <span className={styles.itemTop}>
                     <span className={styles.itemName}>{name}</span>

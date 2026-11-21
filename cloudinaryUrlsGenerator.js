@@ -1,7 +1,7 @@
 // run this script from the root of the project
 // bash: node cloudinaryUrlsGenerator.js
 // generates the cloudinary urls from local IMAGES_DIRS to cloudinary FOLDER and saves the urls to URLS_FILE
-// MUST HAVE NODE.JS INSTALLED. also, npm install cloudinary & npm install dotenv
+// MUST HAVE NODE.JS INSTALLED. Also, npm install cloudinary & npm install dotenv
 // Script adds new URLs to existing JS file or creates the js file, if it doesn't exist
 
 import { v2 as cloudinary } from 'cloudinary'
@@ -11,22 +11,29 @@ import path from 'path'
 
 config()
 
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.error(
+    [
+      'Missing Cloudinary credentials.',
+      'Copy .env.example to .env and fill in CLOUDINARY_CLOUD_NAME / API_KEY / API_SECRET.',
+      'This script is optional - the site runs fine serving media from /public.',
+    ].join('\n')
+  )
+  process.exit(1)
+}
+
+// You need a Cloudinary account and API credentials. set the values in .env.example and rename or copy to .env 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-// const FOLDER = 'sumit-portfolio/assets/fwc2026/screens/'
-const FOLDER = 'sumit-portfolio/assets/'
+// Destination folder inside your Cloudinary account.
+// Override with CLOUDINARY_FOLDER in .env
+const FOLDER = process.env.CLOUDINARY_FOLDER || 'portfolio/assets/'
 const IMAGES_DIRS = [
-  // './public/',
-  './public/previews/',
-  // './public/screens/',
-  // './public/screens/greenfield-screens/',
-  // './public/screens/fwc2026-screens/',
-  // './public/projects/',
-  // './public/projects/interior/images/',
+  './public/',
 ]
 const URLS_FILE = './src/data/cloudinary-urls.js'
 

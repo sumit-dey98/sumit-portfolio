@@ -1,20 +1,33 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useRevealOnView } from '../hooks/useRevealOnView';
 import styles from './Contact.module.css';
 
-const EMAIL = 'work.sumit@gmail.com';
+/**
+ * Variant: 'contact'
+ * All content comes from the section's `data` - see src/data/sections/contact.js.
+ * `socials` may be any length, including zero.
+ */
+export default function Contact({ data = {}, label }) {
+  const {
+    headline = '',
+    headlineAccent = '',
+    sub = '',
+    email = '',
+    socials = [],
+    footer = '',
+  } = data;
 
-export default function Contact() {
   const [copied, setCopied] = useState(false);
   const contentRef = useRevealOnView({ duration: 0.6 });
 
   const handleCopy = async () => {
+    if (!email) return;
     try {
-      await navigator.clipboard.writeText(EMAIL);
+      await navigator.clipboard.writeText(email);
       setCopied(true);
-    } catch (err) {
+    } catch {
       const textarea = document.createElement('textarea');
-      textarea.value = EMAIL;
+      textarea.value = email;
       textarea.style.position = 'fixed';
       textarea.style.opacity = '0';
       document.body.appendChild(textarea);
@@ -26,50 +39,63 @@ export default function Contact() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const footerText = footer.replace('{year}', String(new Date().getFullYear()));
+
   return (
     <section id="contact" className={styles.contact}>
       <div className={styles.inner}>
-        <p className={styles.label}>
-          <span className={styles.prompt}>&gt;</span> CONTACT
-        </p>
-        <div ref={contentRef} className={styles.content}>
-          <h2 className={styles.headline}>
-            LET'S WORK<br />
-            <span className={styles.accent}>TOGETHER.</span>
-          </h2>
-
-          <p className={styles.sub}>
-            Open to freelance projects, full-time roles, and interesting collabs.
+        {label && (
+          <p className={styles.label}>
+            <span className={styles.prompt}>&gt;</span> {label}
           </p>
+        )}
+        <div ref={contentRef} className={styles.content}>
+          {(headline || headlineAccent) && (
+            <h2 className={styles.headline}>
+              {headline}
+              {headline && headlineAccent && <br />}
+              {headlineAccent && <span className={styles.accent}>{headlineAccent}</span>}
+            </h2>
+          )}
 
-          <button className={styles.emailBtn} onClick={handleCopy} data-cursor>
-            <span className={styles.emailText}>{EMAIL}</span>
-            <span className={styles.emailAction}>
-              {copied ? 'COPIED' : 'COPY'}
-            </span>
-          </button>
+          {sub && <p className={styles.sub}>{sub}</p>}
 
-          <div className={styles.socials}>
-            <a href="https://github.com/sumit-dey98" target="_blank" rel="noopener noreferrer" className={styles.social}>
-              GitHub
-            </a>
-            <span className={styles.socialDiv}>/</span>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className={styles.social}>
-              LinkedIn
-            </a>
-            <span className={styles.socialDiv}>/</span>
-            <a href="https://wa.me/8801717742550" target="_blank" rel="noopener noreferrer" className={styles.social}>
-              WhatsApp
-            </a>
-          </div>
+          {email && (
+            <button className={styles.emailBtn} onClick={handleCopy} data-cursor>
+              <span className={styles.emailText}>{email}</span>
+              <span className={styles.emailAction}>
+                {copied ? 'COPIED' : 'COPY'}
+              </span>
+            </button>
+          )}
+
+          {socials.length > 0 && (
+            <div className={styles.socials}>
+              {socials.map((social, i) => (
+                <Fragment key={social.url || i}>
+                  {i > 0 && <span className={styles.socialDiv}>/</span>}
+                  <a
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.social}
+                  >
+                    {social.label}
+                  </a>
+                </Fragment>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className={styles.footer}>
-        <span className={styles.footerText}>
-          <span className={styles.prompt}>&gt;</span>&copy; SUMIT HILLOL DEY | 2025
-        </span>
-      </div>
+      {footerText && (
+        <div className={styles.footer}>
+          <span className={styles.footerText}>
+            <span className={styles.prompt}>&gt;</span>{footerText}
+          </span>
+        </div>
+      )}
     </section>
   );
 }

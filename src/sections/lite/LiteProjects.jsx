@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { FiArrowUpRight, FiList, FiGrid } from 'react-icons/fi';
 import LiteSection from './LiteSection';
 import LiteProjectModal from './LiteProjectModal';
-import { PROJECTS } from '../../data/data';
 import styles from './LiteProjects.module.css';
-
-const TOTAL = PROJECTS.length;
 
 function ViewToggle({ view, setView }) {
   return (
@@ -74,7 +71,9 @@ function ProjectCard({ p, onOpen }) {
   );
 }
 
-export default function LiteProjects() {
+/** Lite variant: 'showcase'. Data shape matches src/data/sections/projects.js. */
+export default function LiteProjects({ data = {}, label, index, total }) {
+  const { items = [] } = data;
   const [active, setActive] = useState(null); // project object or null
   const [view, setView] = useState(() => {
     try { return localStorage.getItem('lite-projects-view') || 'list'; }
@@ -88,13 +87,14 @@ export default function LiteProjects() {
 
   return (
     <LiteSection
-      index={3}
-      label="PROJECTS"
+      index={index}
+      total={total}
+      label={label}
       className={styles.section}
       headerRight={<ViewToggle view={view} setView={changeView} />}
     >
       <div className={`${styles.collection} ${view === 'grid' ? styles.grid : styles.list}`}>
-        {PROJECTS.map((p) => (
+        {items.map((p) => (
           <ProjectCard key={p.id} p={p} onOpen={setActive} />
         ))}
       </div>
@@ -102,7 +102,7 @@ export default function LiteProjects() {
       {active && (
         <LiteProjectModal
           project={active}
-          total={TOTAL}
+          total={items.length}
           onClose={() => setActive(null)}
         />
       )}

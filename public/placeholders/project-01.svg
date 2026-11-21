@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-label="Project 01 placeholder">
+  <defs>
+    <linearGradient id="g01" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#12121F"/>
+      <stop offset="100%" stop-color="#0A0A14"/>
+    </linearGradient>
+    <pattern id="p01" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#232338" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g01)"/>
+  <rect width="1600" height="1000" fill="url(#p01)"/>
+  <rect x="40" y="40" width="1520" height="920" fill="none" stroke="#5227FF" stroke-width="3" rx="10"/>
+  <text x="800" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace"
+        font-size="150" font-weight="700" fill="#5227FF" letter-spacing="8">01</text>
+  <text x="800" y="570" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace"
+        font-size="46" fill="#7A7AAD" letter-spacing="10">REPLACE THIS IMAGE</text>
+</svg>

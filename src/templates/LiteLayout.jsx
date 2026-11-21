@@ -5,21 +5,17 @@ import Logo from '../components/Logo';
 import ThemeSwitcher from '../components/ThemeSwitcher';
 import SettingsPopup from '../components/SettingsPopup';
 import SvgButton from '../components/SvgButton';
+import { SECTIONS } from '../data/sections';
 import styles from './LiteLayout.module.css';
 
 const SETTINGS_EASE = 'power4.out';
 
-const NAV_ITEMS = [
-  { id: 'landing', label: 'Home' },
-  { id: 'intro', label: 'Intro' },
-  { id: 'about', label: 'About' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'services', label: 'Services' },
-  { id: 'contact', label: 'Contact' },
-];
+// Nav entries are derived from the section data, so adding or removing a
+// section in src/data/sections/index.js updates the rail and the counters.
+const NAV_ITEMS = SECTIONS.map(s => ({ id: s.id, label: s.navLabel || s.id }));
 
-const LAST_INDEX = NAV_ITEMS.length - 1;
+// Sections that count towards the "03 / 06" indicator (landing is excluded).
+const COUNTED = NAV_ITEMS.length - SECTIONS.filter(s => s.showInNav === false).length;
 
 export default function LiteLayout({
   sections = {},
@@ -114,6 +110,10 @@ export default function LiteLayout({
   }, [sections]);
 
   const activeIndex = NAV_ITEMS.findIndex((n) => n.id === activeId);
+  // Position among counted (non-landing) sections, for the peek-bar counter.
+  const activeCount = SECTIONS
+    .filter(sec => sec.showInNav !== false)
+    .findIndex(sec => sec.id === activeId) + 1;
   const nextItem =
     activeIndex >= 0 && activeIndex < NAV_ITEMS.length - 1
       ? NAV_ITEMS[activeIndex + 1]
@@ -197,7 +197,7 @@ export default function LiteLayout({
           <span className={styles.peekPrompt}>&gt;</span>
           <span className={styles.peekLabel}>{nextItem.label}</span>
           <span className={styles.peekNum}>
-            {String(activeIndex + 1).padStart(2, '0')} / {String(LAST_INDEX).padStart(2, '0')}
+            {String(activeCount).padStart(2, '0')} / {String(COUNTED).padStart(2, '0')}
           </span>
         </button>
       )}
@@ -209,7 +209,7 @@ export default function LiteLayout({
             id={`lite-${id}`}
             className={`${styles.section} ${activeId === id ? styles.sectionActive : ''}`}
           >
-            {id !== 'landing' && (
+            {SECTIONS.find(sec => sec.id === id)?.showInNav !== false && (
               <>
                 <span className={`${styles.corner} ${styles.cornerTL}`} aria-hidden="true" />
                 <span className={`${styles.corner} ${styles.cornerBR}`} aria-hidden="true" />

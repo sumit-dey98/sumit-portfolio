@@ -64,7 +64,7 @@ function SkillItem({ item, level, custom, isInView, isFullscreen }) {
   );
 }
 
-export default function Terminal({ isFullscreen, onExpand, data }) {
+export default function Terminal({ isFullscreen, onExpand, data, user = 'user' }) {
   const terminalRef = useRef(null);
   const groupRef = useRef(null);
 
@@ -136,13 +136,13 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         >
           <ExpandIcon color="#000" size={16} style={{ rotate: '-90deg', padding: '3px' }} />
         </span>
-        <span className={styles.termTitle}>sumit@portfolio: ~/stack/{data.group}</span>
+        <span className={styles.termTitle}>{user}@portfolio: ~/stack/{data.group}</span>
       </div>
 
       <div className={`${styles.terminalBody} ${effectiveFullscreen ? styles.terminalBodyFullscreen : ''}`}>
         {!isMobile && (
           <p className={styles.termCmd}>
-            <span className={styles.termPrompt}>sumit@portfolio:~$</span> ls -la ./{data.group}
+            <span className={styles.termPrompt}>{user}@portfolio:~$</span> ls -la ./{data.group}
           </p>
         )}
 
@@ -162,7 +162,7 @@ export default function Terminal({ isFullscreen, onExpand, data }) {
         </div>
 
         <p className={styles.termCmd} style={{ marginTop: '20px' }}>
-          <span className={styles.termPrompt}>sumit@portfolio:~$</span>
+          <span className={styles.termPrompt}>{user}@portfolio:~$</span>
           <span className={styles.cursor}>_</span>
         </p>
       </div>

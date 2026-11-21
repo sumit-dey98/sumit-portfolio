@@ -1,62 +1,94 @@
 import Button from '../../components/Button';
-import { BiLogoGithub, BiLogoLinkedin, BiLogoWhatsapp } from 'react-icons/bi';
+import { ACTIVE_SOCIALS } from '../../data/site.config';
+import { socialIcon } from '../../data/socialIcons';
 import { IoLocationOutline, IoMailOutline } from 'react-icons/io5';
 import LiteSection from './LiteSection';
 import styles from './LiteAbout.module.css';
 
-export default function LiteAbout() {
+/** Icons available to `details[].icon` in the section data. */
+const DETAIL_ICONS = {
+  location: IoLocationOutline,
+  mail: IoMailOutline,
+};
+
+/** Lite variant: 'bio'. Data shape matches src/data/sections/about.js. */
+export default function LiteAbout({ data = {}, label, index, total }) {
+  const {
+    headline = '',
+    headlineAccent = '',
+    paragraphs = [],
+    image = '',
+    imageAlt = '',
+    details = [],
+  } = data;
+
+  const hasSide = Boolean(image) || details.length > 0 || ACTIVE_SOCIALS.length > 0;
+
   return (
-    <LiteSection index={2} label="ABOUT" className={styles.section}>
+    <LiteSection index={index} total={total} label={label} className={styles.section}>
       <div className={styles.layout}>
         <div className={styles.text}>
-          <h2 className={styles.headline}>
-            I BUILD THINGS<br />
-            <span className={styles.accent}>THAT FEEL ALIVE.</span>
-          </h2>
+          {(headline || headlineAccent) && (
+            <h2 className={styles.headline}>
+              {headline}
+              {headline && headlineAccent && <br />}
+              {headlineAccent && <span className={styles.accent}>{headlineAccent}</span>}
+            </h2>
+          )}
 
-          <p className={styles.bio}>
-            I'm Sumit, a front-end web developer with a focus on interactive UI and creative
-            engineering. I care deeply about the intersection of performance and aesthetics —
-            interfaces that don't just work, but feel good to use.
-          </p>
-          <p className={styles.bio}>
-            When I'm not shipping code, I'm experimenting with generative art, contributing to
-            open source, or reverse-engineering animations I find on the web.
-          </p>
+          {paragraphs.map((para, i) => (
+            <p key={i} className={styles.bio}>{para}</p>
+          ))}
         </div>
 
-        <div className={styles.side}>
-          <div className={styles.imageWrap}>
-            <div className={styles.imageFrame}>
-              <img src="" alt="Sumit Hillol Dey" className={styles.image} />
-              <div className={styles.imageOverlay} />
-            </div>
-            <div className={styles.imageBorder} />
-          </div>
+        {hasSide && (
+          <div className={styles.side}>
+            {image && (
+              <div className={styles.imageWrap}>
+                <div className={styles.imageFrame}>
+                  <img src={image} alt={imageAlt} className={styles.image} />
+                  <div className={styles.imageOverlay} />
+                </div>
+                <div className={styles.imageBorder} />
+              </div>
+            )}
 
-          <div className={styles.contact}>
-            <div className={styles.contactRow}>
-              <IoLocationOutline size={22} className={styles.contactIcon} strokeWidth={3} />
-              <span>Dhaka, Bangladesh</span>
-            </div>
-            <div className={styles.contactRow}>
-              <IoMailOutline size={22} className={styles.contactIcon} strokeWidth={2} />
-              <a href="mailto:work.sumit@gmail.com">work.sumit@gmail.com</a>
-            </div>
-          </div>
+            {details.length > 0 && (
+              <div className={styles.contact}>
+                {details.map((detail, i) => {
+                  const Icon = DETAIL_ICONS[detail.icon];
+                  return (
+                    <div key={i} className={styles.contactRow}>
+                      {Icon && (
+                        <Icon size={22} className={styles.contactIcon} strokeWidth={2} />
+                      )}
+                      {detail.href
+                        ? <a href={detail.href}>{detail.value}</a>
+                        : <span>{detail.value}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-          <div className={styles.links}>
-            <Button variant="nofill" href="https://github.com/sumit-dey98" icon={BiLogoGithub} iconSize={20} iconPosition="left">
-              @sumit-dey98
-            </Button>
-            <Button variant="nofill" href="https://linkedin.com" icon={BiLogoLinkedin} iconSize={20} iconPosition="left">
-              Sumit
-            </Button>
-            <Button variant="nofill" href="https://wa.me/8801717742550" icon={BiLogoWhatsapp} iconSize={20} iconPosition="left">
-              +880-1717742550
-            </Button>
+            {ACTIVE_SOCIALS.length > 0 && (
+              <div className={styles.links}>
+                {ACTIVE_SOCIALS.map(social => (
+                  <Button
+                    key={social.key}
+                    variant="nofill"
+                    href={social.url}
+                    icon={socialIcon(social.key)}
+                    iconSize={20}
+                    iconPosition="left"
+                  >
+                    {social.label}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </LiteSection>
   );

@@ -10,26 +10,14 @@ import SpinnerScreen from './components/SpinnerScreen';
 import Genie from './components/Genie';
 import Nav from './components/Nav';
 import ThemeSwitcher from './components/ThemeSwitcher';
-import Landing from './sections/Landing';
-import Intro from './sections/Intro';
-import Projects from './sections/Projects';
 import SingleProject from './templates/SingleProject';
-import Skills from './sections/Skills';
-import Services from './sections/Services';
-import About from './sections/About';
-import Contact from './sections/Contact';
 import MobileLayout from './templates/MobileLayout';
 import DesktopLayout from './templates/DesktopLayout';
 import LiteLayout from './templates/LiteLayout';
-import LiteLanding from './sections/lite/LiteLanding';
-import LiteIntro from './sections/lite/LiteIntro';
-import LiteAbout from './sections/lite/LiteAbout';
-import LiteProjects from './sections/lite/LiteProjects';
-import LiteSkills from './sections/lite/LiteSkills';
-import LiteServices from './sections/lite/LiteServices';
-import LiteContact from './sections/lite/LiteContact';
 import { ModeProvider } from './mode/ModeContext';
-import {PROJECT_ROUTES} from './data/data';
+import { buildSectionElements, renderSection, buildLiteSectionElements } from './sections/renderSection';
+import { SECTIONS, getSection } from './data/sections';
+import { PROJECT_ROUTES } from './data/routes';
 import { isDebug } from './utils/debug';
 import './index.css';
 
@@ -200,24 +188,16 @@ function PortfolioInner() {
   const showGenie = genieDebug || (genieEnabled && (phase === 'genie' || phase === 'sliding'));
   const showBody = phase === 'sliding' || phase === 'landing';
 
-  const mobileSections = {
-    intro: <Intro userPrefs={userPrefs} />,
-    about: <About />,
-    projects: <Projects />,
-    skills: <Skills />,
-    services: <Services />,
-    contact: <Contact />,
-  };
+  // Section elements are built from src/data/sections/index.js, so adding or
+  // removing a section there is all that's needed - nothing here is per-section.
+  const mobileSections = buildSectionElements({
+    intro: { userPrefs },
+  });
 
-  const liteSections = {
-    landing: <LiteLanding />,
-    intro: <LiteIntro />,
-    about: <LiteAbout />,
-    projects: <LiteProjects />,
-    skills: <LiteSkills />,
-    services: <LiteServices />,
-    contact: <LiteContact />,
-  };
+  const landingSection = getSection('landing');
+
+  // Lite mode renders the same section data through the lite variant registry.
+  const liteSections = buildLiteSectionElements();
 
   return (
     <>
@@ -275,11 +255,11 @@ function PortfolioInner() {
 
               <HorizontalMobileShell
                 landingPanel={(slideTo) => (
-                  <Landing
-                    ready={phase === 'landing'}
-                    onEnter={() => slideTo(1)}
-                    onViewProjects={() => { setPendingTab('projects'); slideTo(1); }}
-                  />
+                  landingSection && renderSection(landingSection, {
+                    ready: phase === 'landing',
+                    onEnter: () => slideTo(1),
+                    onViewProjects: () => { setPendingTab('projects'); slideTo(1); },
+                  })
                 )}
                 tabsPanel={(slideTo) => (
                   <MobileLayout
@@ -293,11 +273,11 @@ function PortfolioInner() {
           ) : (
             <HorizontalDesktopShell
               landingPanel={(slideTo) => (
-                <Landing
-                  ready={phase === 'landing'}
-                  onEnter={() => slideTo(1)}
-                  onViewProjects={() => { setPendingTab('projects'); slideTo(1); }}
-                />
+                landingSection && renderSection(landingSection, {
+                    ready: phase === 'landing',
+                    onEnter: () => slideTo(1),
+                    onViewProjects: () => { setPendingTab('projects'); slideTo(1); },
+                  })
               )}
               shellPanel={(slideTo, revealed) => (
                 <DesktopLayout
@@ -323,10 +303,15 @@ function AppInner() {
     <>
       <Routes>
         <Route path="/" element={<PortfolioInner />} />
-        <Route path="/project/connect4" element={<SingleProject {...PROJECT_ROUTES.connect4} />} />
-        <Route path="/project/rubiks-cube" element={<SingleProject {...PROJECT_ROUTES.rubiks} />} />
-        <Route path="/project/interior" element={<SingleProject {...PROJECT_ROUTES.interior} />} />
-        <Route path="/project/greenfield" element={<SingleProject {...PROJECT_ROUTES.greenfield} />} />
+        {/* One route per entry in PROJECT_ROUTES - add a project there and its
+            /project/<url> page exists automatically. */}
+        {Object.entries(PROJECT_ROUTES).map(([key, route]) => (
+          <Route
+            key={key}
+            path={`/project/${route.url}`}
+            element={<SingleProject {...route} />}
+          />
+        ))}
       </Routes>
       <Analytics />
       <SpeedInsights />

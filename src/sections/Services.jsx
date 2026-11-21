@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Services.module.css';
-import { SERVICES } from '../data/data';
 
 const LERP = 0.2;
 const INTRO_DURATION = 700;
 const DEAD_ZONE = 100;
 const CARD_MOVE = 800;
 
-const TOTAL = SERVICES.length;
-const TOTAL_BUDGET = (TOTAL - 1) * (DEAD_ZONE + CARD_MOVE) + DEAD_ZONE;
+// Scroll budget derives from the number of cards, so any count works.
+const totalBudget = total => (total - 1) * (DEAD_ZONE + CARD_MOVE) + DEAD_ZONE;
 const cardStart = si => si * (DEAD_ZONE + CARD_MOVE) + DEAD_ZONE;
 const cardEnd = si => cardStart(si) + CARD_MOVE;
 
-const getStep = () => {
+const getStep = (total) => {
   if (typeof window === 'undefined') return { x: 100, y: 34 };
+  const n = Math.max(1, total);
   return {
-    x: Math.round(Math.min(130, (window.innerWidth * 0.8) / (TOTAL * 1.5))),
-    y: Math.round(Math.min(44, (window.innerWidth * 0.8) / (TOTAL * 5.5))),
+    x: Math.round(Math.min(130, (window.innerWidth * 0.8) / (n * 1.5))),
+    y: Math.round(Math.min(44, (window.innerWidth * 0.8) / (n * 5.5))),
   };
 };
 
@@ -44,7 +44,7 @@ const M = {
   OVERLAP: 0.8, 
 };
 
-function MobileServices() {
+function MobileServices({ items, label }) {
   const containerRef = useRef(null);   // the scroll container
   const stageRef = useRef(null);   // sticky card viewport
   const cardRefs = useRef([]);     // one ref per card
@@ -53,10 +53,10 @@ function MobileServices() {
   const targetY = useRef(0);      // raw scrollTop
   const stageH = useRef(0);      // measured height of stage/container
 
-  const N = SERVICES.length;
+  const N = items.length;
   const sentinelH = (N - 1) * M.SCROLL_PER_CARD * (1 - M.OVERLAP) + M.SCROLL_PER_CARD + M.BOTTOM_PAD;
 
-  const CARD_DEFS = SERVICES.map((_, i) => ({
+  const CARD_DEFS = items.map((_, i) => ({
     restY: i * M.CARD_OFFSET_Y,
     exitStart: i === 0 ? Infinity : (N - 1 - i) * M.SCROLL_PER_CARD * (1 - M.OVERLAP),
     isBase: i === 0,
@@ -145,14 +145,14 @@ function MobileServices() {
 
         <div className={styles.mobileHeader}>
           <p className={styles.label}>
-            <span className={styles.prompt}>&gt;</span> WHAT I OFFER
+            <span className={styles.prompt}>&gt;</span> {label}
           </p>
         </div>
 
         <div className={styles.stackContainer} ref={containerRef}>
 
           <div className={styles.cardStage} ref={stageRef}>
-            {[...SERVICES].reverse().map((service, i) => (
+            {[...items].reverse().map((service, i) => (
               <div
                 key={service.id}
                 className={`${styles.mobileCard} ${styles[`mobileCard_${i}`]}`}
@@ -162,7 +162,7 @@ function MobileServices() {
                   <div className={styles.cardTop}>
                     <span className={styles.cardNum}>{service.id}</span>
                     <span className={styles.cardTotal}>
-                      /{String(TOTAL).padStart(2, '0')}
+                      /{String(N).padStart(2, '0')}
                     </span>
                   </div>
                   <div className={styles.cardBody}>
@@ -192,13 +192,15 @@ function MobileServices() {
   );
 }
 
-function DesktopServices() {
+function DesktopServices({ items, label }) {
+  const TOTAL = items.length;
+  const TOTAL_BUDGET = totalBudget(TOTAL);
   const sectionRef = useRef(null);
   const rawTargetRef = useRef(0);
   const rawDisplayRef = useRef(0);
   const [raw, setRaw] = useState(0);
   const rafRef = useRef(null);
-  const [step, setStep] = useState(getStep);
+  const [step, setStep] = useState(() => getStep(TOTAL));
   const hijackingRef = useRef(false);
   const releaseTimerRef = useRef(null);
   const [introP, setIntroP] = useState(0);
@@ -207,10 +209,10 @@ function DesktopServices() {
   const introDoneRef = useRef(false);
 
   useEffect(() => {
-    const onResize = () => setStep(getStep());
+    const onResize = () => setStep(getStep(TOTAL));
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [TOTAL]);
 
   useEffect(() => {
     document.documentElement.style.setProperty(
@@ -374,7 +376,7 @@ function DesktopServices() {
     <section ref={sectionRef} id="services" className={styles.section}>
       <div className={styles.header}>
         <p className={styles.label}>
-          <span className={styles.prompt}>&gt;</span> WHAT I OFFER
+          <span className={styles.prompt}>&gt;</span> {label}
         </p>
       </div>
 
@@ -390,7 +392,7 @@ function DesktopServices() {
       </div>
 
       <div className={styles.stackArea}>
-        {SERVICES.map((service, i) => {
+        {items.map((service, i) => {
           const p = effectiveP(i);
           if (p <= 0.001) return null;
           return (
@@ -420,7 +422,18 @@ function DesktopServices() {
   );
 }
 
-export default function Services() {
+/**
+ * Variant: 'cards'
+ * All content comes from the section's `data` - see src/data/sections/services.js.
+ * Any number of cards; the scroll maths is derived from the count.
+ */
+export default function Services({ data = {}, label }) {
+  const { items = [] } = data;
   const isMobile = useIsMobile();
-  return isMobile ? <MobileServices /> : <DesktopServices />;
+
+  if (items.length === 0) return null;
+
+  return isMobile
+    ? <MobileServices items={items} label={label} />
+    : <DesktopServices items={items} label={label} />;
 }

@@ -6,7 +6,7 @@ import MenuTrigger from './MenuTrigger';
 import SvgButton from './SvgButton';
 import SettingsPopup from './SettingsPopup';
 import { IoSettingsOutline, IoArrowBackOutline, IoArrowForwardSharp } from 'react-icons/io5';
-import { SECTIONS } from '../data/data';
+import { SECTION_IDS, NAV_SECTIONS } from '../data/sections';
 import styles from './Nav.module.css';
 
 const ease = 'power4.out';
@@ -26,7 +26,7 @@ export default function Nav({ children, cursorEnabled, onCursorChange, onReplayI
   useEffect(() => {
     if (alwaysVisible) return;
 
-    const observers = SECTIONS.map(id => {
+    const observers = SECTION_IDS.map(id => {
       const el = document.getElementById(id);
       if (!el) return null;
       const obs = new IntersectionObserver(
@@ -173,12 +173,12 @@ export default function Nav({ children, cursorEnabled, onCursorChange, onReplayI
       <nav className={`${styles.nav} ${visible ? styles.visible : ''}`}>
         <Logo onClick={() => scrollTo('landing')} />
         <ul className={styles.links}>
-          {SECTIONS.slice(1).map(id => (
-            <li key={id}>
+          {NAV_SECTIONS.map(section => (
+            <li key={section.id}>
               <button
-                className={`${styles.link} ${active === id ? styles.active : ''}`}
-                onClick={() => scrollTo(id)}
-              >{id}</button>
+                className={`${styles.link} ${active === section.id ? styles.active : ''}`}
+                onClick={() => scrollTo(section.id)}
+              >{section.navLabel || section.id}</button>
             </li>
           ))}
         </ul>
@@ -208,7 +208,7 @@ export default function Nav({ children, cursorEnabled, onCursorChange, onReplayI
           </SvgButton>
         </div>
         <div className={styles.indicator}>
-          {SECTIONS.map(id => (
+          {SECTION_IDS.map(id => (
             <span
               key={id}
               className={`${styles.dot} ${active === id ? styles.activeDot : ''}`}

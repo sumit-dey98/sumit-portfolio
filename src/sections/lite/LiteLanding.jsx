@@ -2,7 +2,10 @@ import Button from '../../components/Button';
 import { IoArrowForwardSharp } from 'react-icons/io5';
 import styles from './LiteLanding.module.css';
 
-export default function LiteLanding() {
+/** Lite variant: 'hero'. Data shape matches src/data/sections/landing.js. */
+export default function LiteLanding({ data = {} }) {
+  const { nameLines = [], roles = [], actions = [] } = data;
+
   const viewProjects = () => {
     const scroller = document.querySelector('[data-lite-scroll]');
     const target = scroller?.querySelector('#lite-projects');
@@ -20,18 +23,35 @@ export default function LiteLanding() {
       </p>
 
       <div className={styles.content}>
-        <h1 className={styles.headline}>
-          <span className={styles.word}>SUMIT</span>
-          <span className={styles.word}>HILLOL</span>
-          <span className={styles.word}>DEY</span>
-        </h1>
+        {nameLines.length > 0 && (
+          <h1 className={styles.headline}>
+            {nameLines.map(word => (
+              <span key={word} className={styles.word}>{word}</span>
+            ))}
+          </h1>
+        )}
 
-        <p className={styles.role}>Front-end web developer</p>
+        {roles.length > 0 && <p className={styles.role}>{roles[0]}</p>}
 
-        <div className={styles.buttons}>
-          <Button variant="fill" icon={IoArrowForwardSharp}>VIEW CV</Button>
-          <Button variant="fill" onClick={viewProjects}>VIEW PROJECTS</Button>
-        </div>
+        {actions.length > 0 && (
+          <div className={styles.buttons}>
+            {actions.map((action, i) => {
+              const handler = action.action === 'projects' ? viewProjects : undefined;
+              if (!action.href && !handler) return null;
+              return (
+                <Button
+                  key={action.label || i}
+                  variant="fill"
+                  href={action.href || undefined}
+                  onClick={handler}
+                  icon={action.href ? IoArrowForwardSharp : undefined}
+                >
+                  {action.label}
+                </Button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <span className={styles.index} aria-hidden="true">00</span>

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
+import { PERSON } from '../data/site.config';
 import styles from './Logo.module.css';
 
 function LogoSvg() {
@@ -105,13 +106,13 @@ export default function Logo({ onClick, mobile = false, className = '' }) {
 
       <span className={styles.textClip}>
         <span ref={text1Ref} className={styles.text} style={{ opacity: 0 }}>
-          SUMIT
+          {PERSON.shortName}
         </span>
       </span>
 
       <span className={styles.textClip}>
         <span ref={text2Ref} className={styles.text} style={{ opacity: 0 }}>
-          <span className={styles.dot}>.</span>DEV
+          <span className={styles.dot}>{PERSON.logoSuffix.charAt(0)}</span>{PERSON.logoSuffix.slice(1)}
         </span>
       </span>
     </span>

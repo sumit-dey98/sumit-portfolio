@@ -9,23 +9,33 @@ import { useTypewriter } from '../hooks/useTypewriter';
 import { IoArrowForwardSharp } from 'react-icons/io5';
 import styles from './Landing.module.css';
 
-const LINE = ['Front-end web developer'];
 const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1023;
 
-export default function Landing({ ready = false, onEnter, onViewProjects }) {
+/**
+ * Variant: 'hero'
+ * All content comes from the section's `data` - see src/data/sections/landing.js.
+ * Any number of nameLines / roles / actions.
+ */
+export default function Landing({ data = {}, ready = false, onEnter, onViewProjects }) {
+  const {
+    boot = '',
+    nameLines: NAME_LINES = [],
+    roles = [],
+    actions = [],
+  } = data;
+  const LAST = NAME_LINES.length - 1;
   const { getCssVar } = useThemeContext();
   const firedRef = useRef(false);
   const tlRef = useRef(null);
 
   const preRef = useRef(null);
-  const word0Ref = useRef(null);
-  const word1Ref = useRef(null);
-  const word2Ref = useRef(null);
+  // One ref per hero name line, so nameLines can be any length.
+  const wordRefs = useRef([]);
   const roleRef = useRef(null);
   const buttonsRef = useRef(null);
   const hintRef = useRef(null);
 
-  const { display, start: startDecrypt } = useDecryptedText('INITIALIZING PORTFOLIO...', {
+  const { display, start: startDecrypt } = useDecryptedText(boot, {
     speed: 50,
     revealSpeed: 1,
     autoStart: false,
@@ -34,7 +44,7 @@ export default function Landing({ ready = false, onEnter, onViewProjects }) {
   const startDecryptRef = useRef(startDecrypt);
   useEffect(() => { startDecryptRef.current = startDecrypt; }, [startDecrypt]);
 
-  const typed = useTypewriter(LINE, {
+  const typed = useTypewriter(roles.length ? roles : [''], {
     speed: 55,
     pause: 2000,
     paused: !ready,
@@ -54,7 +64,7 @@ export default function Landing({ ready = false, onEnter, onViewProjects }) {
       0.1
     );
 
-    tl.fromTo([word0Ref.current, word1Ref.current, word2Ref.current],
+    tl.fromTo(wordRefs.current.filter(Boolean),
       { y: '100%' },
       { y: '0%', duration: 0.65, stagger: 0.1 },
       0.2  
@@ -106,17 +116,17 @@ export default function Landing({ ready = false, onEnter, onViewProjects }) {
         </p>
 
         <h1 className={styles.headline}>
-          {['SUMIT', 'HILLOL', 'DEY'].map((word, i) => (
-            <span key={word} className={i === 2 ? styles.lastLine : undefined} style={{ display: i === 2 ? 'flex' : 'block' }}>
+          {NAME_LINES.map((word, i) => (
+            <span key={word} className={i === LAST ? styles.lastLine : undefined} style={{ display: i === LAST ? 'flex' : 'block' }}>
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <span
-                  ref={i === 0 ? word0Ref : i === 1 ? word1Ref : word2Ref}
+                  ref={el => { wordRefs.current[i] = el; }}
                   style={{ display: 'inline-block', transform: 'translateY(100%)' }}
                 >
                   {word}
                 </span>
               </span>
-              {i === 2 && !isMobile && (
+              {i === LAST && !isMobile && (
                 <button
                   ref={hintRef}
                   type="button"
@@ -139,24 +149,46 @@ export default function Landing({ ready = false, onEnter, onViewProjects }) {
         </p>
 
         <div ref={buttonsRef} className={styles.buttons} style={{ opacity: 0 }}>
-          <Button variant="fill" icon={IoArrowForwardSharp}>VIEW CV</Button>
-          <SvgButton
-            color={getCssVar('--accent')}
-            colorHover={getCssVar('--accent2')}
-            width={186}
-            height={48}
-            radius={6}
-            duration={1500}
-            fadeLength={0.75}
-            strokeWidth={1.5}
-            direction="ccw"
-            gsap={gsap}
-            maxGap={0.5}
-            ease="expo.inOut"
-            onClick={onViewProjects}
-          >
-            VIEW PROJECTS
-          </SvgButton>
+          {actions.map((action, i) => {
+            // An action with neither href nor a known action is inert - skip it.
+            const handler = action.action === 'projects' ? onViewProjects : undefined;
+            if (!action.href && !handler) return null;
+
+            if (action.style === 'svg') {
+              return (
+                <SvgButton
+                  key={action.label || i}
+                  color={getCssVar('--accent')}
+                  colorHover={getCssVar('--accent2')}
+                  width={186}
+                  height={48}
+                  radius={6}
+                  duration={1500}
+                  fadeLength={0.75}
+                  strokeWidth={1.5}
+                  direction="ccw"
+                  gsap={gsap}
+                  maxGap={0.5}
+                  ease="expo.inOut"
+                  onClick={handler}
+                >
+                  {action.label}
+                </SvgButton>
+              );
+            }
+
+            return (
+              <Button
+                key={action.label || i}
+                variant="fill"
+                href={action.href || undefined}
+                onClick={handler}
+                icon={IoArrowForwardSharp}
+              >
+                {action.label}
+              </Button>
+            );
+          })}
         </div>
 
       </div>

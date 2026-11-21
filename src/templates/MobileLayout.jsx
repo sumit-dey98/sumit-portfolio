@@ -1,23 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import gsap from 'gsap';
-import {
-  IoPersonOutline,
-  IoDocumentTextOutline,
-  IoGridOutline,
-  IoPulseOutline,
-  IoLayersOutline,
-  IoChatbubbleOutline,
-} from 'react-icons/io5';
+import { NAV_SECTIONS } from '../data/sections';
+import { sectionIcon } from '../data/sectionIcons';
 import styles from './MobileLayout.module.css';
 
-const TABS = [
-  { id: 'intro', label: 'Intro', icon: <IoPersonOutline size={20} /> },
-  { id: 'about', label: 'About', icon: <IoDocumentTextOutline size={20} /> },
-  { id: 'projects', label: 'Projects', icon: <IoGridOutline size={20} /> },
-  { id: 'skills', label: 'Skills', icon: <IoPulseOutline size={20} /> },
-  { id: 'services', label: 'Services', icon: <IoLayersOutline size={20} /> },
-  { id: 'contact', label: 'Contact', icon: <IoChatbubbleOutline size={20} /> },
-];
+// Tabs are derived from the section data - add or remove a section in
+// src/data/sections/index.js and the tab bar follows.
+const TABS = NAV_SECTIONS.map(s => ({
+  id: s.id,
+  label: s.navLabel || s.id,
+  icon: sectionIcon(s.icon, 20),
+}));
 
 const COLLAPSED_H = 52;
 const EXPANDED_H = 64;
@@ -25,7 +18,7 @@ const DRAG_THRESHOLD = 28;
 const SWIPE_THRESHOLD = 128;
 
 export default function MobileLayout({ sections = {}, nav, initialTab = null, onBackToLanding }) {
-  const [activeTab, setActiveTab] = useState(initialTab || 'intro');
+  const [activeTab, setActiveTab] = useState(initialTab || TABS[0]?.id);
   const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
 

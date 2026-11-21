@@ -1,5 +1,6 @@
 import Button from '../components/Button';
-import { BiLogoGithub, BiLogoLinkedin, BiLogoWhatsapp } from 'react-icons/bi';
+import { ACTIVE_SOCIALS } from '../data/site.config';
+import { socialIcon } from '../data/socialIcons';
 import { useRevealOnView } from '../hooks/useRevealOnView';
 import styles from './About.module.css';
 
@@ -47,72 +48,106 @@ function MailIcon({ size = 24, color1 = 'var(--accent)', color2 = 'var(--accent)
   );
 }
 
-export default function About() {
+/** Icons available to `details[].icon` in the section data. */
+const DETAIL_ICONS = {
+  location: LocationIcon,
+  mail: MailIcon,
+};
+
+/**
+ * Variant: 'bio'
+ * All content comes from the section's `data` - see src/data/sections/about.js.
+ * `paragraphs`, `details` and socials may be any length, including zero.
+ */
+export default function About({ data = {}, label }) {
+  const {
+    headline = '',
+    headlineAccent = '',
+    paragraphs = [],
+    image = '',
+    details = [],
+  } = data;
+
   const textRef = useRevealOnView({ duration: 0.5 });
   const imageRef = useRevealOnView({ duration: 0.5, delay: 0.15 });
+
+  const hasSide = Boolean(image) || details.length > 0 || ACTIVE_SOCIALS.length > 0;
 
   return (
     <section id="about" className={styles.about}>
       <div className={styles.inner}>
-        <p className={styles.label}>
-          <span className={styles.prompt}>&gt;</span> ABOUT
-        </p>
+        {label && (
+          <p className={styles.label}>
+            <span className={styles.prompt}>&gt;</span> {label}
+          </p>
+        )}
 
         <div className={styles.layout}>
           <div ref={textRef} className={styles.text}>
-            <h2 className={styles.headline}>
-              I BUILD THINGS<br />
-              <span className={styles.accent}>THAT FEEL ALIVE.</span>
-            </h2>
-            <p className={styles.bio}>
-              I'm Sumit, a front-end web developer with a focus on interactive UI and creative engineering.
-              I care deeply about the intersection of performance and aesthetics - interfaces that don't just
-              work, but feel good to use.
-            </p>
-            <p className={styles.bio}>
-              When I'm not shipping code, I'm experimenting with generative art, contributing to open source,
-              or reverse-engineering animations I find on the web.
-            </p>
-            <div className={styles.addresses}>
-              <div className={styles.location}>
-                <LocationIcon size={28} />
-                <span>Location: Dhaka, Bangladesh</span>
+            {(headline || headlineAccent) && (
+              <h2 className={styles.headline}>
+                {headline}
+                {headline && headlineAccent && <br />}
+                {headlineAccent && <span className={styles.accent}>{headlineAccent}</span>}
+              </h2>
+            )}
+
+            {paragraphs.map((para, i) => (
+              <p key={i} className={styles.bio}>{para}</p>
+            ))}
+
+            {details.length > 0 && (
+              <div className={styles.addresses}>
+                {details.map((detail, i) => {
+                  const Icon = DETAIL_ICONS[detail.icon];
+                  const text = detail.label
+                    ? `${detail.label}: ${detail.value}`
+                    : detail.value;
+                  return (
+                    <div key={i} className={styles.location}>
+                      {Icon && <Icon size={28} />}
+                      {detail.href
+                        ? <a href={detail.href}>{text}</a>
+                        : <span>{text}</span>}
+                    </div>
+                  );
+                })}
               </div>
-              <div className={styles.location}>
-                <MailIcon size={28} />
-                <a href="mailto:work.sumit@gmail.com">Email: work.sumit@gmail.com</a>
-              </div>
-            </div>
+            )}
           </div>
 
-          <div>
-            <div ref={imageRef} className={styles.imageWrap}>
-              <div className={styles.imageFrame}>
-                <img
-                  // src="https://i.pravatar.cc/480?img=11"
-                  src=""
-                  alt="Sumit Hillol Dey"
-                  className={styles.image}
-                />
-                <div className={styles.imageOverlay} />
-              </div>
-              <div className={styles.imageBorder} />
-            </div>
+          {hasSide && (
+            <div>
+              {image && (
+                <div ref={imageRef} className={styles.imageWrap}>
+                  <div className={styles.imageFrame}>
+                    <img src={image} alt={imageAlt} className={styles.image} />
+                    <div className={styles.imageOverlay} />
+                  </div>
+                  <div className={styles.imageBorder} />
+                </div>
+              )}
 
-            <div className={styles.socials}>
-              <div className={styles.links}>
-                <Button variant='nofill' href="https://github.com/sumit-dey98" target="_blank" rel="noopener noreferrer" icon={BiLogoGithub} iconSize={22} iconPosition='left'>
-                  @sumit-dey98
-                </Button>
-                <Button variant='nofill' href="https://linkedin.com" target="_blank" rel="noopener noreferrer" icon={BiLogoLinkedin} iconSize={22} iconPosition='left'>
-                  Sumit
-                </Button>
-                <Button variant='nofill' href="https://wa.me/8801717742550" target="_blank" rel="noopener noreferrer" icon={BiLogoWhatsapp} iconSize={22} iconPosition='left'>
-                  +880-1717742550
-                </Button>
-              </div>
+              {ACTIVE_SOCIALS.length > 0 && (
+                <div className={styles.socials}>
+                  <div className={styles.links}>
+                    {ACTIVE_SOCIALS.map(social => (
+                      <Button
+                        key={social.key}
+                        variant='nofill'
+                        href={social.url}
+                        icon={socialIcon(social.key)}
+                        iconSize={22}
+                        iconPosition='left'
+                      >
+                        {social.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>

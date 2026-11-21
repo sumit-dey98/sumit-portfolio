@@ -1,30 +1,21 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import gsap from 'gsap';
-import {
-  IoPersonOutline,
-  IoDocumentTextOutline,
-  IoGridOutline,
-  IoPulseOutline,
-  IoLayersOutline,
-  IoChatbubbleOutline,
-  IoSettingsOutline,
-  IoExpandOutline,
-  IoContractOutline,
-} from 'react-icons/io5';
+import { IoSettingsOutline, IoExpandOutline, IoContractOutline } from 'react-icons/io5';
 import ThemeSwitcher from '../components/ThemeSwitcher';
 import SettingsPopup from '../components/SettingsPopup';
 import SvgButton from '../components/SvgButton';
 import Logo from '../components/Logo';
+import { NAV_SECTIONS } from '../data/sections';
+import { sectionIcon } from '../data/sectionIcons';
 import styles from './DesktopLayout.module.css';
 
-const TABS = [
-  { id: 'intro', label: 'Intro', icon: <IoPersonOutline size={22} /> },
-  { id: 'about', label: 'About', icon: <IoDocumentTextOutline size={22} /> },
-  { id: 'projects', label: 'Projects', icon: <IoGridOutline size={22} /> },
-  { id: 'skills', label: 'Skills', icon: <IoPulseOutline size={22} /> },
-  { id: 'services', label: 'Services', icon: <IoLayersOutline size={22} /> },
-  { id: 'contact', label: 'Contact', icon: <IoChatbubbleOutline size={22} /> },
-];
+// Tabs are derived from the section data - add or remove a section in
+// src/data/sections/index.js and the tab bar follows.
+const TABS = NAV_SECTIONS.map(s => ({
+  id: s.id,
+  label: s.navLabel || s.id,
+  icon: sectionIcon(s.icon, 22),
+}));
 
 // Fisheye magnification tuning
 const BASE = 44;        // resting icon size (px), for distance math
@@ -69,7 +60,7 @@ export default function DesktopLayout({
   useEffect(() => {
     if (revealed && !entered) setEntered(true);
   }, [revealed, entered]);
-  const [activeTab, setActiveTab] = useState(initialTab || 'intro');
+  const [activeTab, setActiveTab] = useState(initialTab || TABS[0]?.id);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsAnim = useExitTransition(settingsOpen);
   const [isFullscreen, setIsFullscreen] = useState(false);

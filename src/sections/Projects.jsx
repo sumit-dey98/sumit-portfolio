@@ -5,9 +5,7 @@ import { Link } from 'react-router-dom';
 import Lenis from 'lenis';
 import ScreenSlides from './../components/ScreenSlides';
 import styles from './Projects.module.css';
-import { PROJECTS } from '../data/data';
 
-const TOTAL = PROJECTS.length;
 
 function requestFullscreen(el) {
   if (el.requestFullscreen) return el.requestFullscreen();
@@ -238,7 +236,7 @@ function Preview({ project, src }) {
 }
 
 /* ---- One project row (desktop) / card (mobile) ---- */
-function ProjectRow({ project, index, rowRef, mobile }) {
+function ProjectRow({ project, index, rowRef, mobile, total }) {
   return (
     <article
       ref={rowRef}
@@ -250,7 +248,7 @@ function ProjectRow({ project, index, rowRef, mobile }) {
           <span className={styles.num}>
             <span className={styles.cardNum}>{project.id}</span>
             <span className={styles.cardSlash}>/</span>
-            <span className={styles.cardTotal}>{String(TOTAL).padStart(2, '0')}</span>
+            <span className={styles.cardTotal}>{String(total).padStart(2, '0')}</span>
           </span>
           {project.link ? (
             <Link to={project.link} target="_blank" className={styles.demoBtn} onClick={e => e.stopPropagation()}>
@@ -284,7 +282,7 @@ function ProjectRow({ project, index, rowRef, mobile }) {
 const STRIP_EASE = 'power3.out';
 const STRIP_DUR = 0.5;
 
-function ProjectStrip({ activeIndex, onSelect }) {
+function ProjectStrip({ activeIndex, onSelect, items }) {
   const stripRef = useRef(null);
   const itemRefs = useRef([]);
   const nameRefs = useRef([]);
@@ -315,7 +313,7 @@ function ProjectStrip({ activeIndex, onSelect }) {
 
   return (
     <div ref={stripRef} className={styles.strip}>
-      {PROJECTS.map((p, i) => (
+      {items.map((p, i) => (
         <button
           key={p.id}
           ref={el => (itemRefs.current[i] = el)}
@@ -336,7 +334,7 @@ function ProjectStrip({ activeIndex, onSelect }) {
 }
 
 /* ---- Desktop: vertical smooth-scroll list with active tracking ---- */
-function VerticalProjects() {
+function VerticalProjects({ items, label }) {
   const scrollRef = useRef(null);
   const rowRefs = useRef([]);
   const lenisRef = useRef(null);
@@ -415,18 +413,19 @@ function VerticalProjects() {
     <section id="projects" className={styles.desktopSection}>
       <div className={styles.header}>
         <p className={styles.label}>
-          <span className={styles.prompt}>&gt;</span> PROJECTS
+          <span className={styles.prompt}>&gt;</span> {label}
         </p>
-        <ProjectStrip activeIndex={activeIndex} onSelect={scrollToIndex} />
+        <ProjectStrip activeIndex={activeIndex} onSelect={scrollToIndex} items={items} />
       </div>
 
       <div ref={scrollRef} className={styles.scroller}>
         <div className={styles.scrollContent}>
-          {PROJECTS.map((p, i) => (
+          {items.map((p, i) => (
             <ProjectRow
               key={p.id}
               project={p}
               index={i}
+              total={items.length}
               rowRef={el => (rowRefs.current[i] = el)}
             />
           ))}
@@ -440,7 +439,7 @@ function VerticalProjects() {
 }
 
 /* ---- Mobile: dropdown jump-nav to any project ---- */
-function MobileProjectDropdown({ activeIndex, onSelect, open, setOpen }) {
+function MobileProjectDropdown({ activeIndex, onSelect, open, setOpen, items }) {
   const wrapRef = useRef(null);
 
   useEffect(() => {
@@ -452,7 +451,7 @@ function MobileProjectDropdown({ activeIndex, onSelect, open, setOpen }) {
     return () => document.removeEventListener('pointerdown', onDown);
   }, [open, setOpen]);
 
-  const active = PROJECTS[activeIndex];
+  const active = items[activeIndex];
 
   return (
     <div ref={wrapRef} className={styles.mDrop}>
@@ -468,7 +467,7 @@ function MobileProjectDropdown({ activeIndex, onSelect, open, setOpen }) {
 
       {open && (
         <div className={styles.mDropMenu}>
-          {PROJECTS.map((p, i) => (
+          {items.map((p, i) => (
             <button
               key={p.id}
               className={`${styles.mDropItem} ${i === activeIndex ? styles.mDropItemActive : ''}`}
@@ -484,7 +483,7 @@ function MobileProjectDropdown({ activeIndex, onSelect, open, setOpen }) {
   );
 }
 
-function MobileProjects() {
+function MobileProjects({ items, label }) {
   const rowRefs = useRef([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -548,7 +547,7 @@ function MobileProjects() {
 
       <div className={styles.mobileHeader}>
         <p className={styles.label}>
-          <span className={styles.prompt}>&gt;</span> PROJECTS
+          <span className={styles.prompt}>&gt;</span> {label}
         </p>
       </div>
 
@@ -558,14 +557,16 @@ function MobileProjects() {
           onSelect={scrollToIndex}
           open={dropdownOpen}
           setOpen={setDropdownOpen}
+          items={items}
         />
       </div>
       <div className={styles.mobileList}>
-        {PROJECTS.map((p, i) => (
+        {items.map((p, i) => (
           <ProjectRow
             key={p.id}
             project={p}
             index={i}
+            total={items.length}
             rowRef={el => (rowRefs.current[i] = el)}
             mobile
           />
@@ -576,7 +577,13 @@ function MobileProjects() {
 }
 
 // -- Main ----
-export default function Projects() {
+/**
+ * Variant: 'showcase'
+ * All content comes from the section's `data` - see src/data/sections/projects.js.
+ * Any number of projects.
+ */
+export default function Projects({ data = {}, label }) {
+  const { items = [] } = data;
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   );
@@ -588,5 +595,7 @@ export default function Projects() {
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  return isMobile ? <MobileProjects /> : <VerticalProjects />;
+  return isMobile
+    ? <MobileProjects items={items} label={label} />
+    : <VerticalProjects items={items} label={label} />;
 }
